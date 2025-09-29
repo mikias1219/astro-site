@@ -1,0 +1,25 @@
+<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="80" fill="white" stroke="black" stroke-width="1"/>
+  
+  <!-- Sunburst graphic -->
+  <g transform="translate(100, 25)">
+    <circle cx="0" cy="0" r="8" fill="#FFD700"/>
+    <g stroke="#FFD700" stroke-width="2" fill="none">
+      <line x1="0" y1="-12" x2="0" y2="-20"/>
+      <line x1="8.5" y1="-8.5" x2="14.1" y2="-14.1"/>
+      <line x1="12" y1="0" x2="20" y2="0"/>
+      <line x1="8.5" y1="8.5" x2="14.1" y2="14.1"/>
+      <line x1="0" y1="12" x2="0" y2="20"/>
+      <line x1="-8.5" y1="8.5" x2="-14.1" y2="14.1"/>
+      <line x1="-12" y1="0" x2="-20" y2="0"/>
+      <line x1="-8.5" y1="-8.5" x2="-14.1" y2="-14.1"/>
+    </g>
+  </g>
+  
+  <!-- Main text -->
+  <text x="100" y="50" text-anchor="middle" font-family="serif" font-size="18" font-weight="bold" fill="#DC2626">Dr. Arup Shastri</text>
+  
+  <!-- Subtitle -->
+  <text x="100" y="65" text-anchor="middle" font-family="serif" font-size="12" fill="black">Doctorate of Astrology</text>
+</svg>

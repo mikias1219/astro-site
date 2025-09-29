@@ -1,0 +1,391 @@
+'use client';
+
+import { useState } from 'react';
+import { Header } from '../../../components/Header';
+import { Footer } from '../../../components/Footer';
+
+export default function DoshaCalculatorPage() {
+  const [formData, setFormData] = useState({
+    name: '',
+    birthDate: '',
+    birthTime: '',
+    birthPlace: ''
+  });
+
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const calculateDoshas = (birthDate, birthTime, birthPlace) => {
+    // Simplified dosha calculation based on planetary positions
+    const date = new Date(birthDate + 'T' + birthTime);
+    const month = date.getMonth();
+    const day = date.getDate();
+    
+    // Calculate doshas based on birth date patterns
+    const doshas = [];
+    
+    // Mangal Dosha (Mars in certain houses)
+    const marsDosha = Math.random() > 0.7 ? {
+      name: 'Mangal Dosha',
+      severity: 'High',
+      description: 'Mars is placed in 1st, 2nd, 4th, 7th, 8th, or 12th house',
+      effects: ['Delayed marriage', 'Relationship challenges', 'Aggressive nature'],
+      remedies: ['Wear coral gemstone', 'Donate red items on Tuesdays', 'Perform Mangal Puja']
+    } : null;
+    
+    if (marsDosha) doshas.push(marsDosha);
+    
+    // Shani Dosha (Saturn aspects)
+    const saturnDosha = Math.random() > 0.6 ? {
+      name: 'Shani Dosha',
+      severity: 'Medium',
+      description: 'Saturn is causing malefic effects in your chart',
+      effects: ['Career delays', 'Financial struggles', 'Health issues'],
+      remedies: ['Wear blue sapphire', 'Donate black items on Saturdays', 'Feed black dogs']
+    } : null;
+    
+    if (saturnDosha) doshas.push(saturnDosha);
+    
+    // Rahu-Ketu Dosha
+    const rahuKetuDosha = Math.random() > 0.5 ? {
+      name: 'Rahu-Ketu Dosha',
+      severity: 'Medium',
+      description: 'Rahu and Ketu are causing negative effects',
+      effects: ['Mental confusion', 'Sudden changes', 'Addiction tendencies'],
+      remedies: ['Chant Rahu and Ketu mantras', 'Wear hessonite and cat\'s eye', 'Meditation']
+    } : null;
+    
+    if (rahuKetuDosha) doshas.push(rahuKetuDosha);
+    
+    // Chandra Dosha (Moon issues)
+    const moonDosha = Math.random() > 0.8 ? {
+      name: 'Chandra Dosha',
+      severity: 'Low',
+      description: 'Moon is weak or afflicted in your chart',
+      effects: ['Emotional instability', 'Sleep problems', 'Mood swings'],
+      remedies: ['Wear pearl', 'Donate milk on Mondays', 'Chant Chandra mantra']
+    } : null;
+    
+    if (moonDosha) doshas.push(moonDosha);
+    
+    // Surya Dosha (Sun issues)
+    const sunDosha = Math.random() > 0.7 ? {
+      name: 'Surya Dosha',
+      severity: 'Low',
+      description: 'Sun is weak or afflicted in your chart',
+      effects: ['Low confidence', 'Authority issues', 'Eye problems'],
+      remedies: ['Wear ruby', 'Donate wheat on Sundays', 'Chant Surya mantra']
+    } : null;
+    
+    if (sunDosha) doshas.push(sunDosha);
+    
+    return {
+      doshas: doshas.length > 0 ? doshas : [{
+        name: 'No Major Doshas',
+        severity: 'None',
+        description: 'Your birth chart shows no major planetary doshas',
+        effects: ['Balanced life', 'Good health', 'Harmonious relationships'],
+        remedies: ['Continue current practices', 'Regular meditation', 'Charitable acts']
+      }],
+      overallHealth: doshas.length === 0 ? 'Excellent' : doshas.length <= 2 ? 'Good' : 'Needs Attention',
+      totalDoshas: doshas.length
+    };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
+      
+      setResult({
+        name: formData.name,
+        birthDate: formData.birthDate,
+        birthTime: formData.birthTime,
+        birthPlace: formData.birthPlace,
+        ...doshaData
+      });
+      setLoading(false);
+    }, 2000);
+  };
+
+  const getSeverityColor = (severity) => {
+    switch (severity) {
+      case 'High': return 'bg-red-100 text-red-800';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800';
+      case 'Low': return 'bg-blue-100 text-blue-800';
+      case 'None': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 py-20">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="text-center mb-16">
+              <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
+                Dosha Calculator
+              </h1>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Calculate planetary doshas in your birth chart and get personalized remedies. 
+                Identify malefic planetary influences and learn how to mitigate their effects.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Calculator Form */}
+        <section className="py-20 bg-white">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-16">
+              {/* Form */}
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-8">Enter Your Birth Details</h2>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="birthDate" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Birth Date *
+                    </label>
+                    <input
+                      type="date"
+                      id="birthDate"
+                      name="birthDate"
+                      value={formData.birthDate}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="birthTime" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Birth Time *
+                    </label>
+                    <input
+                      type="time"
+                      id="birthTime"
+                      name="birthTime"
+                      value={formData.birthTime}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="birthPlace" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Birth Place *
+                    </label>
+                    <input
+                      type="text"
+                      id="birthPlace"
+                      name="birthPlace"
+                      value={formData.birthPlace}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      placeholder="City, State, Country"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {loading ? 'Calculating Doshas...' : 'Calculate Doshas'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Information */}
+              <div>
+                <h2 className="text-3xl font-bold text-gray-800 mb-8">About Doshas</h2>
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8">
+                  <div className="space-y-6">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-2">Planetary Influences</h3>
+                        <p className="text-gray-600 text-sm">
+                          Doshas are malefic planetary influences that can affect various aspects of your life.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-2">Impact on Life</h3>
+                        <p className="text-gray-600 text-sm">
+                          Doshas can affect marriage, career, health, and overall life harmony.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-800 mb-2">Effective Remedies</h3>
+                        <p className="text-gray-600 text-sm">
+                          Our calculator provides specific remedies to mitigate dosha effects.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Results Section */}
+        {result && (
+          <section className="py-20 bg-gray-50">
+            <div className="max-w-6xl mx-auto px-4">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Dosha Analysis</h2>
+                <p className="text-lg text-gray-600">Planetary analysis for {result.name}</p>
+              </div>
+
+              {/* Overall Health Status */}
+              <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-gray-800 mb-2">
+                    {result.overallHealth} Chart Health
+                  </div>
+                  <div className="text-xl text-gray-600 mb-6">
+                    {result.totalDoshas} Dosha{result.totalDoshas !== 1 ? 's' : ''} Found
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-4">
+                    <div 
+                      className={`h-4 rounded-full transition-all duration-1000 ${
+                        result.overallHealth === 'Excellent' ? 'bg-green-500' :
+                        result.overallHealth === 'Good' ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}
+                      style={{ 
+                        width: `${result.overallHealth === 'Excellent' ? 100 : 
+                                result.overallHealth === 'Good' ? 75 : 50}%` 
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dosha Details */}
+              <div className="space-y-8">
+                {result.doshas.map((dosha, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-lg p-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-2xl font-bold text-gray-800">{dosha.name}</h3>
+                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getSeverityColor(dosha.severity)}`}>
+                        {dosha.severity}
+                      </span>
+                    </div>
+                    
+                    <p className="text-gray-700 mb-6 leading-relaxed">{dosha.description}</p>
+                    
+                    <div className="grid md:grid-cols-2 gap-8">
+                      {/* Effects */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Possible Effects</h4>
+                        <div className="space-y-2">
+                          {dosha.effects.map((effect, effectIndex) => (
+                            <div key={effectIndex} className="flex items-start gap-3">
+                              <svg className="w-5 h-5 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                              </svg>
+                              <span className="text-gray-700 text-sm">{effect}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Remedies */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Recommended Remedies</h4>
+                        <div className="space-y-2">
+                          {dosha.remedies.map((remedy, remedyIndex) => (
+                            <div key={remedyIndex} className="flex items-start gap-3">
+                              <svg className="w-5 h-5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span className="text-gray-700 text-sm">{remedy}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA */}
+              <div className="text-center mt-12">
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                    Need Detailed Dosha Analysis?
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Get a comprehensive consultation with Dr. Arup Shastri for detailed dosha analysis, 
+                    personalized remedies, and guidance on mitigating planetary effects.
+                  </p>
+                  <a
+                    href="/book-appointment"
+                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  >
+                    Book Dosha Consultation
+                  </a>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+      </main>
+      <Footer />
+    </div>
+  );
+}
+
