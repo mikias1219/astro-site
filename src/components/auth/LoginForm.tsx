@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
+import ForgotPassword from './ForgotPassword';
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -15,6 +16,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const { login } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,11 +33,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
     setLoading(true);
 
     try {
-      const success = await login(formData.username, formData.password);
-      if (success) {
+      const result = await login(formData.username, formData.password);
+      if (result.success) {
         onSuccess?.();
       } else {
-        setError('Invalid username or password. Please check your credentials and try again.');
+        setError(result.message || 'Invalid username or password. Please check your credentials and try again.');
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -44,6 +46,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
       setLoading(false);
     }
   };
+
+  if (showForgotPassword) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <ForgotPassword onBack={() => setShowForgotPassword(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
@@ -97,6 +107,15 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
           {loading ? 'Signing In...' : 'Sign In'}
         </button>
       </form>
+
+      <div className="mt-4 text-center">
+        <button
+          onClick={() => setShowForgotPassword(true)}
+          className="text-sm text-orange-600 hover:text-orange-700"
+        >
+          Forgot your password?
+        </button>
+      </div>
 
       {onSwitchToRegister && (
         <div className="mt-6 text-center">

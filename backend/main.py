@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from app.database import engine, Base
-from app.routers import auth, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators
+from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators
 
 # Create database tables
 @asynccontextmanager
@@ -43,6 +43,7 @@ security = HTTPBearer()
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/admin/users", tags=["User Management"])
 app.include_router(pages.router, prefix="/api/pages", tags=["Pages"])
 app.include_router(blogs.router, prefix="/api/blogs", tags=["Blogs"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["Bookings"])

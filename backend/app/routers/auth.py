@@ -1,25 +1,32 @@
 """
-Authentication router for login, register, and user management
+Enhanced Authentication router with email verification and password reset
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from datetime import timedelta
+from datetime import timedelta, datetime
+import os
 
 from app.database import get_db
-from app.models import User, UserRole
-from app.schemas import UserCreate, UserResponse, Token, LoginRequest
+from app.models import User, UserRole, UserVerification
+from app.schemas import (
+    UserCreate, UserResponse, Token, LoginRequest, 
+    EmailVerificationRequest, EmailVerificationResponse,
+    VerifyEmailRequest, PasswordResetRequest, PasswordResetConfirm,
+    PasswordResetResponse
+)
 from app.auth import (
     verify_password, get_password_hash, create_access_token, 
     authenticate_user, get_current_active_user, ACCESS_TOKEN_EXPIRE_MINUTES
 )
+from app.email_service import email_service
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserResponse)
-async def register(user: UserCreate, db: Session = Depends(get_db)):
-    """Register a new user"""
+@router.post("/register", response_model=EmailVerificationResponse)
+async def register(user: UserCreate, request: Request, db: Session = Depends(get_db)):
+    """Register a new user with email verification"""
     # Check if user already exists
     if db.query(User).filter(User.email == user.email).first():
         raise HTTPException(
@@ -33,22 +40,131 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
             detail="Username already taken"
         )
     
-    # Create new user
+    # Create new user (inactive until email verification)
     hashed_password = get_password_hash(user.password)
     db_user = User(
         email=user.email,
         username=user.username,
         full_name=user.full_name,
         phone=user.phone,
+        preferred_language=user.preferred_language,
         hashed_password=hashed_password,
-        role=UserRole.USER
+        role=UserRole.USER,
+        is_active=False,  # Will be activated after email verification
+        is_verified=False
     )
     
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     
-    return db_user
+    # Generate verification token
+    verification_token = email_service.generate_verification_token()
+    expires_at = datetime.utcnow() + timedelta(hours=24)
+    
+    # Store verification token
+    db_verification = UserVerification(
+        user_id=db_user.id,
+        token=verification_token,
+        token_type="email_verification",
+        expires_at=expires_at
+    )
+    
+    db.add(db_verification)
+    db.commit()
+    
+    # Get frontend URL from request
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    
+    # Send verification email
+    email_sent = email_service.send_verification_email(db_user, verification_token, frontend_url)
+    
+    return EmailVerificationResponse(
+        message="Registration successful! Please check your email to verify your account.",
+        email_sent=email_sent
+    )
+
+@router.post("/verify-email", response_model=dict)
+async def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):
+    """Verify user email with token"""
+    # Find verification token
+    verification = db.query(UserVerification).filter(
+        UserVerification.token == request.token,
+        UserVerification.token_type == "email_verification",
+        UserVerification.is_used == False,
+        UserVerification.expires_at > datetime.utcnow()
+    ).first()
+    
+    if not verification:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired verification token"
+        )
+    
+    # Get user and activate account
+    user = db.query(User).filter(User.id == verification.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Activate user account
+    user.is_active = True
+    user.is_verified = True
+    
+    # Mark token as used
+    verification.is_used = True
+    
+    db.commit()
+    
+    # Send welcome email
+    email_service.send_welcome_email(user)
+    
+    return {"message": "Email verified successfully! Your account is now active."}
+
+@router.post("/resend-verification", response_model=EmailVerificationResponse)
+async def resend_verification(request: EmailVerificationRequest, request_obj: Request, db: Session = Depends(get_db)):
+    """Resend verification email"""
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Email already verified"
+        )
+    
+    # Generate new verification token
+    verification_token = email_service.generate_verification_token()
+    expires_at = datetime.utcnow() + timedelta(hours=24)
+    
+    # Store new verification token
+    db_verification = UserVerification(
+        user_id=user.id,
+        token=verification_token,
+        token_type="email_verification",
+        expires_at=expires_at
+    )
+    
+    db.add(db_verification)
+    db.commit()
+    
+    # Get frontend URL from request
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    
+    # Send verification email
+    email_sent = email_service.send_verification_email(user, verification_token, frontend_url)
+    
+    return EmailVerificationResponse(
+        message="Verification email sent! Please check your inbox.",
+        email_sent=email_sent
+    )
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -61,12 +177,96 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             headers={"WWW-Authenticate": "Bearer"},
         )
     
+    # Check if email is verified
+    if not user.is_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Please verify your email address before logging in"
+        )
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"sub": user.username}, expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token, 
+        "token_type": "bearer",
+        "user": UserResponse.from_orm(user)
+    }
+
+@router.post("/forgot-password", response_model=PasswordResetResponse)
+async def forgot_password(request: PasswordResetRequest, request_obj: Request, db: Session = Depends(get_db)):
+    """Request password reset"""
+    user = db.query(User).filter(User.email == request.email).first()
+    
+    if not user:
+        # Don't reveal if email exists or not for security
+        return PasswordResetResponse(
+            message="If the email exists, a password reset link has been sent.",
+            email_sent=True
+        )
+    
+    # Generate password reset token
+    reset_token = email_service.generate_verification_token()
+    expires_at = datetime.utcnow() + timedelta(hours=1)
+    
+    # Store reset token
+    db_reset = UserVerification(
+        user_id=user.id,
+        token=reset_token,
+        token_type="password_reset",
+        expires_at=expires_at
+    )
+    
+    db.add(db_reset)
+    db.commit()
+    
+    # Get frontend URL from request
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    
+    # Send password reset email
+    email_sent = email_service.send_password_reset_email(user, reset_token, frontend_url)
+    
+    return PasswordResetResponse(
+        message="If the email exists, a password reset link has been sent.",
+        email_sent=email_sent
+    )
+
+@router.post("/reset-password", response_model=dict)
+async def reset_password(request: PasswordResetConfirm, db: Session = Depends(get_db)):
+    """Reset password with token"""
+    # Find reset token
+    reset_verification = db.query(UserVerification).filter(
+        UserVerification.token == request.token,
+        UserVerification.token_type == "password_reset",
+        UserVerification.is_used == False,
+        UserVerification.expires_at > datetime.utcnow()
+    ).first()
+    
+    if not reset_verification:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Get user and update password
+    user = db.query(User).filter(User.id == reset_verification.user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Update password
+    user.hashed_password = get_password_hash(request.new_password)
+    
+    # Mark token as used
+    reset_verification.is_used = True
+    
+    db.commit()
+    
+    return {"message": "Password reset successfully!"}
 
 @router.get("/me", response_model=UserResponse)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
@@ -80,8 +280,12 @@ async def update_user_me(
     db: Session = Depends(get_db)
 ):
     """Update current user information"""
+    # Prevent updating sensitive fields
+    restricted_fields = {"id", "role", "is_active", "is_verified", "verification_token", 
+                        "reset_password_token", "hashed_password"}
+    
     for field, value in user_update.items():
-        if hasattr(current_user, field) and field != "id":
+        if field not in restricted_fields and hasattr(current_user, field):
             setattr(current_user, field, value)
     
     db.commit()
@@ -90,7 +294,7 @@ async def update_user_me(
 
 @router.post("/register-admin", response_model=UserResponse)
 async def register_admin(user: UserCreate, db: Session = Depends(get_db)):
-    """Register a new admin user (for initial setup)"""
+    """Register a new admin user (for initial setup only)"""
     # Check if any admin already exists
     existing_admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
     if existing_admin:
@@ -112,16 +316,18 @@ async def register_admin(user: UserCreate, db: Session = Depends(get_db)):
             detail="Username already taken"
         )
     
-    # Create new admin user
+    # Create new admin user (automatically verified and active)
     hashed_password = get_password_hash(user.password)
     db_user = User(
         email=user.email,
         username=user.username,
         full_name=user.full_name,
         phone=user.phone,
+        preferred_language=user.preferred_language,
         hashed_password=hashed_password,
         role=UserRole.ADMIN,
-        is_active=True
+        is_active=True,
+        is_verified=True  # Admin is automatically verified
     )
     
     db.add(db_user)

@@ -11,6 +11,8 @@ interface User {
   phone?: string;
   role: 'admin' | 'editor' | 'user';
   is_active: boolean;
+  is_verified: boolean;
+  preferred_language: string;
   created_at: string;
   updated_at?: string;
 }
@@ -18,12 +20,13 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (username: string, password: string) => Promise<boolean>;
-  register: (userData: RegisterData) => Promise<boolean>;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  register: (userData: RegisterData) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isVerified: boolean;
 }
 
 interface RegisterData {
@@ -32,6 +35,7 @@ interface RegisterData {
   full_name: string;
   phone?: string;
   password: string;
+  preferred_language?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -84,45 +88,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = async (username: string, password: string): Promise<boolean> => {
+  const login = async (username: string, password: string): Promise<{ success: boolean; message?: string }> => {
     try {
       setLoading(true);
       const response = await apiClient.login(username, password);
       
       if (response.success && response.data) {
-        const { access_token } = response.data;
+        const { access_token, user } = response.data;
         setToken(access_token);
         localStorage.setItem('auth_token', access_token);
-        
-        // Get user data
-        const userResponse = await apiClient.getCurrentUser(access_token);
-        if (userResponse.success) {
-          setUser(userResponse.data);
-          return true;
-        }
+        setUser(user);
+        return { success: true };
       }
-      return false;
-    } catch (error) {
+      return { success: false, message: response.message || 'Login failed' };
+    } catch (error: any) {
       console.error('Login error:', error);
-      return false;
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || 'Login failed. Please try again.' 
+      };
     } finally {
       setLoading(false);
     }
   };
 
-  const register = async (userData: RegisterData): Promise<boolean> => {
+  const register = async (userData: RegisterData): Promise<{ success: boolean; message?: string }> => {
     try {
       setLoading(true);
       const response = await apiClient.register(userData);
       
       if (response.success) {
-        // Auto-login after successful registration
-        return await login(userData.username, userData.password);
+        return { 
+          success: true, 
+          message: response.data?.message || 'Registration successful! Please check your email to verify your account.' 
+        };
       }
-      return false;
-    } catch (error) {
+      return { success: false, message: response.message || 'Registration failed' };
+    } catch (error: any) {
       console.error('Registration error:', error);
-      return false;
+      return { 
+        success: false, 
+        message: error.response?.data?.detail || 'Registration failed. Please try again.' 
+      };
     } finally {
       setLoading(false);
     }
@@ -143,6 +150,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     isAuthenticated: !!user && !!token,
     isAdmin: user?.role === 'admin',
+    isVerified: user?.is_verified || false,
   };
 
   return (

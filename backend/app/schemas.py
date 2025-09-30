@@ -13,6 +13,7 @@ class UserBase(BaseModel):
     username: str
     full_name: str
     phone: Optional[str] = None
+    preferred_language: Optional[str] = "en"
 
 class UserCreate(UserBase):
     password: str
@@ -24,11 +25,14 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     role: Optional[UserRole] = None
     is_active: Optional[bool] = None
+    is_verified: Optional[bool] = None
+    preferred_language: Optional[str] = None
 
 class UserResponse(UserBase):
     id: int
     role: UserRole
     is_active: bool
+    is_verified: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
     
@@ -39,6 +43,7 @@ class UserResponse(UserBase):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user: UserResponse
 
 class TokenData(BaseModel):
     username: Optional[str] = None
@@ -46,6 +51,27 @@ class TokenData(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class EmailVerificationRequest(BaseModel):
+    email: EmailStr
+
+class EmailVerificationResponse(BaseModel):
+    message: str
+    email_sent: bool
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+class PasswordResetRequest(BaseModel):
+    email: EmailStr
+
+class PasswordResetConfirm(BaseModel):
+    token: str
+    new_password: str
+
+class PasswordResetResponse(BaseModel):
+    message: str
+    email_sent: bool
 
 # Service Schemas
 class ServiceBase(BaseModel):

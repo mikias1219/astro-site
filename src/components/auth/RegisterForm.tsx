@@ -16,12 +16,14 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
     phone: '',
     password: '',
     confirmPassword: '',
+    preferred_language: 'en',
   });
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -47,18 +49,20 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
     setLoading(true);
 
     try {
-      const success = await register({
+      const result = await register({
         email: formData.email,
         username: formData.username,
         full_name: formData.full_name,
         phone: formData.phone || undefined,
         password: formData.password,
+        preferred_language: formData.preferred_language,
       });
 
-      if (success) {
-        onSuccess?.();
+      if (result.success) {
+        setSuccess(true);
+        setError('');
       } else {
-        setError('Registration failed. Email or username may already be in use.');
+        setError(result.message || 'Registration failed. Email or username may already be in use.');
       }
     } catch (err) {
       console.error('Registration error:', err);
@@ -67,6 +71,33 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
+        <div className="text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+            <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 className="mt-4 text-lg font-medium text-gray-900">Registration Successful!</h3>
+          <p className="mt-2 text-gray-600">
+            We've sent a verification email to <strong>{formData.email}</strong>. 
+            Please check your inbox and click the verification link to activate your account.
+          </p>
+          <div className="mt-6">
+            <button
+              onClick={onSwitchToLogin}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
@@ -133,6 +164,29 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onSwitchT
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             placeholder="Enter your phone number"
           />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Preferred Language
+          </label>
+          <select
+            name="preferred_language"
+            value={formData.preferred_language}
+            onChange={handleInputChange}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+          >
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            <option value="mr">Marathi</option>
+            <option value="gu">Gujarati</option>
+            <option value="bn">Bengali</option>
+            <option value="or">Odia</option>
+          </select>
         </div>
 
         <div>

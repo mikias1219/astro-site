@@ -45,7 +45,13 @@ class User(Base):
     full_name = Column(String(255), nullable=False)
     phone = Column(String(20))
     role = Column(Enum(UserRole), default=UserRole.USER)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=False)  # Changed to False for email verification
+    is_verified = Column(Boolean, default=False)  # Email verification status
+    verification_token = Column(String(255), nullable=True)  # Email verification token
+    verification_token_expires = Column(DateTime, nullable=True)  # Token expiration
+    reset_password_token = Column(String(255), nullable=True)  # Password reset token
+    reset_password_token_expires = Column(DateTime, nullable=True)  # Reset token expiration
+    preferred_language = Column(String(10), default="en")  # User's preferred language
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
@@ -245,3 +251,18 @@ class SEO(Base):
     # Relationships
     page = relationship("Page", back_populates="seo")
     blog = relationship("Blog", back_populates="seo")
+
+# User Verification Token Model
+class UserVerification(Base):
+    __tablename__ = "user_verifications"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(255), nullable=False, unique=True)
+    token_type = Column(String(50), nullable=False)  # 'email_verification', 'password_reset'
+    expires_at = Column(DateTime, nullable=False)
+    is_used = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Relationships
+    user = relationship("User")
