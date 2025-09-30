@@ -1,22 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const { token } = useAuth();
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchDashboardData(existingToken);
+    if (token) {
+      fetchDashboardData(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchDashboardData = async (authToken: string) => {
     try {

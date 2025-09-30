@@ -97,8 +97,8 @@ export default function RudrakshaCalculatorPage() {
 
     try {
       const response = await apiClient.calculateRudraksha(formData);
-      if (response.success) {
-        setResult(response.data);
+      if (response.success && response.data) {
+        setResult(response.data as RudrakshaResult);
       } else {
         setError(response.error || 'Failed to calculate Rudraksha recommendations');
       }
@@ -262,7 +262,7 @@ export default function RudrakshaCalculatorPage() {
                   Your Rudraksha Recommendations
                 </h2>
                 <p className="text-lg text-gray-600">
-                  Personalized recommendations for {result.personal_info.name}
+                  Personalized recommendations{result.personal_info?.name ? ` for ${result.personal_info.name}` : ''}
                 </p>
               </div>
 
@@ -271,35 +271,35 @@ export default function RudrakshaCalculatorPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-6">
                     <div className="w-20 h-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl font-bold text-white">{result.primary_rudraksha.mukhi}</span>
+                      <span className="text-2xl font-bold text-white">{result.primary_rudraksha?.mukhi || 'N/A'}</span>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
                       Primary Rudraksha
                     </h3>
                     <p className="text-lg text-orange-600 font-semibold">
-                      {result.primary_rudraksha.details.name}
+                      {result.primary_rudraksha?.details?.name || 'Not Available'}
                     </p>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Ruling Planet:</h4>
-                      <p className="text-gray-600">{result.primary_rudraksha.details.ruling_planet}</p>
+                      <p className="text-gray-600">{result.primary_rudraksha?.details?.ruling_planet || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Benefits:</h4>
-                      <p className="text-gray-600">{result.primary_rudraksha.details.benefits}</p>
+                      <p className="text-gray-600">{result.primary_rudraksha?.details?.benefits || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Wearing Method:</h4>
-                      <p className="text-gray-600">{result.primary_rudraksha.details.wearing_method}</p>
+                      <p className="text-gray-600">{result.primary_rudraksha?.details?.wearing_method || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Color:</h4>
-                      <p className="text-gray-600">{result.primary_rudraksha.details.color}</p>
+                      <p className="text-gray-600">{result.primary_rudraksha?.details?.color || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -308,48 +308,48 @@ export default function RudrakshaCalculatorPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-6">
                     <div className="w-20 h-20 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl font-bold text-white">{result.secondary_rudraksha.mukhi}</span>
+                      <span className="text-2xl font-bold text-white">{result.secondary_rudraksha?.mukhi || 'N/A'}</span>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-800 mb-2">
                       Secondary Rudraksha
                     </h3>
                     <p className="text-lg text-blue-600 font-semibold">
-                      {result.secondary_rudraksha.details.name}
+                      {result.secondary_rudraksha?.details?.name || 'Not Available'}
                     </p>
                   </div>
                   
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Ruling Planet:</h4>
-                      <p className="text-gray-600">{result.secondary_rudraksha.details.ruling_planet}</p>
+                      <p className="text-gray-600">{result.secondary_rudraksha?.details?.ruling_planet || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Benefits:</h4>
-                      <p className="text-gray-600">{result.secondary_rudraksha.details.benefits}</p>
+                      <p className="text-gray-600">{result.secondary_rudraksha?.details?.benefits || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Wearing Method:</h4>
-                      <p className="text-gray-600">{result.secondary_rudraksha.details.wearing_method}</p>
+                      <p className="text-gray-600">{result.secondary_rudraksha?.details?.wearing_method || 'N/A'}</p>
                     </div>
                     
                     <div>
                       <h4 className="font-semibold text-gray-800 mb-2">Color:</h4>
-                      <p className="text-gray-600">{result.secondary_rudraksha.details.color}</p>
+                      <p className="text-gray-600">{result.secondary_rudraksha?.details?.color || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Problem-Specific Recommendations */}
-              {result.problem_specific_recommendations.length > 0 && (
+              {result.problem_specific_recommendations && result.problem_specific_recommendations.length > 0 && (
                 <div className="mt-12">
                   <h3 className="text-2xl font-bold text-gray-800 mb-8 text-center">
                     Problem-Specific Recommendations
                   </h3>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {result.problem_specific_recommendations.map((rec, index) => (
+                    {result.problem_specific_recommendations?.map((rec, index) => (
                       <div key={index} className="bg-white rounded-xl shadow-lg p-6">
                         <div className="text-center mb-4">
                           <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -372,19 +372,19 @@ export default function RudrakshaCalculatorPage() {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-2">Wearing Time:</h4>
-                    <p className="text-gray-600">{result.general_guidelines.wearing_time}</p>
+                    <p className="text-gray-600">{result.general_guidelines?.wearing_time || 'N/A'}</p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-2">Mantra:</h4>
-                    <p className="text-gray-600">{result.general_guidelines.mantra}</p>
+                    <p className="text-gray-600">{result.general_guidelines?.mantra || 'N/A'}</p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-2">Care Instructions:</h4>
-                    <p className="text-gray-600">{result.general_guidelines.care_instructions}</p>
+                    <p className="text-gray-600">{result.general_guidelines?.care_instructions || 'N/A'}</p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-2">Replacement:</h4>
-                    <p className="text-gray-600">{result.general_guidelines.replacement}</p>
+                    <p className="text-gray-600">{result.general_guidelines?.replacement || 'N/A'}</p>
                   </div>
                 </div>
               </div>

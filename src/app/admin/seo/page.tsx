@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 import { seoMetaAPI, type SEOMetaData } from '@/lib/api/seo-meta';
 import { seoSchemaAPI, type SchemaData } from '@/lib/api/seo-schema';
 import { seoUrlsAPI, type URLData } from '@/lib/api/seo-urls';
@@ -23,7 +24,7 @@ export default function AdminSEOPage() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('meta');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const { token } = useAuth();
 
   // Data states
   const [seoMetaData, setSeoMetaData] = useState<SEOMetaData[]>([]);
@@ -41,14 +42,12 @@ export default function AdminSEOPage() {
   const [editingItem, setEditingItem] = useState<any>(null);
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchAllData(existingToken);
+    if (token) {
+      fetchAllData(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchAllData = async (authToken: string) => {
     try {

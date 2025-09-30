@@ -124,6 +124,8 @@ class PageBase(BaseModel):
     slug: str
     content: str
     excerpt: Optional[str] = None
+    anchor_text: Optional[str] = None
+    anchor_link: Optional[str] = None
 
 class PageCreate(PageBase):
     pass
@@ -133,6 +135,8 @@ class PageUpdate(BaseModel):
     slug: Optional[str] = None
     content: Optional[str] = None
     excerpt: Optional[str] = None
+    anchor_text: Optional[str] = None
+    anchor_link: Optional[str] = None
     is_published: Optional[bool] = None
 
 class PageResponse(PageBase):

@@ -36,11 +36,11 @@ async def get_podcasts(
     if not podcasts:
         sample_podcasts = [
             PodcastResponse(
-                id=0,
+                id=999001,
                 title="करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित",
                 description="जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।",
                 video_url="https://www.youtube.com/watch?v=sample1",
-                thumbnail_url="/podcast-thumbnail-1.jpg",
+                thumbnail_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop",
                 duration="10:00",
                 category="Politics",
                 is_featured=True,
@@ -49,11 +49,11 @@ async def get_podcasts(
                 updated_at=None
             ),
             PodcastResponse(
-                id=0,
+                id=999002,
                 title="ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?",
                 description="जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।",
                 video_url="https://www.youtube.com/watch?v=sample2",
-                thumbnail_url="/podcast-thumbnail-2.jpg",
+                thumbnail_url="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=225&fit=crop",
                 duration="07:12",
                 category="International",
                 is_featured=True,
@@ -62,11 +62,11 @@ async def get_podcasts(
                 updated_at=None
             ),
             PodcastResponse(
-                id=0,
+                id=999003,
                 title="Share Market Astrology। Stock Market Prediction",
                 description="Dr. Vinay Bajrangi के साथ शेयर मार्केट की ज्योतिषीय भविष्यवाणी।",
                 video_url="https://www.youtube.com/watch?v=sample3",
-                thumbnail_url="/podcast-thumbnail-3.jpg",
+                thumbnail_url="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=225&fit=crop",
                 duration="06:12",
                 category="Finance",
                 is_featured=False,
@@ -93,11 +93,11 @@ async def get_featured_podcasts(
     if not podcasts:
         sample_podcasts = [
             PodcastResponse(
-                id=0,
+                id=999001,
                 title="करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित",
                 description="जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।",
                 video_url="https://www.youtube.com/watch?v=sample1",
-                thumbnail_url="/podcast-thumbnail-1.jpg",
+                thumbnail_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop",
                 duration="10:00",
                 category="Politics",
                 is_featured=True,
@@ -106,11 +106,11 @@ async def get_featured_podcasts(
                 updated_at=None
             ),
             PodcastResponse(
-                id=0,
+                id=999002,
                 title="ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?",
                 description="जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।",
                 video_url="https://www.youtube.com/watch?v=sample2",
-                thumbnail_url="/podcast-thumbnail-2.jpg",
+                thumbnail_url="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=225&fit=crop",
                 duration="07:12",
                 category="International",
                 is_featured=True,

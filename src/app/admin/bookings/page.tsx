@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Booking {
   id: number;
@@ -23,18 +24,16 @@ export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
+  const { token } = useAuth();
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchBookings(existingToken);
+    if (token) {
+      fetchBookings(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchBookings = async (authToken: string) => {
     try {

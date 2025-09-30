@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState('');
@@ -9,6 +10,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,24 +18,17 @@ export default function AdminLoginPage() {
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('username', username);
-      formData.append('password', password);
-
-      const response = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('admin_token', data.access_token);
-        router.push('/admin');
+      const success = await login(username, password);
+      if (success) {
+        // Small delay for better UX
+        setTimeout(() => {
+          router.push('/admin');
+        }, 500);
       } else {
-        const errorData = await response.json();
-        setError(errorData.detail || 'Invalid credentials. Please try again.');
+        setError('Invalid username or password. Please try again.');
       }
     } catch (error) {
+      console.error('Login error:', error);
       setError('Login failed. Please check your connection and try again.');
     } finally {
       setLoading(false);

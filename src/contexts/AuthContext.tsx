@@ -113,10 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await apiClient.request('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      });
+      const response = await apiClient.register(userData);
       
       if (response.success) {
         // Auto-login after successful registration

@@ -27,8 +27,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const switchToRegister = () => setMode('register');
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="relative w-full max-w-md">
+    <div
+      className="fixed inset-0 z-50 p-4 bg-black/50 flex items-start justify-center overflow-y-auto"
+      aria-modal="true"
+      role="dialog"
+    >
+      <div className="relative w-full max-w-md my-8">
         {/* Close button */}
         <button
           onClick={onClose}
@@ -40,7 +44,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </button>
 
         {/* Modal content */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl overflow-y-auto max-h-[85vh]">
           {mode === 'login' ? (
             <LoginForm 
               onSuccess={handleSuccess}

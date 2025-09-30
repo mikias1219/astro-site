@@ -45,7 +45,7 @@ export function Podcasts() {
   // Fallback data if API fails
   const fallbackPodcasts = [
     {
-      id: 0,
+      id: 1,
       title: 'करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित',
       description: 'जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।',
       duration: '10:00',
@@ -57,7 +57,7 @@ export function Podcasts() {
       created_at: '2024-01-15T10:00:00'
     },
     {
-      id: 0,
+      id: 2,
       title: 'ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?',
       description: 'जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।',
       duration: '07:12',
@@ -69,7 +69,7 @@ export function Podcasts() {
       created_at: '2024-01-14T15:30:00'
     },
     {
-      id: 0,
+      id: 3,
       title: 'Share Market Astrology। Stock Market Prediction',
       description: 'Dr. Vinay Bajrangi के साथ शेयर मार्केट की ज्योतिषीय भविष्यवाणी।',
       duration: '06:12',
@@ -123,8 +123,8 @@ export function Podcasts() {
               }}
               className="pb-8"
             >
-              {displayPodcasts.map((podcast) => (
-                <SwiperSlide key={podcast.id}>
+              {displayPodcasts.map((podcast, index) => (
+                <SwiperSlide key={`podcast-${podcast.id}-${index}`}>
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group">
                     <div className="relative aspect-video overflow-hidden">
                       <img 

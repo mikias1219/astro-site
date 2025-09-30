@@ -17,6 +17,7 @@ class BirthDetails(BaseModel):
     birth_time: str  # HH:MM format
     birth_place: str
     gender: str  # male/female
+    language: Optional[str] = "english"  # english, bengali, hindi
 
 class RudrakshaRequest(BaseModel):
     name: str
@@ -79,6 +80,51 @@ GEMSTONES = {
     "Rahu": "Hessonite",
     "Ketu": "Cat's Eye"
 }
+
+# Nakshatras with complete details
+NAKSHATRAS = [
+    {"name": "Ashwini", "deity": "Ashwini Kumaras", "symbol": "Horse's Head", "lord": "Ketu"},
+    {"name": "Bharani", "deity": "Yama", "symbol": "Yoni", "lord": "Venus"},
+    {"name": "Krittika", "deity": "Agni", "symbol": "Razor", "lord": "Sun"},
+    {"name": "Rohini", "deity": "Brahma", "symbol": "Chariot", "lord": "Moon"},
+    {"name": "Mrigashira", "deity": "Soma", "symbol": "Deer's Head", "lord": "Mars"},
+    {"name": "Ardra", "deity": "Rudra", "symbol": "Teardrop", "lord": "Rahu"},
+    {"name": "Punarvasu", "deity": "Aditi", "symbol": "Bow", "lord": "Jupiter"},
+    {"name": "Pushya", "deity": "Brihaspati", "symbol": "Cow's Udder", "lord": "Saturn"},
+    {"name": "Ashlesha", "deity": "Nagas", "symbol": "Coiled Serpent", "lord": "Mercury"},
+    {"name": "Magha", "deity": "Pitris", "symbol": "Royal Throne", "lord": "Ketu"},
+    {"name": "Purva Phalguni", "deity": "Bhaga", "symbol": "Hammock", "lord": "Venus"},
+    {"name": "Uttara Phalguni", "deity": "Aryaman", "symbol": "Bed", "lord": "Sun"},
+    {"name": "Hasta", "deity": "Savitar", "symbol": "Hand", "lord": "Moon"},
+    {"name": "Chitra", "deity": "Tvashtar", "symbol": "Pearl", "lord": "Mars"},
+    {"name": "Swati", "deity": "Vayu", "symbol": "Coral", "lord": "Rahu"},
+    {"name": "Vishakha", "deity": "Indra-Agni", "symbol": "Archway", "lord": "Jupiter"},
+    {"name": "Anuradha", "deity": "Mitra", "symbol": "Lotus", "lord": "Saturn"},
+    {"name": "Jyeshtha", "deity": "Indra", "symbol": "Earring", "lord": "Mercury"},
+    {"name": "Mula", "deity": "Nirriti", "symbol": "Roots", "lord": "Ketu"},
+    {"name": "Purva Ashadha", "deity": "Apas", "symbol": "Fan", "lord": "Venus"},
+    {"name": "Uttara Ashadha", "deity": "Vishvedevas", "symbol": "Elephant Tusk", "lord": "Sun"},
+    {"name": "Shravana", "deity": "Vishnu", "symbol": "Ear", "lord": "Moon"},
+    {"name": "Dhanishtha", "deity": "Vasus", "symbol": "Drum", "lord": "Mars"},
+    {"name": "Shatabhisha", "deity": "Varuna", "symbol": "Circle", "lord": "Rahu"},
+    {"name": "Purva Bhadrapada", "deity": "Aja Ekapada", "symbol": "Sword", "lord": "Jupiter"},
+    {"name": "Uttara Bhadrapada", "deity": "Ahir Budhnya", "symbol": "Twins", "lord": "Saturn"},
+    {"name": "Revati", "deity": "Pushan", "symbol": "Fish", "lord": "Mercury"}
+]
+
+# Yogas - Special planetary combinations
+YOGAS_LIST = [
+    {"name": "Gaj Kesari Yoga", "description": "Moon and Jupiter in kendras", "benefits": "Wisdom, prosperity, and respect"},
+    {"name": "Chandra Mangal Yoga", "description": "Moon and Mars conjunction", "benefits": "Wealth and courage"},
+    {"name": "Hamsa Yoga", "description": "Jupiter in kendra in own sign", "benefits": "Spiritual knowledge and prosperity"},
+    {"name": "Malavya Yoga", "description": "Venus in kendra in own sign", "benefits": "Luxury and beauty"},
+    {"name": "Sasa Yoga", "description": "Saturn in kendra in own sign", "benefits": "Authority and longevity"},
+    {"name": "Ruchaka Yoga", "description": "Mars in kendra in own sign", "benefits": "Courage and leadership"},
+    {"name": "Bhadra Yoga", "description": "Mercury in kendra in own sign", "benefits": "Intelligence and communication"},
+    {"name": "Sankha Yoga", "description": "Lords of 5th and 6th in kendras", "benefits": "Wealth and longevity"},
+    {"name": "Budha Aditya Yoga", "description": "Sun and Mercury conjunction", "benefits": "Intelligence and name"},
+    {"name": "Vasumati Yoga", "description": "Benefics in upachayas", "benefits": "Wealth accumulation"}
+]
 
 # Rudraksha beads and their benefits
 RUDRAKSHA_BEADS = {
@@ -252,6 +298,118 @@ def calculate_doshas(birth_date: str, birth_time: str) -> Dict[str, Any]:
         "recommendation": "Consult an astrologer for detailed analysis" if doshas_found else "No major doshas found"
     }
 
+def get_nakshatra_details(birth_date: str) -> Dict[str, Any]:
+    """Get detailed nakshatra information"""
+    date_obj = datetime.strptime(birth_date, "%Y-%m-%d")
+    day_of_year = date_obj.timetuple().tm_yday
+    nakshatra_index = (day_of_year - 1) % 27
+    nakshatra = NAKSHATRAS[nakshatra_index]
+    
+    pada = ((day_of_year - 1) % 4) + 1  # Calculate pada (quarter)
+    
+    return {
+        "nakshatra": nakshatra["name"],
+        "pada": pada,
+        "deity": nakshatra["deity"],
+        "symbol": nakshatra["symbol"],
+        "ruling_planet": nakshatra["lord"],
+        "characteristics": f"This nakshatra is ruled by {nakshatra['lord']} and brings qualities of {nakshatra['symbol'].lower()}."
+    }
+
+def calculate_dasha_periods(birth_date: str) -> Dict[str, Any]:
+    """Calculate Vimshottari Dasha periods"""
+    date_obj = datetime.strptime(birth_date, "%Y-%m-%d")
+    day = date_obj.day
+    
+    # Dasha sequence and years
+    dasha_sequence = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"]
+    dasha_years = {"Ketu": 7, "Venus": 20, "Sun": 6, "Moon": 10, "Mars": 7, "Rahu": 18, "Jupiter": 16, "Saturn": 19, "Mercury": 17}
+    
+    # Determine current Maha Dasha based on birth
+    current_dasha_index = day % len(dasha_sequence)
+    current_dasha = dasha_sequence[current_dasha_index]
+    
+    # Calculate periods
+    periods = []
+    for i in range(3):  # Show next 3 periods
+        dasha_index = (current_dasha_index + i) % len(dasha_sequence)
+        dasha_name = dasha_sequence[dasha_index]
+        periods.append({
+            "planet": dasha_name,
+            "duration_years": dasha_years[dasha_name],
+            "effects": f"{dasha_name} period brings transformation and growth in areas governed by {dasha_name}."
+        })
+    
+    return {
+        "current_mahadasha": current_dasha,
+        "current_duration": dasha_years[current_dasha],
+        "upcoming_periods": periods[1:],
+        "description": f"You are currently in {current_dasha} Maha Dasha which lasts for {dasha_years[current_dasha]} years."
+    }
+
+def identify_yogas(birth_date: str, birth_time: str) -> list:
+    """Identify special yogas in the birth chart"""
+    date_obj = datetime.strptime(birth_date, "%Y-%m-%d")
+    day = date_obj.day
+    
+    # Simulate yoga presence based on birth details
+    yogas_present = []
+    
+    # Add 2-4 yogas based on birth date
+    num_yogas = (day % 3) + 2
+    for i in range(num_yogas):
+        yoga_index = (day + i * 3) % len(YOGAS_LIST)
+        yogas_present.append(YOGAS_LIST[yoga_index])
+    
+    return yogas_present
+
+def get_detailed_predictions(zodiac_sign: str, moon_sign: str, ascendant: str, language: str = "english") -> Dict[str, Any]:
+    """Get detailed predictions in multiple languages"""
+    
+    predictions = {
+        "english": {
+            "personality": f"As a {zodiac_sign} with {moon_sign} moon, you possess a dynamic personality with strong emotional intelligence. Your {ascendant} ascendant adds depth to your character.",
+            "career": f"Your {zodiac_sign} sun sign indicates success in fields related to leadership and innovation. The {moon_sign} moon supports careers in creative and humanitarian fields.",
+            "relationships": f"In relationships, {zodiac_sign} individuals are passionate and loyal. Your {moon_sign} moon brings emotional depth and understanding to partnerships.",
+            "health": f"Pay attention to areas governed by {zodiac_sign}. Regular exercise and meditation will help maintain balance. Your {moon_sign} moon suggests focus on emotional well-being.",
+            "finance": f"Financial prospects are favorable with {zodiac_sign} sun. Plan investments carefully during {moon_sign} moon periods for best results.",
+            "lucky_elements": {
+                "color": "Orange, Red, Golden",
+                "day": "Sunday, Thursday",
+                "number": "3, 9, 12",
+                "gemstone": "Ruby, Yellow Sapphire"
+            }
+        },
+        "bengali": {
+            "personality": f"{zodiac_sign} রাশি এবং {moon_sign} চন্দ্র রাশির সঙ্গে, আপনার একটি গতিশীল ব্যক্তিত্ব রয়েছে যা শক্তিশালী আবেগময় বুদ্ধিমত্তার সাথে। আপনার {ascendant} লগ্ন আপনার চরিত্রে গভীরতা যোগ করে।",
+            "career": f"আপনার {zodiac_sign} সূর্য রাশি নেতৃত্ব এবং উদ্ভাবন সম্পর্কিত ক্ষেত্রে সাফল্য নির্দেশ করে। {moon_sign} চন্দ্র সৃজনশীল এবং মানবিক ক্ষেত্রে ক্যারিয়ারকে সমর্থন করে।",
+            "relationships": f"সম্পর্কে, {zodiac_sign} ব্যক্তিরা আবেগপ্রবণ এবং বিশ্বস্ত। আপনার {moon_sign} চন্দ্র সম্পর্কে আবেগময় গভীরতা এবং বোঝাপড়া নিয়ে আসে।",
+            "health": f"{zodiac_sign} দ্বারা নিয়ন্ত্রিত এলাকায় মনোযোগ দিন। নিয়মিত ব্যায়াম এবং ধ্যান ভারসাম্য বজায় রাখতে সাহায্য করবে। আপনার {moon_sign} চন্দ্র আবেগময় সুস্থতার উপর ফোকাস করার পরামর্শ দেয়।",
+            "finance": f"{zodiac_sign} সূর্যের সাথে আর্থিক সম্ভাবনা অনুকূল। সর্বোত্তম ফলাফলের জন্য {moon_sign} চন্দ্র সময়কালে বিনিয়োগের পরিকল্পনা সাবধানে করুন।",
+            "lucky_elements": {
+                "color": "কমলা, লাল, সোনালি",
+                "day": "রবিবার, বৃহস্পতিবার",
+                "number": "৩, ৯, ১২",
+                "gemstone": "মাণিক, পোখরাজ"
+            }
+        },
+        "hindi": {
+            "personality": f"{zodiac_sign} राशि और {moon_sign} चंद्र राशि के साथ, आपके पास मजबूत भावनात्मक बुद्धिमत्ता के साथ एक गतिशील व्यक्तित्व है। आपका {ascendant} लग्न आपके चरित्र में गहराई जोड़ता है।",
+            "career": f"आपकी {zodiac_sign} सूर्य राशि नेतृत्व और नवाचार से संबंधित क्षेत्रों में सफलता का संकेत देती है। {moon_sign} चंद्र रचनात्मक और मानवीय क्षेत्रों में करियर का समर्थन करता है।",
+            "relationships": f"रिश्तों में, {zodiac_sign} व्यक्ति भावुक और वफादार होते हैं। आपका {moon_sign} चंद्र साझेदारी में भावनात्मक गहराई और समझ लाता है।",
+            "health": f"{zodiac_sign} द्वारा नियंत्रित क्षेत्रों पर ध्यान दें। नियमित व्यायाम और ध्यान संतुलन बनाए रखने में मदद करेगा। आपका {moon_sign} चंद्र भावनात्मक कल्याण पर ध्यान केंद्रित करने का सुझाव देता है।",
+            "finance": f"{zodiac_sign} सूर्य के साथ वित्तीय संभावनाएं अनुकूल हैं। सर्वोत्तम परिणामों के लिए {moon_sign} चंद्र अवधि के दौरान निवेश की सावधानीपूर्वक योजना बनाएं।",
+            "lucky_elements": {
+                "color": "नारंगी, लाल, सुनहरा",
+                "day": "रविवार, गुरुवार",
+                "number": "३, ९, १२",
+                "gemstone": "माणिक, पुखराज"
+            }
+        }
+    }
+    
+    return predictions.get(language, predictions["english"])
+
 def get_gemstone_recommendations(birth_date: str, birth_time: str) -> Dict[str, Any]:
     """Get gemstone recommendations (simplified)"""
     # This is a simplified calculation. Real gemstone recommendation requires
@@ -268,7 +426,8 @@ def get_gemstone_recommendations(birth_date: str, birth_time: str) -> Dict[str, 
         "secondary_gemstone": secondary_gemstone,
         "wearing_finger": "Ring finger" if day % 2 == 0 else "Index finger",
         "wearing_day": "Sunday" if day % 7 == 0 else "Friday",
-        "benefits": f"Wearing {primary_gemstone} will enhance your planetary strength and bring positive energy"
+        "benefits": f"Wearing {primary_gemstone} will enhance your planetary strength and bring positive energy",
+        "metal": "Gold" if primary_gemstone in ["Ruby", "Yellow Sapphire", "Diamond"] else "Silver"
     }
 
 def get_rudraksha_recommendations(birth_date: str, birth_time: str, current_problems: list = None) -> Dict[str, Any]:
@@ -342,7 +501,7 @@ def get_rudraksha_recommendations(birth_date: str, birth_time: str, current_prob
 
 @router.post("/kundli", response_model=CalculatorResponse)
 async def calculate_kundli(birth_details: BirthDetails):
-    """Calculate complete birth chart (Kundli)"""
+    """Calculate complete birth chart (Kundli) with comprehensive details"""
     try:
         # Parse birth date
         birth_date_obj = datetime.strptime(birth_details.birth_date, "%Y-%m-%d")
@@ -351,8 +510,14 @@ async def calculate_kundli(birth_details: BirthDetails):
         zodiac_sign = get_zodiac_sign(birth_date_obj.month, birth_date_obj.day)
         moon_sign = calculate_moon_sign(birth_details.birth_date, birth_details.birth_time)
         ascendant = calculate_ascendant(birth_details.birth_date, birth_details.birth_time, birth_details.birth_place)
+        
+        # Get detailed information
         doshas = calculate_doshas(birth_details.birth_date, birth_details.birth_time)
         gemstones = get_gemstone_recommendations(birth_details.birth_date, birth_details.birth_time)
+        nakshatra_info = get_nakshatra_details(birth_details.birth_date)
+        dasha_periods = calculate_dasha_periods(birth_details.birth_date)
+        yogas = identify_yogas(birth_details.birth_date, birth_details.birth_time)
+        predictions = get_detailed_predictions(zodiac_sign, moon_sign, ascendant, birth_details.language)
         
         kundli_data = {
             "personal_info": {
@@ -360,7 +525,8 @@ async def calculate_kundli(birth_details: BirthDetails):
                 "birth_date": birth_details.birth_date,
                 "birth_time": birth_details.birth_time,
                 "birth_place": birth_details.birth_place,
-                "gender": birth_details.gender
+                "gender": birth_details.gender,
+                "language": birth_details.language
             },
             "astrological_elements": {
                 "zodiac_sign": zodiac_sign,
@@ -368,23 +534,29 @@ async def calculate_kundli(birth_details: BirthDetails):
                 "ascendant": ascendant,
                 "sun_sign": zodiac_sign
             },
+            "nakshatra": nakshatra_info,
+            "dasha_periods": dasha_periods,
+            "yogas": yogas,
             "doshas": doshas,
             "gemstone_recommendations": gemstones,
             "planetary_positions": {
-                "sun": f"House {((birth_date_obj.day - 1) % 12) + 1}",
-                "moon": f"House {((birth_date_obj.day + 5) % 12) + 1}",
-                "mars": f"House {((birth_date_obj.day + 2) % 12) + 1}",
-                "mercury": f"House {((birth_date_obj.day + 1) % 12) + 1}",
-                "jupiter": f"House {((birth_date_obj.day + 4) % 12) + 1}",
-                "venus": f"House {((birth_date_obj.day + 3) % 12) + 1}",
-                "saturn": f"House {((birth_date_obj.day + 6) % 12) + 1}"
-            }
+                "sun": {"house": ((birth_date_obj.day - 1) % 12) + 1, "sign": zodiac_sign},
+                "moon": {"house": ((birth_date_obj.day + 5) % 12) + 1, "sign": moon_sign},
+                "mars": {"house": ((birth_date_obj.day + 2) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 2) % 12]},
+                "mercury": {"house": ((birth_date_obj.day + 1) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 1) % 12]},
+                "jupiter": {"house": ((birth_date_obj.day + 4) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 4) % 12]},
+                "venus": {"house": ((birth_date_obj.day + 3) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 3) % 12]},
+                "saturn": {"house": ((birth_date_obj.day + 6) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 6) % 12]},
+                "rahu": {"house": ((birth_date_obj.day + 1) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 1) % 12]},
+                "ketu": {"house": ((birth_date_obj.day + 7) % 12) + 1, "sign": MOON_SIGNS[(birth_date_obj.day + 7) % 12]}
+            },
+            "detailed_predictions": predictions
         }
         
         return CalculatorResponse(
             success=True,
             data=kundli_data,
-            message="Kundli calculated successfully"
+            message="Kundli calculated successfully with comprehensive details"
         )
         
     except Exception as e:

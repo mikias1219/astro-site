@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
 import { apiClient } from '../../../lib/api';
+import { useAuth } from '../../../contexts/AuthContext';
 
 export default function AdminRegisterPage() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function AdminRegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const { login } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,9 +60,17 @@ export default function AdminRegisterPage() {
 
       if (response.success) {
         setSuccess(true);
-        setTimeout(() => {
-          router.push('/admin/login');
-        }, 2000);
+        // Auto-login after successful registration
+        const loginSuccess = await login(formData.username, formData.password);
+        if (loginSuccess) {
+          setTimeout(() => {
+            router.push('/admin');
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            router.push('/admin/login');
+          }, 1500);
+        }
       } else {
         setError(response.error || 'Registration failed. Please try again.');
       }

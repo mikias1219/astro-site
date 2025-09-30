@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Service {
   id: number;
@@ -17,9 +18,9 @@ export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -30,14 +31,12 @@ export default function AdminServicesPage() {
   });
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchServices(existingToken);
+    if (token) {
+      fetchServices(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchServices = async (authToken: string) => {
     try {

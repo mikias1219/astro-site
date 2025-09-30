@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Blog {
   id: number;
@@ -21,9 +22,9 @@ export default function AdminBlogsPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -37,14 +38,12 @@ export default function AdminBlogsPage() {
   });
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchBlogs(existingToken);
+    if (token) {
+      fetchBlogs(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchBlogs = async (authToken: string) => {
     try {

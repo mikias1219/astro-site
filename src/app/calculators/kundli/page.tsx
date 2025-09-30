@@ -10,7 +10,8 @@ export default function KundliCalculatorPage() {
     birthDate: '',
     birthTime: '',
     birthPlace: '',
-    gender: 'male'
+    gender: 'male',
+    language: 'english'
   });
 
   const [result, setResult] = useState(null);
@@ -116,7 +117,8 @@ export default function KundliCalculatorPage() {
           birth_date: formData.birthDate,
           birth_time: formData.birthTime,
           birth_place: formData.birthPlace,
-          gender: formData.gender
+          gender: formData.gender,
+          language: formData.language
         })
       });
 
@@ -253,6 +255,25 @@ export default function KundliCalculatorPage() {
                       <option value="male">Male</option>
                       <option value="female">Female</option>
                     </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor="language" className="block text-sm font-semibold text-gray-700 mb-2">
+                      Preferred Language *
+                    </label>
+                    <select
+                      id="language"
+                      name="language"
+                      value={formData.language}
+                      onChange={handleInputChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    >
+                      <option value="english">English</option>
+                      <option value="bengali">বাংলা (Bengali)</option>
+                      <option value="hindi">हिंदी (Hindi)</option>
+                    </select>
+                    <p className="text-sm text-gray-500 mt-1">Predictions will be shown in your selected language</p>
                   </div>
 
                   <button
@@ -410,6 +431,82 @@ export default function KundliCalculatorPage() {
                   </div>
                 </div>
 
+                {/* Nakshatra Details */}
+                {result.nakshatra && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Nakshatra Details</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Birth Nakshatra:</span>
+                        <span className="text-gray-800">{result.nakshatra.nakshatra}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Pada:</span>
+                        <span className="text-gray-800">{result.nakshatra.pada}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Ruling Planet:</span>
+                        <span className="text-gray-800">{result.nakshatra.ruling_planet}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Deity:</span>
+                        <span className="text-gray-800">{result.nakshatra.deity}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Symbol:</span>
+                        <span className="text-gray-800">{result.nakshatra.symbol}</span>
+                      </div>
+                      <div className="py-2">
+                        <span className="font-semibold text-gray-700 block mb-2">Characteristics:</span>
+                        <span className="text-gray-600 text-sm">{result.nakshatra.characteristics}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Dasha Periods */}
+                {result.dasha_periods && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Dasha Periods</h3>
+                    <div className="space-y-4">
+                      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg">
+                        <div className="font-semibold text-gray-700 mb-2">Current Maha Dasha:</div>
+                        <div className="text-xl font-bold text-orange-600">{result.dasha_periods.current_mahadasha}</div>
+                        <div className="text-sm text-gray-600 mt-1">Duration: {result.dasha_periods.current_duration} years</div>
+                        <div className="text-sm text-gray-600 mt-2">{result.dasha_periods.description}</div>
+                      </div>
+                      <div>
+                        <span className="font-semibold text-gray-700 block mb-3">Upcoming Periods:</span>
+                        {result.dasha_periods.upcoming_periods?.map((period, index) => (
+                          <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-semibold text-gray-800">{period.planet} Dasha</span>
+                              <span className="text-sm text-gray-600">{period.duration_years} years</span>
+                            </div>
+                            <div className="text-sm text-gray-600">{period.effects}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Yogas */}
+                {result.yogas && result.yogas.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Special Yogas</h3>
+                    <div className="space-y-3">
+                      {result.yogas.map((yoga, index) => (
+                        <div key={index} className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+                          <div className="font-semibold text-green-800 mb-2">{yoga.name}</div>
+                          <div className="text-sm text-gray-700 mb-1"><strong>Formation:</strong> {yoga.description}</div>
+                          <div className="text-sm text-gray-700"><strong>Benefits:</strong> {yoga.benefits}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Doshas */}
                 {result.doshas && (
                   <div className="bg-white rounded-2xl shadow-lg p-8">
@@ -462,6 +559,12 @@ export default function KundliCalculatorPage() {
                         <span className="font-semibold text-gray-700">Wearing Day:</span>
                         <span className="text-gray-800">{result.gemstone_recommendations.wearing_day}</span>
                       </div>
+                      {result.gemstone_recommendations.metal && (
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700">Metal:</span>
+                          <span className="text-gray-800">{result.gemstone_recommendations.metal}</span>
+                        </div>
+                      )}
                       <div className="py-2">
                         <span className="font-semibold text-gray-700 block mb-2">Benefits:</span>
                         <span className="text-gray-800">{result.gemstone_recommendations.benefits}</span>
@@ -492,8 +595,58 @@ export default function KundliCalculatorPage() {
                 )}
               </div>
 
+              {/* Detailed Predictions */}
+              {result.detailed_predictions && (
+                <div className="bg-white rounded-2xl shadow-lg p-8 lg:col-span-2">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Detailed Predictions</h3>
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">🧑 Personality</h4>
+                      <p className="text-gray-700">{result.detailed_predictions.personality}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">💼 Career</h4>
+                      <p className="text-gray-700">{result.detailed_predictions.career}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">❤️ Relationships</h4>
+                      <p className="text-gray-700">{result.detailed_predictions.relationships}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">🏥 Health</h4>
+                      <p className="text-gray-700">{result.detailed_predictions.health}</p>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg text-gray-800 mb-2">💰 Finance</h4>
+                      <p className="text-gray-700">{result.detailed_predictions.finance}</p>
+                    </div>
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
+                      <h4 className="font-semibold text-lg text-gray-800 mb-4">🍀 Lucky Elements</h4>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="font-semibold text-gray-700">Color:</span>
+                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.color}</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Day:</span>
+                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.day}</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Number:</span>
+                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.number}</span>
+                        </div>
+                        <div>
+                          <span className="font-semibold text-gray-700">Gemstone:</span>
+                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.gemstone}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               {/* CTA */}
-              <div className="text-center mt-12">
+              <div className="text-center mt-12 lg:col-span-2">
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-4">
                     Want Detailed Analysis?
@@ -504,7 +657,7 @@ export default function KundliCalculatorPage() {
                   </p>
                   <a
                     href="/book-appointment"
-                    className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                   >
                     Book Consultation
                   </a>

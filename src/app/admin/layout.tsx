@@ -14,19 +14,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
 
+  // Allow access to login and register pages without authentication
+  const publicPages = ['/admin/login', '/admin/register'];
+  const isPublicPage = publicPages.includes(pathname);
+
   useEffect(() => {
-    if (!loading) {
+    if (!loading && !isPublicPage) {
       if (!isAuthenticated) {
-        // Redirect to main site login if not authenticated
-        router.push('/');
+        // Redirect to login if not authenticated
+        router.push('/admin/login');
       } else if (!isAdmin) {
         // Redirect to main site if not admin
         router.push('/');
       }
     }
-  }, [loading, isAuthenticated, isAdmin, router]);
+  }, [loading, isAuthenticated, isAdmin, router, isPublicPage]);
 
-  if (loading) {
+  // Show loading only for protected pages
+  if (loading && !isPublicPage) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -37,6 +42,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     );
   }
 
+  // For public pages (login/register), render without admin nav
+  if (isPublicPage) {
+    return <>{children}</>;
+  }
+
+  // For protected pages, check authentication
   if (!isAuthenticated || !isAdmin) {
     return null; // Will redirect
   }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Podcast {
   id: number;
@@ -18,8 +19,8 @@ export default function AdminPodcastsPage() {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -31,14 +32,12 @@ export default function AdminPodcastsPage() {
   });
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchPodcasts(existingToken);
+    if (token) {
+      fetchPodcasts(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchPodcasts = async (authToken: string) => {
     try {

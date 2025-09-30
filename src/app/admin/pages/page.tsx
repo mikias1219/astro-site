@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface Page {
   id: number;
@@ -9,6 +10,8 @@ interface Page {
   content: string;
   meta_description?: string;
   meta_keywords?: string;
+  anchor_text?: string;
+  anchor_link?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -18,9 +21,9 @@ export default function AdminPagesPage() {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
+  const { token } = useAuth();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -28,18 +31,18 @@ export default function AdminPagesPage() {
     content: '',
     meta_description: '',
     meta_keywords: '',
+    anchor_text: '',
+    anchor_link: '',
     is_published: false
   });
 
   useEffect(() => {
-    const existingToken = localStorage.getItem('admin_token');
-    if (existingToken) {
-      setToken(existingToken);
-      fetchPages(existingToken);
+    if (token) {
+      fetchPages(token);
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [token]);
 
   const fetchPages = async (authToken: string) => {
     try {
@@ -93,6 +96,8 @@ export default function AdminPagesPage() {
           content: '',
           meta_description: '',
           meta_keywords: '',
+          anchor_text: '',
+          anchor_link: '',
           is_published: false
         });
       } else {
@@ -111,6 +116,8 @@ export default function AdminPagesPage() {
       content: page.content,
       meta_description: page.meta_description || '',
       meta_keywords: page.meta_keywords || '',
+      anchor_text: page.anchor_text || '',
+      anchor_link: page.anchor_link || '',
       is_published: page.is_published
     });
     setShowAddForm(true);
@@ -181,17 +188,19 @@ export default function AdminPagesPage() {
           </div>
           <button
             onClick={() => {
-              setShowAddForm(true);
-              setEditingPage(null);
-              setFormData({
-                title: '',
-                slug: '',
-                content: '',
-                meta_description: '',
-                meta_keywords: '',
-                is_published: false
-              });
-            }}
+            setShowAddForm(true);
+            setEditingPage(null);
+            setFormData({
+              title: '',
+              slug: '',
+              content: '',
+              meta_description: '',
+              meta_keywords: '',
+              anchor_text: '',
+              anchor_link: '',
+              is_published: false
+            });
+          }}
             className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
           >
             Add New Page
@@ -294,6 +303,28 @@ export default function AdminPagesPage() {
                   placeholder="Enter keywords separated by commas"
                 />
               </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Anchor Text (Internal Linking)</label>
+                  <input
+                    type="text"
+                    value={formData.anchor_text}
+                    onChange={(e) => setFormData({...formData, anchor_text: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="e.g., Best Astrologer in Kolkata"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Link To (URL)</label>
+                  <input
+                    type="text"
+                    value={formData.anchor_link}
+                    onChange={(e) => setFormData({...formData, anchor_link: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="/services/consultation"
+                  />
+                </div>
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Page Content</label>
                 <textarea
@@ -352,6 +383,9 @@ export default function AdminPagesPage() {
                     URL Slug
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Anchor Text
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -373,6 +407,16 @@ export default function AdminPagesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">/{page.slug}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      {page.anchor_text ? (
+                        <div className="text-sm">
+                          <div className="font-medium text-blue-600">{page.anchor_text}</div>
+                          <div className="text-gray-500 text-xs">→ {page.anchor_link}</div>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">No anchor text</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
