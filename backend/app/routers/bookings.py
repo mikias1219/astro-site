@@ -5,7 +5,7 @@ Bookings router for appointment management
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 from app.database import get_db
 from app.models import Booking, Service, User, BookingStatus
@@ -80,7 +80,7 @@ async def create_booking(
         )
     
     # Check if booking date is in the future
-    if booking.booking_date < datetime.now():
+    if booking.booking_date < datetime.now(timezone.utc):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Booking date must be in the future"

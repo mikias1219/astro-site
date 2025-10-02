@@ -17,6 +17,11 @@ export default function KundliCalculatorPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // Type guard to check if position is an object with house and sign
+  const isPlanetaryPosition = (position: any): position is { house: number; sign: string } => {
+    return typeof position === 'object' && position !== null && 'house' in position && 'sign' in position;
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -418,12 +423,20 @@ export default function KundliCalculatorPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6">Planetary Positions</h3>
                   <div className="space-y-4">
-                    {Object.entries(result.planetary_positions || result.planets || {}).map(([planet, sign]) => (
-                      <div key={planet} className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700 capitalize">{planet}:</span>
-                        <span className="text-gray-800">{sign as string}</span>
-                      </div>
-                    ))}
+                    {Object.entries(result.planetary_positions || result.planets || {}).map(([planet, position]) => {
+                      // Handle both object format {house, sign} and string format
+                      const sign = isPlanetaryPosition(position) ? position.sign : position as string;
+                      const house = isPlanetaryPosition(position) ? position.house : null;
+
+                      return (
+                        <div key={planet} className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700 capitalize">{planet}:</span>
+                          <span className="text-gray-800">
+                            {sign}{house ? ` (House ${house})` : ''}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -431,14 +444,19 @@ export default function KundliCalculatorPage() {
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6">Special Yogas</h3>
                   <div className="space-y-3">
-                    {(result.yogas || []).map((yoga, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-gray-800">{yoga}</span>
-                      </div>
-                    ))}
+                    {(result.yogas || []).map((yoga, index) => {
+                      // Handle both object format {name, description, benefits} and string format
+                      const yogaName = typeof yoga === 'object' && yoga && 'name' in yoga ? (yoga as any).name : yoga as string;
+
+                      return (
+                        <div key={index} className="flex items-center gap-3">
+                          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span className="text-gray-800">{yogaName}</span>
+                        </div>
+                      );
+                    })}
                     {(!result.yogas || result.yogas.length === 0) && (
                       <div className="text-gray-500 text-center py-4">
                         No special yogas found in this chart.

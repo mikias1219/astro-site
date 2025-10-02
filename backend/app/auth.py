@@ -107,6 +107,30 @@ async def get_admin_or_editor_user(current_user: User = Depends(get_current_acti
         )
     return current_user
 
+async def get_optional_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """Get the current user if authenticated, None otherwise"""
+    try:
+        token = credentials.credentials
+        payload = verify_token(token)
+        if payload is None:
+            return None
+
+        username: str = payload.get("sub")
+        if username is None:
+            return None
+
+        user = db.query(User).filter(User.username == username).first()
+        if user is None or not user.is_active:
+            return None
+
+        return user
+
+    except Exception:
+        return None
+
 def authenticate_user(db: Session, username: str, password: str) -> Union[User, bool]:
     """Authenticate a user with username and password"""
     user = db.query(User).filter(User.username == username).first()

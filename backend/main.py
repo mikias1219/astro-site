@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 import uvicorn
 
 from app.database import engine, Base
-from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators
+from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators, kundli, matching, numerology
 
 # Create database tables
 @asynccontextmanager
@@ -32,9 +32,9 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Configure this properly for production
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Specific origins for better compatibility
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -57,6 +57,9 @@ app.include_router(panchang.router, prefix="/api/panchang", tags=["Panchang"])
 app.include_router(horoscopes.router, prefix="/api/horoscopes", tags=["Horoscopes"])
 app.include_router(podcasts.router, prefix="/api/podcasts", tags=["Podcasts"])
 app.include_router(calculators.router, prefix="/api/calculators", tags=["Calculators"])
+app.include_router(kundli.router, prefix="/api", tags=["Kundli"])
+app.include_router(matching.router, prefix="/api", tags=["Matching"])
+app.include_router(numerology.router, prefix="/api", tags=["Numerology"])
 
 @app.get("/")
 async def root():

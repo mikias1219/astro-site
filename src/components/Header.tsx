@@ -47,13 +47,13 @@ export function Header() {
               ) : (
                 <>
                   <Link
-                    href="/admin/login"
+                    href="/login"
                     className="text-gray-700 hover:text-orange-600 px-3 py-1 text-xs font-semibold transition-colors"
                   >
                     Login
                   </Link>
                   <Link
-                    href="/admin/register"
+                    href="/register"
                     className="bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-orange-600 transition-colors"
                   >
                     Register

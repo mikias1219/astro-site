@@ -40,7 +40,7 @@ async def register(user: UserCreate, request: Request, db: Session = Depends(get
             detail="Username already taken"
         )
     
-    # Create new user (inactive until email verification)
+    # Create new user (automatically active and verified - email verification disabled)
     hashed_password = get_password_hash(user.password)
     db_user = User(
         email=user.email,
@@ -50,38 +50,39 @@ async def register(user: UserCreate, request: Request, db: Session = Depends(get
         preferred_language=user.preferred_language,
         hashed_password=hashed_password,
         role=UserRole.USER,
-        is_active=False,  # Will be activated after email verification
-        is_verified=False
+        is_active=True,   # Automatically active - no email verification required
+        is_verified=True  # Automatically verified - no email verification required
     )
     
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     
+    # EMAIL VERIFICATION DISABLED - COMMENTED OUT FOR FUTURE USE
     # Generate verification token
-    verification_token = email_service.generate_verification_token()
-    expires_at = datetime.utcnow() + timedelta(hours=24)
+    # verification_token = email_service.generate_verification_token()
+    # expires_at = datetime.utcnow() + timedelta(hours=24)
     
     # Store verification token
-    db_verification = UserVerification(
-        user_id=db_user.id,
-        token=verification_token,
-        token_type="email_verification",
-        expires_at=expires_at
-    )
+    # db_verification = UserVerification(
+    #     user_id=db_user.id,
+    #     token=verification_token,
+    #     token_type="email_verification",
+    #     expires_at=expires_at
+    # )
     
-    db.add(db_verification)
-    db.commit()
+    # db.add(db_verification)
+    # db.commit()
     
     # Get frontend URL from request
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    # frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
     
     # Send verification email
-    email_sent = email_service.send_verification_email(db_user, verification_token, frontend_url)
+    # email_sent = email_service.send_verification_email(db_user, verification_token, frontend_url)
     
     return EmailVerificationResponse(
-        message="Registration successful! Please check your email to verify your account.",
-        email_sent=email_sent
+        message="Registration successful! You can now login with your credentials.",
+        email_sent=False
     )
 
 @router.post("/verify-email", response_model=dict)
@@ -177,12 +178,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Check if email is verified
-    if not user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Please verify your email address before logging in"
-        )
+    # Check if email is verified - COMMENTED OUT FOR NOW
+    # if not user.is_verified:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_403_FORBIDDEN,
+    #         detail="Please verify your email address before logging in"
+    #     )
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
