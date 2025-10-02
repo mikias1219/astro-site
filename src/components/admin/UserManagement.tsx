@@ -49,7 +49,8 @@ const UserManagement: React.FC = () => {
     try {
       const response = await apiClient.getUsers(token!);
       if (response.success) {
-        setUsers(response.data || []);
+        const usersData = (response.data as unknown as { users?: User[] })?.users || (response.data as unknown as User[]) || [];
+        setUsers(usersData as User[]);
       } else {
         setError('Failed to fetch users');
       }
@@ -64,7 +65,7 @@ const UserManagement: React.FC = () => {
     try {
       const response = await apiClient.getUserStats(token!);
       if (response.success) {
-        setStats(response.data);
+        setStats((response.data as unknown as { stats?: UserStats })?.stats || (response.data as unknown as UserStats));
       }
     } catch (err) {
       console.error('Error fetching stats:', err);

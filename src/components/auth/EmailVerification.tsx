@@ -32,7 +32,7 @@ const EmailVerification: React.FC = () => {
         }, 3000);
       } else {
         setStatus('error');
-        setMessage(response.message || 'Email verification failed');
+        setMessage(response.error || 'Email verification failed');
       }
     } catch (error: any) {
       setStatus('error');

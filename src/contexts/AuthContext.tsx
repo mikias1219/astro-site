@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await apiClient.getCurrentUser(token);
       if (response.success) {
-        setUser(response.data);
+        setUser(response.data as unknown as User);
       } else {
         // Token is invalid, remove it
         localStorage.removeItem('auth_token');
@@ -94,13 +94,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await apiClient.login(username, password);
       
       if (response.success && response.data) {
-        const { access_token, user } = response.data;
+        const { access_token } = response.data as any;
         setToken(access_token);
         localStorage.setItem('auth_token', access_token);
-        setUser(user);
-        return { success: true };
+        
+        // Get user data
+        const userResponse = await apiClient.getCurrentUser(access_token);
+        if (userResponse.success) {
+          setUser(userResponse.data as unknown as User);
+          return { success: true };
+        }
       }
-      return { success: false, message: response.message || 'Login failed' };
+      return { success: false, message: (response as any).error || 'Login failed' };
     } catch (error: any) {
       console.error('Login error:', error);
       return { 
@@ -120,10 +125,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (response.success) {
         return { 
           success: true, 
-          message: response.data?.message || 'Registration successful! Please check your email to verify your account.' 
+          message: (response.data as any)?.message || 'Registration successful! Please check your email to verify your account.' 
         };
       }
-      return { success: false, message: response.message || 'Registration failed' };
+      return { success: false, message: (response as any).error || 'Registration failed' };
     } catch (error: any) {
       console.error('Registration error:', error);
       return { 

@@ -2,8 +2,7 @@
 
 import { ReactNode } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { AuthModal } from './AuthModal';
-import { useState } from 'react';
+import Link from 'next/link';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -17,7 +16,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   fallback 
 }) => {
   const { isAuthenticated, isAdmin, loading } = useAuth();
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Show loading state
   if (loading) {
@@ -49,14 +47,19 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </p>
           </div>
           
-          <div className="space-y-4">
-            <button
-              onClick={() => setShowAuthModal(true)}
-              className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300"
+          <div className="space-y-3">
+            <Link
+              href="/login"
+              className="block w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-6 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300"
             >
-              Sign In / Register
-            </button>
-            
+              Sign In
+            </Link>
+            <Link
+              href="/register"
+              className="block w-full bg-gray-900 text-white py-3 px-6 rounded-lg font-semibold hover:bg-black transition-all duration-300"
+            >
+              Create Account
+            </Link>
             <button
               onClick={() => window.history.back()}
               className="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-semibold hover:bg-gray-300 transition-all duration-300"
@@ -65,11 +68,6 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             </button>
           </div>
         </div>
-
-        <AuthModal 
-          isOpen={showAuthModal}
-          onClose={() => setShowAuthModal(false)}
-        />
       </div>
     );
   }

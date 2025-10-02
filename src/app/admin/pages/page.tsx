@@ -46,7 +46,7 @@ export default function AdminPagesPage() {
 
   const fetchPages = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/pages', {
+      const response = await fetch('http://localhost:8000/api/pages?published_only=false', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -72,8 +72,8 @@ export default function AdminPagesPage() {
 
     try {
       const url = editingPage 
-        ? `http://localhost:8000/api/admin/pages/${editingPage.id}`
-        : 'http://localhost:8000/api/admin/pages';
+        ? `http://localhost:8000/api/pages/${editingPage.id}`
+        : 'http://localhost:8000/api/pages';
       
       const method = editingPage ? 'PUT' : 'POST';
 
@@ -127,7 +127,7 @@ export default function AdminPagesPage() {
     if (!token || !confirm('Are you sure you want to delete this page?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/pages/${pageId}`, {
+      const response = await fetch(`http://localhost:8000/api/pages/${pageId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -148,11 +148,13 @@ export default function AdminPagesPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/pages/${pageId}/toggle`, {
+      const response = await fetch(`http://localhost:8000/api/pages/${pageId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_published: !currentStatus })
       });
 
       if (response.ok) {

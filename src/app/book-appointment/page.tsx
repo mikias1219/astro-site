@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
+import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../lib/api';
 
 interface Service {
   id: number;
@@ -32,6 +34,7 @@ export default function BookAppointmentPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { token, login } = useAuth();
   
   const [formData, setFormData] = useState<BookingData>({
     service_id: 0,
@@ -81,46 +84,47 @@ export default function BookAppointmentPage() {
     setMessage(null);
 
     try {
-      // First, register or login user
-      const authResponse = await fetch('http://localhost:8000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          username: 'testuser', // Using test user for demo
-          password: 'test123'
-        })
-      });
-
-      if (!authResponse.ok) {
-        throw new Error('Authentication failed');
+      // Ensure we have a token (auto-login demo user if needed)
+      let authToken = token;
+      if (!authToken) {
+        const loginResult = await login('testuser', 'test123');
+        if (!loginResult.success) {
+          throw new Error(loginResult.message || 'Authentication failed');
+        }
+        // AuthContext stores token internally; re-read it
+        authToken = localStorage.getItem('auth_token');
       }
 
-      const authData = await authResponse.json();
-      const token = authData.access_token;
+      if (!authToken) {
+        throw new Error('Missing authentication token');
+      }
 
-      // Create booking
-      const bookingResponse = await fetch('http://localhost:8000/api/bookings/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          ...formData,
-          service_id: parseInt(formData.service_id.toString())
-        })
-      });
+      // Build ISO datetimes per backend schema
+      const bookingDateIso = new Date(`${formData.booking_date}T${formData.booking_time}:00`).toISOString();
+      const birthDateIso = formData.birth_date && formData.birth_time
+        ? new Date(`${formData.birth_date}T${formData.birth_time}:00`).toISOString()
+        : undefined;
 
-      if (bookingResponse.ok) {
-        const bookingData = await bookingResponse.json();
+      const payload: any = {
+        service_id: Number(formData.service_id),
+        booking_date: bookingDateIso,
+        booking_time: formData.booking_time,
+        customer_name: formData.customer_name,
+        customer_email: formData.customer_email,
+        customer_phone: formData.customer_phone,
+        notes: formData.notes,
+      };
+      if (birthDateIso) payload.birth_date = birthDateIso;
+      if (formData.birth_time) payload.birth_time = formData.birth_time;
+      if (formData.birth_place) payload.birth_place = formData.birth_place;
+
+      const response = await apiClient.createBooking(authToken, payload);
+      if (response.success && response.data) {
+        const bookingData: any = response.data;
         setMessage({
           type: 'success',
           text: `Booking successful! Your booking ID is ${bookingData.id}. You will receive a confirmation email shortly.`
         });
-        
-        // Reset form
         setFormData({
           service_id: 0,
           booking_date: '',
@@ -134,8 +138,7 @@ export default function BookAppointmentPage() {
           notes: ''
         });
       } else {
-        const errorData = await bookingResponse.json();
-        throw new Error(errorData.detail || 'Booking failed');
+        throw new Error(response.error || 'Booking failed');
       }
     } catch (error) {
       console.error('Booking error:', error);

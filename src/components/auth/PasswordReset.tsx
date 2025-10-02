@@ -47,7 +47,7 @@ const PasswordReset: React.FC = () => {
           router.push('/admin/login');
         }, 3000);
       } else {
-        setMessage(response.message || 'Password reset failed');
+        setMessage(response.error || 'Password reset failed');
       }
     } catch (error: any) {
       setMessage(error.response?.data?.detail || 'Password reset failed');

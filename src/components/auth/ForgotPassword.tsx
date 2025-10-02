@@ -24,7 +24,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ onBack }) => {
         setSuccess(true);
         setMessage('If the email exists, a password reset link has been sent to your inbox.');
       } else {
-        setMessage(response.message || 'Failed to send reset email');
+        setMessage(response.error || 'Failed to send reset email');
       }
     } catch (error: any) {
       setMessage(error.response?.data?.detail || 'Failed to send reset email');

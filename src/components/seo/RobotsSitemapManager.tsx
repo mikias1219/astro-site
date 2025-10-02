@@ -12,7 +12,7 @@ interface RobotsSitemapManagerProps {
 
 export default function RobotsSitemapManager({ robotsData, sitemapData, token, onRefresh }: RobotsSitemapManagerProps) {
   const [activeTab, setActiveTab] = useState<'robots' | 'sitemap'>('robots');
-  const [robotsContent, setRobotsContent] = useState(robotsData?.content || '');
+  const [robotsContent, setRobotsContent] = useState<string>((robotsData as any)?.content || '');
   const [showSitemapForm, setShowSitemapForm] = useState(false);
   const [editingSitemap, setEditingSitemap] = useState<SitemapData | null>(null);
   const [sitemapFormData, setSitemapFormData] = useState({
@@ -192,7 +192,7 @@ Sitemap: https://example.com/sitemap.xml"
                   Update Robots.txt
                 </button>
                 <button
-                  onClick={() => setRobotsContent(robotsData?.content || '')}
+                  onClick={() => setRobotsContent((robotsData as any)?.content || '')}
                   className="bg-gray-500 text-white px-6 py-2 rounded-lg hover:bg-gray-600 transition-colors"
                 >
                   Reset

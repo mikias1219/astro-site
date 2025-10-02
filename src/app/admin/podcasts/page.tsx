@@ -41,7 +41,7 @@ export default function AdminPodcastsPage() {
 
   const fetchPodcasts = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/podcasts', {
+      const response = await fetch('http://localhost:8000/api/podcasts', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -66,7 +66,7 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch('http://localhost:8000/api/admin/podcasts', {
+      const response = await fetch('http://localhost:8000/api/podcasts', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,11 +101,13 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/podcasts/${podcastId}/toggle`, {
+      const response = await fetch(`http://localhost:8000/api/podcasts/${podcastId}`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ is_featured: !currentStatus })
       });
 
       if (response.ok) {

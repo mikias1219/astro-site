@@ -98,7 +98,10 @@ export default function RudrakshaCalculatorPage() {
     try {
       const response = await apiClient.calculateRudraksha(formData);
       if (response.success && response.data) {
-        setResult(response.data as RudrakshaResult);
+        const payload: any = response.data;
+        // Backend returns { success, data, message }. Unwrap inner data.
+        const unwrapped = payload?.data ?? payload;
+        setResult(unwrapped as RudrakshaResult);
       } else {
         setError(response.error || 'Failed to calculate Rudraksha recommendations');
       }

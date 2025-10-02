@@ -133,6 +133,14 @@ export default function KundliCalculatorPage() {
           birthDate: formData.birthDate,
           birthTime: formData.birthTime,
           birthPlace: formData.birthPlace,
+          detailed_predictions: {
+            personality: `As a ${kundliData.sunSign} with ${kundliData.moonSign} moon, you have a balanced nature with growth potential`,
+            career: `Your ${kundliData.sunSign} traits support leadership and initiative.`,
+            relationships: `Empathy from ${kundliData.moonSign} strengthens relationships.`,
+            health: `Focus on routine and balance for well-being.`,
+            finance: `Steady progress expected; plan investments wisely.`,
+            lucky_elements: { color: 'Orange', day: 'Sunday', number: '3', gemstone: 'Ruby' }
+          },
           ...kundliData
         });
       }
@@ -144,6 +152,14 @@ export default function KundliCalculatorPage() {
         birthDate: formData.birthDate,
         birthTime: formData.birthTime,
         birthPlace: formData.birthPlace,
+        detailed_predictions: {
+          personality: `As a ${kundliData.sunSign} with ${kundliData.moonSign} moon, you have a balanced nature with growth potential`,
+          career: `Your ${kundliData.sunSign} traits support leadership and initiative.`,
+          relationships: `Empathy from ${kundliData.moonSign} strengthens relationships.`,
+          health: `Focus on routine and balance for well-being.`,
+          finance: `Steady progress expected; plan investments wisely.`,
+          lucky_elements: { color: 'Orange', day: 'Sunday', number: '3', gemstone: 'Ruby' }
+        },
         ...kundliData
       });
     } finally {
@@ -595,49 +611,49 @@ export default function KundliCalculatorPage() {
                 )}
               </div>
 
-              {/* Detailed Predictions */}
-              {result.detailed_predictions && (
+                {/* Detailed Predictions */}
+              {(result.detailed_predictions || result.predictions) && (
                 <div className="bg-white rounded-2xl shadow-lg p-8 lg:col-span-2">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6">Detailed Predictions</h3>
                   <div className="space-y-6">
                     <div>
                       <h4 className="font-semibold text-lg text-gray-800 mb-2">🧑 Personality</h4>
-                      <p className="text-gray-700">{result.detailed_predictions.personality}</p>
+                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.personality || 'No data available for personality.'}</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg text-gray-800 mb-2">💼 Career</h4>
-                      <p className="text-gray-700">{result.detailed_predictions.career}</p>
+                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.career || 'No data available for career.'}</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg text-gray-800 mb-2">❤️ Relationships</h4>
-                      <p className="text-gray-700">{result.detailed_predictions.relationships}</p>
+                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.relationships || 'No data available for relationships.'}</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg text-gray-800 mb-2">🏥 Health</h4>
-                      <p className="text-gray-700">{result.detailed_predictions.health}</p>
+                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.health || 'No data available for health.'}</p>
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg text-gray-800 mb-2">💰 Finance</h4>
-                      <p className="text-gray-700">{result.detailed_predictions.finance}</p>
+                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.finance || 'No data available for finance.'}</p>
                     </div>
                     <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
                       <h4 className="font-semibold text-lg text-gray-800 mb-4">🍀 Lucky Elements</h4>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <span className="font-semibold text-gray-700">Color:</span>
-                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.color}</span>
+                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.color || '—'}</span>
                         </div>
                         <div>
                           <span className="font-semibold text-gray-700">Day:</span>
-                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.day}</span>
+                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.day || '—'}</span>
                         </div>
                         <div>
                           <span className="font-semibold text-gray-700">Number:</span>
-                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.number}</span>
+                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.number || '—'}</span>
                         </div>
                         <div>
                           <span className="font-semibold text-gray-700">Gemstone:</span>
-                          <span className="text-gray-800 ml-2">{result.detailed_predictions.lucky_elements.gemstone}</span>
+                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.gemstone || '—'}</span>
                         </div>
                       </div>
                     </div>

@@ -196,3 +196,40 @@ async def confirm_booking(
     email_service.send_booking_update(booking, "pending")
     
     return {"message": "Booking confirmed successfully"}
+
+@router.put("/{booking_id}/status")
+async def update_booking_status(
+    booking_id: int,
+    status_update: dict,
+    current_user: User = Depends(get_admin_or_editor_user),
+    db: Session = Depends(get_db)
+):
+    """Update only the booking status (Admin/Editor only)"""
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Booking not found"
+        )
+
+    new_status = status_update.get("status")
+    if new_status is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Missing 'status' in request body"
+        )
+
+    try:
+        booking.status = new_status  # FastAPI/SQLAlchemy will validate against Enum
+        db.commit()
+        db.refresh(booking)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid status value"
+        )
+
+    # Send update notification email
+    email_service.send_booking_update(booking, "pending")
+
+    return {"message": "Booking status updated successfully"}

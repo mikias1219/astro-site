@@ -15,7 +15,7 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
   const [selectedSchemaType, setSelectedSchemaType] = useState<'article' | 'product' | 'organization' | 'breadcrumb' | 'faq'>('article');
   const [formData, setFormData] = useState({
     page_url: '',
-    schema_type: 'article' as const,
+    schema_type: 'article' as 'article' | 'product' | 'organization' | 'breadcrumb' | 'faq',
     schema_data: {} as any,
     is_active: true
   });
@@ -52,11 +52,11 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
     setEditingItem(item);
     setFormData({
       page_url: item.page_url,
-      schema_type: item.schema_type,
+      schema_type: item.schema_type as 'article' | 'product' | 'organization' | 'breadcrumb' | 'faq',
       schema_data: item.schema_data,
       is_active: item.is_active
     });
-    setSelectedSchemaType(item.schema_type);
+    setSelectedSchemaType(item.schema_type as any);
     setShowForm(true);
   };
 
