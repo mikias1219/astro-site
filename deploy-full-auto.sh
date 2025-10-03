@@ -9,21 +9,19 @@ echo "🚀 COMPLETE AUTOMATED DEPLOYMENT for AstroArupShastri.com"
 echo "========================================================="
 echo "Domain: astroarupshastri.com"
 echo "Server: srv596142 (88.222.245.41)"
-echo "Panel Credentials: admin / Brainwave786@"
+echo "Database: Already created in Hostinger panel"
 echo ""
-echo "This script will create EVERYTHING automatically!"
+echo "This script will deploy backend and frontend automatically!"
 echo ""
 
 # Configuration
 DOMAIN="astroarupshastri.com"
 DB_NAME="astroarupshastri_db"
 DB_USER="astroarupshastri_user"
+DB_PASSWORD="V38VfuFS5csh15Hokfjs"  # From Hostinger panel
 BACKEND_DIR="/root/astroarupshastri-backend"
 FRONTEND_DIR="/root/astroarupshastri-frontend"
 PROJECT_DIR="/root/astro-site"
-
-# Generate a secure database password
-DB_PASSWORD="AstroArup$(openssl rand -hex 4)!2024"
 
 # Colors for output
 RED='\033[0;31m'
@@ -74,62 +72,11 @@ fi
 
 print_status "Pre-deployment checks completed"
 
-# Try to create database automatically
-print_info "Attempting to create database automatically..."
-MYSQL_ROOT_PASSWORD="Brainwave786@"
-
-# Try to create database with root password
-if mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1;" 2>/dev/null; then
-    print_status "Connected with root password, creating database..."
-
-    mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF
-CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
-FLUSH PRIVILEGES;
-USE $DB_NAME;
-SELECT 'Database created successfully!' as status;
-EOF
-
-elif mysql -u admin -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1;" 2>/dev/null; then
-    print_status "Connected with admin user, creating database..."
-
-    mysql -u admin -p"$MYSQL_ROOT_PASSWORD" << EOF
-CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
-FLUSH PRIVILEGES;
-USE $DB_NAME;
-SELECT 'Database created successfully!' as status;
-EOF
-
-else
-    print_warning "Could not connect to MySQL automatically."
-    echo ""
-    echo "Please create the database manually in CloudPanel:"
-    echo "1. Login: https://88.222.245.41:8443"
-    echo "2. Username: admin"
-    echo "3. Password: Brainwave786@"
-    echo "4. Databases → Add Database"
-    echo "5. Database Name: astroarupshastri_db"
-    echo "6. Database User: astroarupshastri_user"
-    echo "7. Password: $DB_PASSWORD"
-    echo "8. Host: localhost"
-    echo ""
-    read -p "Have you created the database manually? (y/N): " MANUAL_DB
-    if [[ ! $MANUAL_DB =~ ^[Yy]$ ]]; then
-        print_error "Database creation required. Exiting."
-        exit 1
-    fi
-    # Fallback: ask for manual database credentials
-    print_info "Please enter your database credentials:"
-    read -p "Database Name [astroarupshastri_db]: " DB_NAME
-    DB_NAME=${DB_NAME:-astroarupshastri_db}
-    read -p "Database User [astroarupshastri_user]: " DB_USER
-    DB_USER=${DB_USER:-astroarupshastri_user}
-    read -s -p "Database Password: " DB_PASSWORD
-    echo ""
-fi
+# Database already created in Hostinger panel
+print_info "Using existing database from Hostinger panel..."
+print_info "Database: $DB_NAME"
+print_info "User: $DB_USER"
+print_info "Password: $DB_PASSWORD"
 
 # Test database connection
 print_status "Testing database connection..."
