@@ -285,14 +285,42 @@ mkdir -p "$FRONTEND_DIR"
 print_step "Copying frontend files..."
 cd /root/astro-site  # Go back to project root
 
-# Copy frontend files
-cp -r public "$FRONTEND_DIR/"
-cp -r src "$FRONTEND_DIR/"
-cp package.json "$FRONTEND_DIR/"
-cp package-lock.json "$FRONTEND_DIR/" 2>/dev/null || true
+# Copy frontend files with verification
+echo "Copying public directory..."
+cp -r public "$FRONTEND_DIR/" || { echo "Failed to copy public"; exit 1; }
+
+echo "Copying src directory..."
+cp -r src "$FRONTEND_DIR/" || { echo "Failed to copy src"; exit 1; }
+
+echo "Copying root configuration files..."
+cp package.json "$FRONTEND_DIR/" || { echo "Failed to copy package.json"; exit 1; }
+cp next.config.mjs "$FRONTEND_DIR/" || { echo "Failed to copy next.config.mjs"; exit 1; }
+cp tailwind.config.ts "$FRONTEND_DIR/" || { echo "Failed to copy tailwind.config.ts"; exit 1; }
+cp tsconfig.json "$FRONTEND_DIR/" || { echo "Failed to copy tsconfig.json"; exit 1; }
+cp postcss.config.mjs "$FRONTEND_DIR/" 2>/dev/null || true
 cp pnpm-lock.yaml "$FRONTEND_DIR/" 2>/dev/null || true
-cp next.config.mjs "$FRONTEND_DIR/"
-cp tailwind.config.ts "$FRONTEND_DIR/"
+cp package-lock.json "$FRONTEND_DIR/" 2>/dev/null || true
+
+# Verify critical files were copied
+echo "Verifying file copy..."
+if [ ! -f "$FRONTEND_DIR/package.json" ]; then
+    echo "❌ package.json not copied"
+    exit 1
+fi
+
+if [ ! -d "$FRONTEND_DIR/src" ]; then
+    echo "❌ src directory not copied"
+    exit 1
+fi
+
+if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
+    echo "❌ src/lib/api directory not copied"
+    exit 1
+fi
+
+# List the API files to verify they exist
+echo "Checking API files..."
+ls -la "$FRONTEND_DIR/src/lib/api/" | grep "seo-"
 cp tsconfig.json "$FRONTEND_DIR/"
 cp postcss.config.mjs "$FRONTEND_DIR/" 2>/dev/null || true
 
