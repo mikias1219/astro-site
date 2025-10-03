@@ -74,60 +74,53 @@ fi
 
 print_status "Pre-deployment checks completed"
 
-# Try to create database with CloudPanel credentials
+# Try to create database automatically
 print_info "Attempting to create database automatically..."
 MYSQL_ROOT_PASSWORD="Brainwave786@"
 
-# Create database and user
-mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF 2>/dev/null || {
-    print_warning "Could not connect with root password. Trying alternative methods..."
+# Try to create database with root password
+if mysql -u root -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1;" 2>/dev/null; then
+    print_status "Connected with root password, creating database..."
 
-    # Try alternative: create database with admin user if it has privileges
-    mysql -u admin -p"$MYSQL_ROOT_PASSWORD" << EOF 2>/dev/null || {
-        print_error "Could not create database automatically."
-        echo ""
-        echo "Please create the database manually in CloudPanel:"
-        echo "1. Login: https://88.222.245.41:8443"
-        echo "2. Username: admin"
-        echo "3. Password: Brainwave786@"
-        echo "4. Databases → Add Database"
-        echo "5. Database Name: astroarupshastri_db"
-        echo "6. Database User: astroarupshastri_user"
-        echo "7. Password: $DB_PASSWORD"
-        echo "8. Host: localhost"
-        echo ""
-        read -p "Have you created the database manually? (y/N): " MANUAL_DB
-        if [[ ! $MANUAL_DB =~ ^[Yy]$ ]]; then
-            print_error "Database creation required. Exiting."
-            exit 1
-        fi
-    }
-}
-
-# Create database and user
+    mysql -u root -p"$MYSQL_ROOT_PASSWORD" << EOF
 CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Create user if it doesn't exist
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-
--- Grant all privileges
 GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
-
--- Flush privileges
 FLUSH PRIVILEGES;
-
--- Test connection
 USE $DB_NAME;
 SELECT 'Database created successfully!' as status;
 EOF
 
-if [ $? -eq 0 ]; then
-    print_status "Database created successfully!"
-    print_info "Database: $DB_NAME"
-    print_info "User: $DB_USER"
-    print_info "Password: $DB_PASSWORD"
+elif mysql -u admin -p"$MYSQL_ROOT_PASSWORD" -e "SELECT 1;" 2>/dev/null; then
+    print_status "Connected with admin user, creating database..."
+
+    mysql -u admin -p"$MYSQL_ROOT_PASSWORD" << EOF
+CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
+FLUSH PRIVILEGES;
+USE $DB_NAME;
+SELECT 'Database created successfully!' as status;
+EOF
+
 else
-    print_warning "Automatic database creation failed, will use manual credentials"
+    print_warning "Could not connect to MySQL automatically."
+    echo ""
+    echo "Please create the database manually in CloudPanel:"
+    echo "1. Login: https://88.222.245.41:8443"
+    echo "2. Username: admin"
+    echo "3. Password: Brainwave786@"
+    echo "4. Databases → Add Database"
+    echo "5. Database Name: astroarupshastri_db"
+    echo "6. Database User: astroarupshastri_user"
+    echo "7. Password: $DB_PASSWORD"
+    echo "8. Host: localhost"
+    echo ""
+    read -p "Have you created the database manually? (y/N): " MANUAL_DB
+    if [[ ! $MANUAL_DB =~ ^[Yy]$ ]]; then
+        print_error "Database creation required. Exiting."
+        exit 1
+    fi
     # Fallback: ask for manual database credentials
     print_info "Please enter your database credentials:"
     read -p "Database Name [astroarupshastri_db]: " DB_NAME
