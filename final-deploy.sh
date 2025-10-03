@@ -334,16 +334,20 @@ if [ ! -d "$FRONTEND_DIR/src" ]; then
     exit 1
 fi
 
+if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
+    echo "❌ src/lib directory not copied"
+    exit 1
+fi
+
 if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
     echo "❌ src/lib/api directory not copied"
+    ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "src/lib contents:"
     exit 1
 fi
 
 # List the API files to verify they exist
 echo "Checking API files..."
-ls -la "$FRONTEND_DIR/src/lib/api/" | grep "seo-"
-cp tsconfig.json "$FRONTEND_DIR/"
-cp postcss.config.mjs "$FRONTEND_DIR/" 2>/dev/null || true
+ls -la "$FRONTEND_DIR/src/lib/api/" 2>/dev/null | head -10
 
 cd "$FRONTEND_DIR"
 
