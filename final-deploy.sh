@@ -345,27 +345,40 @@ ls -la src/lib/api/ 2>/dev/null || echo "Source api not found"
 
 # Copy frontend files with verification
 echo "Copying public directory..."
-cp -r public "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy public"; exit 1; }
+if [ -d "public" ]; then
+    cp -r public "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy public"; exit 1; }
+else
+    echo "⚠️  Public directory not found, creating empty one..."
+    mkdir -p "$FRONTEND_DIR/public"
+fi
 
 echo "Copying src directory..."
-cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
-
-# Ensure lib directory structure is copied completely
-echo "Ensuring lib directory structure..."
-if [ -d "src/lib" ]; then
-    echo "Copying lib directory..."
-    cp -r src/lib "$FRONTEND_DIR/src/" 2>&1 || { echo "Failed to copy lib directory"; exit 1; }
+if [ -d "src" ]; then
+    cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
+    echo "✅ Source directory copied successfully"
 else
-    echo "❌ Source lib directory not found!"
+    echo "❌ Source src directory not found!"
     exit 1
 fi
 
-# Verify lib/api structure
+# Verify critical directories were copied
+if [ ! -d "$FRONTEND_DIR/src" ]; then
+    echo "❌ src directory not copied"
+    exit 1
+fi
+
+if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
+    echo "❌ src/lib directory not copied"
+    exit 1
+fi
+
 if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
-    echo "❌ lib/api directory not copied properly"
+    echo "❌ src/lib/api directory not copied"
     ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "lib contents:"
     exit 1
 fi
+
+echo "✅ All frontend source files copied successfully"
 
 # Copy root configuration files
 echo "Copying root configuration files..."
