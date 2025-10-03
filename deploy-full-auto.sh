@@ -16,9 +16,7 @@ echo ""
 
 # Configuration
 DOMAIN="astroarupshastri.com"
-DB_NAME="astroarupshastri_db"
-DB_USER="astroarupshastri_user"
-DB_PASSWORD="V38VfuFS5csh15Hokfjs"  # From Hostinger panel
+DATABASE_URL="mysql+pymysql://astroarupshastri_user:V38VfuFS5csh15Hokfjs@localhost/astroarupshastri_db"
 BACKEND_DIR="/root/astroarupshastri-backend"
 FRONTEND_DIR="/root/astroarupshastri-frontend"
 PROJECT_DIR="/root/astro-site"
@@ -74,9 +72,7 @@ print_status "Pre-deployment checks completed"
 
 # Database already created in Hostinger panel
 print_info "Using existing database from Hostinger panel..."
-print_info "Database: $DB_NAME"
-print_info "User: $DB_USER"
-print_info "Password: $DB_PASSWORD"
+print_info "Database URL: $DATABASE_URL"
 
 # Install MySQL connector for testing
 print_status "Installing MySQL connector..."
@@ -86,12 +82,21 @@ pip install mysql-connector-python
 print_status "Testing database connection..."
 python3 -c "
 import mysql.connector
+from urllib.parse import urlparse
+
 try:
+    # Parse the DATABASE_URL
+    url = urlparse('$DATABASE_URL')
+    db_name = url.path.lstrip('/')
+    user = url.username
+    password = url.password
+    host = url.hostname
+    
     conn = mysql.connector.connect(
-        host='localhost',
-        user='$DB_USER',
-        password='$DB_PASSWORD',
-        database='$DB_NAME'
+        host=host,
+        user=user,
+        password=password,
+        database=db_name
     )
     conn.close()
     print('✅ Database connection successful!')
@@ -138,7 +143,7 @@ SECRET_KEY=$(openssl rand -hex 32)
 print_status "Creating backend environment configuration..."
 cat > .env << EOF
 # Database Configuration
-DATABASE_URL=mysql+pymysql://$DB_USER:$DB_PASSWORD@localhost/$DB_NAME
+DATABASE_URL=$DATABASE_URL
 
 # JWT Configuration
 SECRET_KEY=$SECRET_KEY
