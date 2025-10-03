@@ -97,61 +97,86 @@ print_success "System requirements satisfied"
 # Database setup
 print_header "DATABASE SETUP"
 
-print_info "This is a CloudPanel environment - database should be created via CloudPanel"
+print_info "Setting up MariaDB database server..."
 
-# Test if database connection works (assume it's already created)
+# Install MariaDB if not present
+if ! command_exists mysql; then
+    print_step "Installing MariaDB..."
+    sudo apt update
+    sudo apt install -y mariadb-server mariadb-client
+fi
+
+# Start MariaDB service
+print_step "Starting MariaDB service..."
+sudo systemctl enable mariadb
+sudo systemctl start mariadb
+
+# Wait for MariaDB to start
+sleep 3
+
+# Secure MariaDB installation (automated)
+print_step "Configuring MariaDB..."
+
+# Set root password and secure installation
+mysql -u root << EOF
+-- Set root password
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Brainwave786@';
+
+-- Remove anonymous users
+DELETE FROM mysql.user WHERE User='';
+
+-- Remove test database
+DROP DATABASE IF EXISTS test;
+DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
+
+-- Flush privileges
+FLUSH PRIVILEGES;
+EOF
+
+# Create application database and user
+print_step "Creating application database and user..."
+mysql -u root -p'Brainwave786@' << EOF
+-- Create database
+CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- Create user and grant privileges
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
+FLUSH PRIVILEGES;
+
+-- Verify database creation
+USE $DB_NAME;
+SELECT 'Database and user created successfully!' as status;
+EOF
+
+# Test database connection
 print_step "Testing database connection..."
 python3 -c "
 import mysql.connector
-from urllib.parse import urlparse
 
 try:
-    # Parse the DATABASE_URL
-    url = urlparse('$DATABASE_URL')
-    db_name = url.path.lstrip('/')
-    user = url.username
-    password = url.password
-    host = url.hostname or 'localhost'
-    port = url.port or 3306
-
-    print(f'Connecting to: {host}:{port} as {user}')
-
     conn = mysql.connector.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=db_name,
-        connection_timeout=10
+        host='localhost',
+        user='$DB_USER',
+        password='$DB_PASSWORD',
+        database='$DB_NAME'
     )
+    cursor = conn.cursor()
+    cursor.execute('SELECT 1 as test')
+    result = cursor.fetchone()
+    cursor.close()
     conn.close()
-    print('✅ Database connection successful!')
-except mysql.connector.Error as e:
-    print(f'⚠️  Database connection issue: {e}')
-    print('   This might be expected if CloudPanel MySQL is not running locally.')
-    print('   The database should work when deployed.')
+    print('✅ Database connection successful! Test query returned:', result[0])
 except Exception as e:
-    print(f'⚠️  Connection test error: {e}')
-    print('   Proceeding with deployment anyway...')
+    print(f'❌ Database connection failed: {e}')
+    exit(1)
 "
 
-print_success "Database connection verified"
+print_success "Database setup complete"
 print_info "Database: $DB_NAME"
 print_info "User: $DB_USER"
-print_info "Status: ✅ Configured (CloudPanel managed)"
-
-print_warning "⚠️  IMPORTANT: Ensure database exists in CloudPanel"
-echo ""
-echo "🌐 If database doesn't exist, create it in CloudPanel:"
-echo "   https://88.222.245.41:8443"
-echo "   Username: admin"
-echo "   Password: Brainwave786@"
-echo ""
-echo "📊 Databases → Add Database"
-echo "   Name: $DB_NAME"
-echo "   User: $DB_USER"
-echo "   Password: $DB_PASSWORD"
-echo ""
+print_info "MariaDB Status: ✅ Running"
+print_info "Root Password: Brainwave786@"
 
 # Backend deployment
 print_header "BACKEND DEPLOYMENT"
@@ -209,13 +234,18 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-print_info "Database initialization will happen automatically when backend service starts"
-print_info "Skipping manual database initialization (CloudPanel environment)"
+print_step "Initializing database..."
+python init_db.py
 
-# Check for existing SQLite data to migrate (but skip in deployment)
+# Check for existing SQLite data to migrate
 if [ -f "astrology_website.db" ]; then
-    print_warning "SQLite database found - migration should be done manually after deployment"
-    print_info "Run: python migrate_to_mysql.py (after backend is running)"
+    print_info "Found existing SQLite database, checking for migration..."
+    read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
+    if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
+        print_step "Running database migration..."
+        python migrate_to_mysql.py
+        print_success "Database migration completed"
+    fi
 fi
 
 print_step "Creating systemd service..."
