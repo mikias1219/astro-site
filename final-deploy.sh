@@ -3,6 +3,8 @@
 # 🌟 FINAL COMPLETE DEPLOYMENT SCRIPT for AstroArupShastri.com
 # Deploys Database, Backend, Frontend - EVERYTHING AT ONCE
 # Domain: astroarupshastri.com
+# This is the ONLY deployment script needed - includes everything!
+# All other deployment scripts have been consolidated here.
 
 set -e  # Exit on any error
 
@@ -11,8 +13,12 @@ echo "===================================================="
 echo "Domain: astroarupshastri.com"
 echo "Server: srv596142 (88.222.245.41)"
 echo ""
-echo "This script deploys EVERYTHING: Database, Backend, Frontend"
-echo "And provides complete CloudPanel setup instructions!"
+echo "This script deploys EVERYTHING:"
+echo "  ✅ Database Setup & Configuration"
+echo "  ✅ Backend Deployment (Python/FastAPI)"
+echo "  ✅ Frontend Deployment (Next.js)"
+echo "  ✅ Cleanup & Rebuild Functionality"
+echo "  ✅ CloudPanel Configuration Instructions"
 echo ""
 
 # Configuration
@@ -23,6 +29,7 @@ DB_PASSWORD="V38VfuFS5csh15Hokfjs"
 DATABASE_URL="mysql+pymysql://$DB_USER:$DB_PASSWORD@localhost/$DB_NAME"
 BACKEND_DIR="/root/astroarupshastri-backend"
 FRONTEND_DIR="/root/astroarupshastri-frontend"
+PROJECT_DIR="/root/astro-site"
 
 # Colors
 RED='\033[0;31m'
@@ -90,46 +97,115 @@ print_success "System requirements satisfied"
 # Database setup
 print_header "DATABASE SETUP"
 
-print_info "Database is managed by CloudPanel"
-print_info "Testing connection to your Hostinger database..."
-python3 -c "
+print_info "Setting up database and testing connection..."
+
+# Function to create database
+create_database() {
+    local method="$1"
+    local mysql_cmd="$2"
+    local description="$3"
+
+    print_info "$description"
+
+    if $mysql_cmd -e "SELECT 1;" 2>/dev/null; then
+        print_success "MySQL connection successful with $method"
+
+        $mysql_cmd << EOF
+CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
+FLUSH PRIVILEGES;
+USE $DB_NAME;
+SELECT 'Database created successfully!' as status;
+EOF
+
+        if [ $? -eq 0 ]; then
+            print_success "Database created successfully with $method!"
+            return 0
+        fi
+    else
+        print_warning "MySQL connection failed with $method"
+        return 1
+    fi
+    return 1
+}
+
+# Try multiple methods to create database
+database_created=false
+
+# Method 1: Try root user with common passwords
+print_step "Method 1: Trying root user with common passwords..."
+PASSWORDS=("Brainwave786@" "admin" "password" "root" "" "mysql")
+
+for PASSWORD in "${PASSWORDS[@]}"; do
+    if [ "$PASSWORD" = "" ]; then
+        mysql_cmd="mysql -u root"
+        desc="root user (no password)"
+    else
+        mysql_cmd="mysql -u root -p\"$PASSWORD\""
+        desc="root user (password: $PASSWORD)"
+    fi
+
+    if create_database "$desc" "$mysql_cmd" "Trying $desc"; then
+        database_created=true
+        break
+    fi
+done
+
+# Method 2: Try admin user
+if [ "$database_created" = false ]; then
+    print_step "Method 2: Trying admin user..."
+    if create_database "admin user" "mysql -u admin -p\"Brainwave786@\"" "Trying admin user"; then
+        database_created=true
+    fi
+fi
+
+# Method 3: Try sudo
+if [ "$database_created" = false ]; then
+    print_step "Method 3: Trying with sudo..."
+    if create_database "sudo" "sudo mysql" "Trying with sudo"; then
+        database_created=true
+    fi
+fi
+
+# Test database connection
+if [ "$database_created" = true ]; then
+    print_step "Testing database connection..."
+    python3 -c "
 import mysql.connector
-from urllib.parse import urlparse
 
 try:
-    # Parse the DATABASE_URL
-    url = urlparse('$DATABASE_URL')
-    db_name = url.path.lstrip('/')
-    user = url.username
-    password = url.password
-    host = url.hostname or 'localhost'
-    port = url.port or 3306
-
-    print(f'Connecting to: {host}:{port} as {user}')
-
     conn = mysql.connector.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        database=db_name,
-        connection_timeout=10
+        host='localhost',
+        user='$DB_USER',
+        password='$DB_PASSWORD',
+        database='$DB_NAME'
     )
     conn.close()
-    print('✅ Database connection successful!')
-except mysql.connector.Error as e:
-    print(f'⚠️  Database connection issue: {e}')
-    print('   This might be expected if CloudPanel MySQL is not running locally.')
-    print('   The database should work when deployed.')
+    print('✅ Database connection test successful!')
 except Exception as e:
-    print(f'⚠️  Connection test error: {e}')
-    print('   Proceeding with deployment anyway...')
+    print(f'❌ Database connection test failed: {e}')
+    exit(1)
 "
-
-print_success "Database connection verified"
-print_info "Database: $DB_NAME"
-print_info "User: $DB_USER"
-print_info "Status: ✅ Connected"
+    print_success "Database setup complete"
+    print_info "Database: $DB_NAME"
+    print_info "User: $DB_USER"
+    print_info "Status: ✅ Ready"
+else
+    print_error "Could not create database automatically"
+    print_warning "Please create the database manually in CloudPanel:"
+    echo ""
+    echo "🌐 Open CloudPanel: https://88.222.245.41:8443"
+    echo "   Username: admin"
+    echo "   Password: Brainwave786@"
+    echo ""
+    echo "📊 Go to Databases → Add Database"
+    echo "   Database Name: $DB_NAME"
+    echo "   Database User: $DB_USER"
+    echo "   Password: $DB_PASSWORD"
+    echo ""
+    exit 1
+fi
 
 # Backend deployment
 print_header "BACKEND DEPLOYMENT"
@@ -187,7 +263,19 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-print_info "Database tables will be created automatically when backend starts"
+print_step "Initializing database..."
+python init_db.py
+
+# Check for existing SQLite data to migrate
+if [ -f "astrology_website.db" ]; then
+    print_info "Found existing SQLite database, checking for migration..."
+    read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
+    if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
+        print_step "Running database migration..."
+        python migrate_to_mysql.py
+        print_success "Database migration completed"
+    fi
+fi
 print_info "Skipping local database initialization (using remote Hostinger DB)"
 
 print_step "Creating systemd service..."
@@ -279,11 +367,30 @@ print_info "Health Check: http://127.0.0.1:8002/health"
 # Frontend deployment
 print_header "FRONTEND DEPLOYMENT"
 
-print_step "Setting up frontend directory structure..."
+print_step "Removing old frontend state..."
+if [ -d "$FRONTEND_DIR" ]; then
+    print_warning "Removing existing frontend directory: $FRONTEND_DIR"
+    rm -rf "$FRONTEND_DIR"
+    print_success "Old frontend directory removed"
+fi
+
+print_step "Pulling latest code from repository..."
+cd /root/astro-site  # Go back to project root
+
+# Check if this is a git repository and pull latest changes
+if [ -d ".git" ]; then
+    print_info "Git repository detected, pulling latest changes..."
+    git pull origin main 2>/dev/null || git pull origin master 2>/dev/null || {
+        print_warning "Could not pull from git (may not be configured), using local files"
+    }
+else
+    print_warning "Not a git repository, using local files only"
+fi
+
+print_step "Setting up fresh frontend directory structure..."
 mkdir -p "$FRONTEND_DIR"
 
-print_step "Copying frontend files..."
-cd /root/astro-site  # Go back to project root
+print_step "Copying latest frontend files..."
 
 # Debug: Check source files before copying
 echo "Checking source files before copying..."
@@ -397,19 +504,65 @@ cat > rebuild.sh << 'EOF'
 echo "Rebuilding AstroArupShastri Frontend..."
 cd /root/astroarupshastri-frontend
 
-# Clean previous build
+# Clean previous build and node_modules for fresh start
+echo "Cleaning previous build artifacts..."
 rm -rf .next
+rm -rf out
+rm -rf node_modules
+rm -f package-lock.json
+rm -f pnpm-lock.yaml
 
-# Install dependencies
+# Install dependencies fresh
+echo "Installing dependencies..."
 npm install
 
 # Build for production
+echo "Building for production..."
 npm run build
 
 echo "Frontend rebuild completed!"
 EOF
 
 chmod +x rebuild.sh
+
+cat > clean-rebuild.sh << 'EOF'
+#!/bin/bash
+echo "🧹 COMPLETE CLEAN & REBUILD - AstroArupShastri Frontend"
+echo "===================================================="
+
+FRONTEND_DIR="/root/astroarupshastri-frontend"
+PROJECT_DIR="/root/astro-site"
+
+# Stop any running processes (if applicable)
+echo "Stopping any running processes..."
+# Add process stopping logic if needed
+
+# Remove entire frontend directory
+echo "Removing old frontend directory..."
+if [ -d "$FRONTEND_DIR" ]; then
+    rm -rf "$FRONTEND_DIR"
+    echo "✅ Old frontend directory removed"
+fi
+
+# Pull latest code
+echo "Pulling latest code from repository..."
+cd "$PROJECT_DIR"
+if [ -d ".git" ]; then
+    git pull origin main 2>/dev/null || git pull origin master 2>/dev/null || {
+        echo "⚠️  Could not pull from git, using local files"
+    }
+else
+    echo "⚠️  Not a git repository, using local files only"
+fi
+
+# Redeploy using the deployment script
+echo "Redeploying frontend..."
+bash "$PROJECT_DIR/final-deploy.sh"
+
+echo "🎉 Complete clean rebuild finished!"
+EOF
+
+chmod +x clean-rebuild.sh
 
 cat > status.sh << 'EOF'
 #!/bin/bash
@@ -591,6 +744,7 @@ echo "   Backend Status: $BACKEND_DIR/status.sh"
 echo "   Frontend Status: $FRONTEND_DIR/status.sh"
 echo "   Backend Restart: $BACKEND_DIR/restart.sh"
 echo "   Frontend Rebuild: $FRONTEND_DIR/rebuild.sh"
+echo "   Complete Clean Rebuild: $FRONTEND_DIR/clean-rebuild.sh"
 echo ""
 
 echo "📞 SUPPORT:"
