@@ -26,6 +26,14 @@ fi
 
 echo "✅ Virtual environment activated"
 
+# Load environment variables from .env file
+if [ -f ".env" ]; then
+    echo "📄 Loading environment variables from .env file..."
+    export $(grep -v '^#' .env | xargs)
+else
+    echo "⚠️  No .env file found in backend directory"
+fi
+
 # Run the Python test
 echo "🧪 Running backend tests..."
 python3 << 'EOF'
