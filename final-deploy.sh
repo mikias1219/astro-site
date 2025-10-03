@@ -209,20 +209,14 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-print_step "Initializing database..."
-python init_db.py
+print_info "Database initialization will happen automatically when backend service starts"
+print_info "Skipping manual database initialization (CloudPanel environment)"
 
-# Check for existing SQLite data to migrate
+# Check for existing SQLite data to migrate (but skip in deployment)
 if [ -f "astrology_website.db" ]; then
-    print_info "Found existing SQLite database, checking for migration..."
-    read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
-    if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
-        print_step "Running database migration..."
-        python migrate_to_mysql.py
-        print_success "Database migration completed"
-    fi
+    print_warning "SQLite database found - migration should be done manually after deployment"
+    print_info "Run: python migrate_to_mysql.py (after backend is running)"
 fi
-print_info "Skipping local database initialization (using remote Hostinger DB)"
 
 print_step "Creating systemd service..."
 sudo tee /etc/systemd/system/astroarupshastri-backend.service > /dev/null << EOF
