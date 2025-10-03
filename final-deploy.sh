@@ -235,13 +235,13 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-print_step "Initializing database..."
-python init_db.py
-print_success "Database initialized successfully"
-
 # Note about SQLite vs MySQL
 if [ "$MARIADB_SUCCESS" = true ]; then
     print_info "Using MySQL/MariaDB database"
+    print_step "Initializing database..."
+    python init_db.py
+    print_success "Database initialized successfully"
+
     # Check for existing SQLite data to migrate
     if [ -f "astrology_website.db" ]; then
         print_info "Found existing SQLite database, checking for migration..."
@@ -254,7 +254,8 @@ if [ "$MARIADB_SUCCESS" = true ]; then
     fi
 else
     print_info "Using SQLite database (simpler for development)"
-    print_info "Database file: astroarupshastri.db"
+    print_info "Database file will be created automatically when backend starts"
+    print_info "No manual initialization required for SQLite"
 fi
 
 print_step "Creating systemd service..."
