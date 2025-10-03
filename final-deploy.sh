@@ -286,11 +286,8 @@ print_step "Copying frontend files..."
 cd /root/astro-site  # Go back to project root
 
 # Copy frontend files
-cp -r src "$FRONTEND_DIR/"
 cp -r public "$FRONTEND_DIR/"
-cp -r src/components "$FRONTEND_DIR/" 2>/dev/null || true
-cp -r src/contexts "$FRONTEND_DIR/" 2>/dev/null || true
-cp -r src/lib "$FRONTEND_DIR/" 2>/dev/null || true
+cp -r src "$FRONTEND_DIR/"
 cp package.json "$FRONTEND_DIR/"
 cp package-lock.json "$FRONTEND_DIR/" 2>/dev/null || true
 cp pnpm-lock.yaml "$FRONTEND_DIR/" 2>/dev/null || true
