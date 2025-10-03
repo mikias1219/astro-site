@@ -410,37 +410,24 @@ cp -r public "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy public"; exit 1; }
 echo "Copying src directory..."
 cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
 
-# Ensure lib directory is copied properly
+# Ensure lib directory structure is copied completely
 echo "Ensuring lib directory structure..."
-if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
-    echo "Creating lib directory..."
-    mkdir -p "$FRONTEND_DIR/src/lib"
+if [ -d "src/lib" ]; then
+    echo "Copying lib directory..."
+    cp -r src/lib "$FRONTEND_DIR/src/" 2>&1 || { echo "Failed to copy lib directory"; exit 1; }
+else
+    echo "❌ Source lib directory not found!"
+    exit 1
 fi
 
+# Verify lib/api structure
 if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
-    echo "Creating lib/api directory..."
-    mkdir -p "$FRONTEND_DIR/src/lib/api"
+    echo "❌ lib/api directory not copied properly"
+    ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "lib contents:"
+    exit 1
 fi
 
-# Copy lib files individually if needed
-if [ -f "src/lib/api.ts" ]; then
-    cp src/lib/api.ts "$FRONTEND_DIR/src/lib/" 2>/dev/null || true
-fi
-
-if [ -d "src/lib/api" ]; then
-    cp -r src/lib/api/* "$FRONTEND_DIR/src/lib/api/" 2>/dev/null || true
-fi
-
-# Debug: Check what was actually copied
-echo "Contents of copied src directory:"
-ls -la "$FRONTEND_DIR/src/" 2>/dev/null || echo "src directory not found"
-
-echo "Contents of copied lib directory:"
-ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "lib directory not found"
-
-echo "Contents of copied api directory:"
-ls -la "$FRONTEND_DIR/src/lib/api/" 2>/dev/null || echo "api directory not found"
-
+# Copy root configuration files
 echo "Copying root configuration files..."
 cp package.json "$FRONTEND_DIR/" || { echo "Failed to copy package.json"; exit 1; }
 cp next.config.mjs "$FRONTEND_DIR/" || { echo "Failed to copy next.config.mjs"; exit 1; }
@@ -459,17 +446,6 @@ fi
 
 if [ ! -d "$FRONTEND_DIR/src" ]; then
     echo "❌ src directory not copied"
-    exit 1
-fi
-
-if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
-    echo "❌ src/lib directory not copied"
-    exit 1
-fi
-
-if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
-    echo "❌ src/lib/api directory not copied"
-    ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "src/lib contents:"
     exit 1
 fi
 
