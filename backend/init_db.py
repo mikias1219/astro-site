@@ -3,6 +3,12 @@ Database initialization script with sample data
 Run this script to create the database and populate it with sample data
 """
 
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine
 from app.models import Base, User, Service, ServiceType, UserRole
