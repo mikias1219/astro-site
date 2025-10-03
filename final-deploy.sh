@@ -477,12 +477,22 @@ EOF
 print_step "Building frontend for production..."
 npm run build
 
-if [ ! -d ".next" ]; then
-    print_error "Frontend build failed! .next directory not found."
+# Check for both .next and out directories (static export creates 'out')
+if [ ! -d ".next" ] && [ ! -d "out" ]; then
+    print_error "Frontend build failed! Neither .next nor out directory found."
     exit 1
 fi
 
-print_success "Frontend build completed successfully"
+# If we have 'out' directory, it's a static export
+if [ -d "out" ]; then
+    print_success "Static export build completed successfully"
+    print_info "Build type: Static export (out/ directory)"
+    FRONTEND_BUILD_TYPE="static"
+else
+    print_success "SSR build completed successfully"
+    print_info "Build type: Server-side rendering (.next/ directory)"
+    FRONTEND_BUILD_TYPE="ssr"
+fi
 
 print_step "Creating frontend management scripts..."
 cat > rebuild.sh << 'EOF'
@@ -577,9 +587,72 @@ EOF
 
 chmod +x status.sh
 
+# PM2 Configuration for Frontend
+print_step "Configuring PM2 for frontend serving..."
+
+# Stop any existing frontend process
+pm2 delete astro-frontend 2>/dev/null || true
+
+# Configure PM2 based on build type
+if [ "$FRONTEND_BUILD_TYPE" = "static" ]; then
+    print_info "Setting up static file serving with PM2..."
+    
+    # Install serve globally if not present
+    if ! command_exists serve; then
+        print_step "Installing serve for static file serving..."
+        npm install -g serve
+    fi
+    
+    # Start with PM2 using serve
+    pm2 start "serve -s out -l 3001" --name astro-frontend
+    print_success "Static frontend started with PM2 on port 3001"
+    
+    # Create serve-specific management script
+    cat > serve.sh << 'EOF'
+#!/bin/bash
+echo "Starting static file server for AstroArupShastri Frontend..."
+cd /root/astroarupshastri-frontend
+pm2 delete astro-frontend 2>/dev/null || true
+pm2 start "serve -s out -l 3001" --name astro-frontend
+pm2 save
+echo "Static server started on port 3001"
+EOF
+    
+    chmod +x serve.sh
+    
+else
+    print_info "Setting up Next.js server with PM2..."
+    
+    # Start with PM2 using next start
+    pm2 start "npm run start -- -p 3001" --name astro-frontend
+    print_success "Next.js frontend started with PM2 on port 3001"
+fi
+
+# Save PM2 configuration
+pm2 save
+
+# Verify frontend is running
+sleep 3
+if pm2 list | grep -q "astro-frontend.*online"; then
+    print_success "Frontend PM2 process: ✅ Running"
+    
+    # Test frontend connectivity
+    if curl -s http://127.0.0.1:3001 > /dev/null; then
+        print_success "Frontend responding: ✅ On port 3001"
+    else
+        print_warning "Frontend not responding yet (may take a moment)"
+    fi
+else
+    print_error "Frontend PM2 process failed to start"
+    pm2 logs astro-frontend --lines 10
+    exit 1
+fi
+
 print_success "Frontend deployment completed!"
 print_info "Location: $FRONTEND_DIR"
 print_info "Build Status: ✅ Ready for production"
+print_info "Serving: Port 3001 via PM2"
+print_info "Build Type: $FRONTEND_BUILD_TYPE"
 
 # Final verification
 print_header "DEPLOYMENT VERIFICATION"
@@ -600,11 +673,43 @@ else
     print_warning "Backend API: ⚠️ Not responding yet"
 fi
 
-# Check frontend build
-if [ -d "$FRONTEND_DIR/.next" ]; then
-    print_success "Frontend build: ✅ Complete"
+# Check frontend build and serving
+if [ "$FRONTEND_BUILD_TYPE" = "static" ] && [ -d "$FRONTEND_DIR/out" ]; then
+    print_success "Frontend build: ✅ Static export complete"
+elif [ "$FRONTEND_BUILD_TYPE" = "ssr" ] && [ -d "$FRONTEND_DIR/.next" ]; then
+    print_success "Frontend build: ✅ SSR build complete"
 else
     print_error "Frontend build: ❌ Failed"
+fi
+
+# Check frontend-backend connectivity
+print_step "Testing frontend-backend connectivity..."
+
+# Test backend API
+if curl -s http://127.0.0.1:8002/health > /dev/null; then
+    print_success "Backend API: ✅ Responding on port 8002"
+else
+    print_warning "Backend API: ⚠️ Not responding on port 8002"
+fi
+
+# Test frontend serving
+if curl -s http://127.0.0.1:3001 > /dev/null; then
+    print_success "Frontend serving: ✅ Responding on port 3001"
+else
+    print_warning "Frontend serving: ⚠️ Not responding on port 3001"
+fi
+
+# Test PM2 processes
+if pm2 list | grep -q "astro-frontend.*online"; then
+    print_success "Frontend PM2: ✅ Process running"
+else
+    print_error "Frontend PM2: ❌ Process not running"
+fi
+
+if pm2 list | grep -q "fastapi-app.*online"; then
+    print_success "Backend PM2: ✅ Process running"
+else
+    print_warning "Backend PM2: ⚠️ Process not detected (may be using systemd)"
 fi
 
 print_success "Deployment verification complete!"
@@ -650,13 +755,14 @@ server {
     {{ssl_certificate}}
     server_name astroarupshastri.com www.astroarupshastri.com;
 
-    root /root/astroarupshastri-frontend;
+    # For static export, serve from the out directory
+    root /root/astroarupshastri-frontend/out;
     index index.html;
 
     {{nginx_access_log}}
     {{nginx_error_log}}
 
-    # Frontend - serve static files
+    # Frontend - serve static files (SPA routing)
     location / {
         try_files $uri $uri/ /index.html;
 
@@ -686,14 +792,20 @@ server {
         proxy_read_timeout 60s;
     }
 
-    # Static files caching
+    # Static files caching for Next.js export
     location /_next/static/ {
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
 
     # Security headers for static files
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Handle Next.js exported static assets
+    location /static/ {
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
@@ -726,11 +838,22 @@ echo "   API Docs: https://astroarupshastri.com/api/docs"
 echo ""
 
 echo "🛠️ MANAGEMENT COMMANDS:"
+echo "   Main Manager: ./manage.sh [command]"
+echo "   Quick Update: ./update-deploy.sh"
+echo "   Full Deploy: ./final-deploy.sh"
+echo ""
 echo "   Backend Status: $BACKEND_DIR/status.sh"
 echo "   Frontend Status: $FRONTEND_DIR/status.sh"
 echo "   Backend Restart: $BACKEND_DIR/restart.sh"
 echo "   Frontend Rebuild: $FRONTEND_DIR/rebuild.sh"
 echo "   Complete Clean Rebuild: $FRONTEND_DIR/clean-rebuild.sh"
+echo ""
+echo "📋 Common Management Commands:"
+echo "   ./manage.sh status     # Check all services"
+echo "   ./manage.sh update     # Quick update deployment"
+echo "   ./manage.sh logs       # Show recent logs"
+echo "   ./manage.sh restart    # Restart all services"
+echo "   ./manage.sh test       # Test connectivity"
 echo ""
 
 echo "📞 SUPPORT:"
