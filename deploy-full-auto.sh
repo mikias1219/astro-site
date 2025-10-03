@@ -278,9 +278,9 @@ mkdir -p "$FRONTEND_DIR"
 # Copy frontend files
 cp -r src "$FRONTEND_DIR/"
 cp -r public "$FRONTEND_DIR/"
-cp -r components "$FRONTEND_DIR/"
-cp -r contexts "$FRONTEND_DIR/"
-cp -r lib "$FRONTEND_DIR/"
+cp -r src/components "$FRONTEND_DIR/" 2>/dev/null || true
+cp -r src/contexts "$FRONTEND_DIR/" 2>/dev/null || true
+cp -r src/lib "$FRONTEND_DIR/" 2>/dev/null || true
 cp package.json "$FRONTEND_DIR/"
 cp package-lock.json "$FRONTEND_DIR/" 2>/dev/null || true
 cp pnpm-lock.yaml "$FRONTEND_DIR/" 2>/dev/null || true
