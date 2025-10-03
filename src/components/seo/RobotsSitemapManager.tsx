@@ -12,13 +12,13 @@ interface RobotsSitemapManagerProps {
 
 export default function RobotsSitemapManager({ robotsData, sitemapData, token, onRefresh }: RobotsSitemapManagerProps) {
   const [activeTab, setActiveTab] = useState<'robots' | 'sitemap'>('robots');
-  const [robotsContent, setRobotsContent] = useState<string>((robotsData as any)?.content || '');
+  const [robotsContent, setRobotsContent] = useState<string>(robotsData?.robots_content || '');
   const [showSitemapForm, setShowSitemapForm] = useState(false);
   const [editingSitemap, setEditingSitemap] = useState<SitemapData | null>(null);
   const [sitemapFormData, setSitemapFormData] = useState({
     url: '',
-    last_modified: new Date().toISOString().split('T')[0],
-    change_frequency: 'weekly' as 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never',
+    lastmod: new Date().toISOString().split('T')[0],
+    changefreq: 'weekly' as 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never',
     priority: 0.5,
     page_type: '',
     include_images: false,
@@ -30,7 +30,10 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
   const handleRobotsUpdate = async () => {
     if (!token) return;
     try {
-      await seoRobotsAPI.updateRobots(token, robotsContent);
+      await seoRobotsAPI.updateRobots(token, {
+        robots_content: robotsContent,
+        sitemap_url: robotsData?.sitemap_url
+      });
       alert('Robots.txt updated successfully!');
       onRefresh();
     } catch (error) {
@@ -61,8 +64,8 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
   const resetSitemapForm = () => {
     setSitemapFormData({
       url: '',
-      last_modified: new Date().toISOString().split('T')[0],
-      change_frequency: 'weekly',
+      lastmod: new Date().toISOString().split('T')[0],
+      changefreq: 'weekly',
       priority: 0.5,
       page_type: '',
       include_images: false,
@@ -76,14 +79,14 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
     setEditingSitemap(item);
     setSitemapFormData({
       url: item.url,
-      last_modified: item.last_modified.split('T')[0],
-      change_frequency: item.change_frequency,
-      priority: item.priority,
-      page_type: item.page_type,
-      include_images: item.include_images,
-      include_categories: item.include_categories,
-      include_tags: item.include_tags,
-      is_active: item.is_active
+      lastmod: item.lastmod?.split('T')[0] || new Date().toISOString().split('T')[0],
+      changefreq: item.changefreq || 'weekly',
+      priority: item.priority || 0.5,
+      page_type: '',
+      include_images: false,
+      include_categories: false,
+      include_tags: false,
+      is_active: true
     });
     setShowSitemapForm(true);
   };
@@ -102,7 +105,7 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
     if (!token) return;
     try {
       const result = await seoRobotsAPI.generateSitemap(token);
-      alert(`Sitemap generated successfully! URL: ${result.url}`);
+      alert(`Sitemap generated successfully! ${result}`);
     } catch (error) {
       console.error('Failed to generate sitemap:', error);
       alert('Failed to generate sitemap');
@@ -112,9 +115,9 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
   const autoGenerateSitemap = async () => {
     if (!token) return;
     try {
-      await seoRobotsAPI.autoGenerateSitemap(token);
-      alert('Sitemap entries auto-generated successfully!');
-      onRefresh();
+      // Auto-generate sitemap entries based on existing pages
+      // This would need to be implemented in the backend
+      alert('Auto-generation feature not yet implemented');
     } catch (error) {
       console.error('Failed to auto-generate sitemap:', error);
       alert('Failed to auto-generate sitemap');
@@ -124,12 +127,9 @@ export default function RobotsSitemapManager({ robotsData, sitemapData, token, o
   const submitSitemap = async (searchEngine: 'google' | 'bing') => {
     if (!token) return;
     try {
-      const result = await seoRobotsAPI.submitSitemap(token, searchEngine);
-      if (result.success) {
-        alert(`Sitemap submitted to ${searchEngine} successfully!`);
-      } else {
-        alert(`Failed to submit sitemap to ${searchEngine}: ${result.message}`);
-      }
+      // Submit sitemap to search engines
+      // This would need to be implemented in the backend
+      alert(`Sitemap submission to ${searchEngine} feature not yet implemented`);
     } catch (error) {
       console.error(`Failed to submit sitemap to ${searchEngine}:`, error);
       alert(`Failed to submit sitemap to ${searchEngine}`);
@@ -266,8 +266,8 @@ Sitemap: https://example.com/sitemap.xml"
                     <label className="block text-sm font-medium text-gray-700 mb-2">Last Modified</label>
                     <input
                       type="date"
-                      value={sitemapFormData.last_modified}
-                      onChange={(e) => setSitemapFormData({...sitemapFormData, last_modified: e.target.value})}
+                      value={sitemapFormData.lastmod}
+                      onChange={(e) => setSitemapFormData({...sitemapFormData, lastmod: e.target.value})}
                       required
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     />
@@ -275,8 +275,8 @@ Sitemap: https://example.com/sitemap.xml"
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Change Frequency</label>
                     <select
-                      value={sitemapFormData.change_frequency}
-                      onChange={(e) => setSitemapFormData({...sitemapFormData, change_frequency: e.target.value as any})}
+                      value={sitemapFormData.changefreq}
+                      onChange={(e) => setSitemapFormData({...sitemapFormData, changefreq: e.target.value as any})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
                     >
                       <option value="always">Always</option>
@@ -401,14 +401,12 @@ Sitemap: https://example.com/sitemap.xml"
                 {sitemapData.map((item) => (
                   <tr key={item.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm text-gray-900 max-w-xs truncate">{item.url}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.last_modified.split('T')[0]}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{item.change_frequency}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.lastmod?.split('T')[0] || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{item.changefreq || 'N/A'}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.priority}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {item.is_active ? 'Active' : 'Inactive'}
+                      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                        Active
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

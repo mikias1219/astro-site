@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { seoSchemaAPI, type SchemaData, type ArticleSchema, type ProductSchema, type OrganizationSchema, type BreadcrumbSchema, type FAQSchema } from '@/lib/api/seo-schema';
+import { seoSchemaAPI, type SchemaData } from '@/lib/api/seo-schema';
 
 interface SchemaManagerProps {
   data: SchemaData[];
@@ -16,8 +16,7 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
   const [formData, setFormData] = useState({
     page_url: '',
     schema_type: 'article' as 'article' | 'product' | 'organization' | 'breadcrumb' | 'faq',
-    schema_data: {} as any,
-    is_active: true
+    schema_data: {} as any
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,8 +42,7 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
     setFormData({
       page_url: '',
       schema_type: 'article',
-      schema_data: {},
-      is_active: true
+      schema_data: {}
     });
   };
 
@@ -53,8 +51,7 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
     setFormData({
       page_url: item.page_url,
       schema_type: item.schema_type as 'article' | 'product' | 'organization' | 'breadcrumb' | 'faq',
-      schema_data: item.schema_data,
-      is_active: item.is_active
+      schema_data: item.schema_data
     });
     setSelectedSchemaType(item.schema_type as any);
     setShowForm(true);
@@ -73,8 +70,8 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
   const autoGenerateSchema = async () => {
     if (!token || !formData.page_url) return;
     try {
-      const result = await seoSchemaAPI.autoGenerate(token, formData.page_url, selectedSchemaType, {});
-      setFormData(prev => ({ ...prev, schema_data: result.schema_data }));
+      // Auto-generation feature not yet implemented
+      alert('Auto-generation feature not yet implemented');
     } catch (error) {
       console.error('Failed to auto-generate schema:', error);
     }
@@ -159,16 +156,6 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
                 Auto Generate
               </button>
               <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
-                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                />
-                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">
-                  Active
-                </label>
               </div>
             </div>
 
@@ -212,10 +199,8 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.page_url}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">{item.schema_type}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    item.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {item.is_active ? 'Active' : 'Inactive'}
+                  <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    Active
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

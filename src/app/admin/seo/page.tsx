@@ -101,7 +101,7 @@ export default function AdminSEOPage() {
   const fetchRobotsData = async (authToken: string) => {
     try {
       const data = await seoRobotsAPI.getRobots(authToken);
-      setRobotsData({ content: data.content } as any);
+      setRobotsData(data);
     } catch (error) {
       console.error('Failed to fetch robots data:', error);
     }
@@ -109,7 +109,7 @@ export default function AdminSEOPage() {
 
   const fetchSitemapData = async (authToken: string) => {
     try {
-      const data = await seoRobotsAPI.getSitemapEntries(authToken);
+      const data = await seoRobotsAPI.getSitemap(authToken);
       setSitemapData(data);
     } catch (error) {
       console.error('Failed to fetch sitemap data:', error);
