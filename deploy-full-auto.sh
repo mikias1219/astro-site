@@ -222,13 +222,22 @@ else
     exit 1
 fi
 
-# Test backend API
+# Test backend API with retry
 print_status "Testing backend API..."
-if curl -s http://127.0.0.1:8002/health > /dev/null; then
-    print_status "Backend API is responding"
-else
-    print_warning "Backend API not responding yet, but service is running"
-fi
+sleep 5  # Give service time to start
+for i in {1..3}; do
+    if curl -s http://127.0.0.1:8002/health > /dev/null; then
+        print_status "Backend API is responding"
+        break
+    else
+        if [ $i -eq 3 ]; then
+            print_warning "Backend API not responding after retries, but service is running"
+        else
+            echo "Waiting for API to respond (attempt $i/3)..."
+            sleep 3
+        fi
+    fi
+done
 
 # Create backend management scripts
 print_status "Creating backend management scripts..."
