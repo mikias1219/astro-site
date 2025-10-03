@@ -354,27 +354,44 @@ fi
 
 echo "Copying src directory..."
 if [ -d "src" ]; then
+    echo "Source src directory exists, copying..."
     cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
     echo "✅ Source directory copied successfully"
+
+    # Debug: Check what was actually copied
+    echo "Contents of copied src directory:"
+    ls -la "$FRONTEND_DIR/src/" 2>/dev/null || echo "src directory not found"
 else
     echo "❌ Source src directory not found!"
     exit 1
 fi
 
-# Verify critical directories were copied
-if [ ! -d "$FRONTEND_DIR/src" ]; then
-    echo "❌ src directory not copied"
-    exit 1
+# Verify and ensure lib directory is properly copied
+echo "Verifying lib directory copy..."
+if [ -d "$FRONTEND_DIR/src/lib" ]; then
+    echo "✅ src/lib directory exists in destination"
+    ls -la "$FRONTEND_DIR/src/lib/" | head -5
+else
+    echo "⚠️  src/lib directory missing, attempting to copy separately..."
+    if [ -d "src/lib" ]; then
+        cp -r src/lib "$FRONTEND_DIR/src/" 2>&1 || { echo "Failed to copy lib separately"; exit 1; }
+        echo "✅ lib directory copied separately"
+    else
+        echo "❌ Source src/lib directory not found locally!"
+        pwd
+        ls -la src/ 2>/dev/null || echo "src contents:"
+        exit 1
+    fi
 fi
 
-if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
-    echo "❌ src/lib directory not copied"
-    exit 1
-fi
-
+# Final verification
 if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
-    echo "❌ src/lib/api directory not copied"
-    ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "lib contents:"
+    echo "❌ src/lib/api directory not found"
+    echo "Debug info:"
+    echo "Current directory: $(pwd)"
+    echo "Source lib exists: $([ -d 'src/lib' ] && echo 'YES' || echo 'NO')"
+    echo "Destination frontend dir: $FRONTEND_DIR"
+    ls -la "$FRONTEND_DIR/src/" 2>/dev/null || echo "destination src contents:"
     exit 1
 fi
 
