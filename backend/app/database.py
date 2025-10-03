@@ -12,8 +12,8 @@ from typing import Generator
 
 # Database URL configuration
 DATABASE_URL = os.getenv(
-    "DATABASE_URL", 
-    "sqlite:///./astrology_website.db"
+    "DATABASE_URL",
+    "mysql+pymysql://username:password@localhost/astrology_website"  # Default to MySQL for Hostinger
 )
 
 # Create engine with different configurations for different databases
@@ -22,13 +22,32 @@ if DATABASE_URL.startswith("sqlite"):
         DATABASE_URL,
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
-        echo=True  # Set to False in production
+        echo=False  # Disabled echo for production
     )
-else:
-    # PostgreSQL/MySQL configuration
+elif DATABASE_URL.startswith("mysql"):
+    # MySQL configuration optimized for Hostinger
     engine = create_engine(
         DATABASE_URL,
-        echo=True,  # Set to False in production
+        echo=False,  # Disabled echo for production
+        pool_pre_ping=True,
+        pool_recycle=3600,  # 1 hour recycle for MySQL
+        pool_size=10,
+        max_overflow=20,
+        pool_timeout=30
+    )
+elif DATABASE_URL.startswith("postgresql"):
+    # PostgreSQL configuration
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,  # Disabled echo for production
+        pool_pre_ping=True,
+        pool_recycle=300
+    )
+else:
+    # Fallback configuration
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False,
         pool_pre_ping=True,
         pool_recycle=300
     )

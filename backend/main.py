@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer
 from contextlib import asynccontextmanager
 import uvicorn
+import os
 
 from app.database import engine, Base
 from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators, kundli, matching, numerology
@@ -29,10 +30,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - configured for production
+allowed_origins = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:3000,http://127.0.0.1:3000"  # Default for development
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],  # Specific origins for better compatibility
+    allow_origins=[origin.strip() for origin in allowed_origins],  # Production-ready origins
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
