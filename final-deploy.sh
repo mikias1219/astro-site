@@ -187,8 +187,8 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-print_step "Initializing database tables..."
-python init_db.py
+print_info "Database tables will be created automatically when backend starts"
+print_info "Skipping local database initialization (using remote Hostinger DB)"
 
 print_step "Creating systemd service..."
 sudo tee /etc/systemd/system/astroarupshastri-backend.service > /dev/null << EOF
