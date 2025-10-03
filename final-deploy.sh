@@ -104,24 +104,95 @@ if ! command_exists mysql; then
     print_step "Installing MariaDB..."
     sudo apt update
     sudo apt install -y mariadb-server mariadb-client
+
+    # Initialize MariaDB data directory if needed
+    if [ ! -d "/var/lib/mysql/mysql" ]; then
+        print_step "Initializing MariaDB data directory..."
+        sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
+    fi
 fi
+
+# Stop any existing MariaDB processes
+print_step "Stopping any existing MariaDB processes..."
+sudo systemctl stop mariadb 2>/dev/null || true
+sudo killall mysqld 2>/dev/null || true
+sudo killall mariadbd 2>/dev/null || true
+sleep 2
+
+# Clean up any socket files
+sudo rm -f /var/run/mysqld/mysqld.sock
+sudo rm -f /tmp/mysql.sock
 
 # Start MariaDB service
 print_step "Starting MariaDB service..."
-sudo systemctl enable mariadb
-sudo systemctl start mariadb
+if sudo systemctl enable mariadb 2>/dev/null; then
+    sudo systemctl start mariadb
+else
+    print_warning "Systemd service failed, trying to start MariaDB directly..."
+    sudo mysqld_safe --user=mysql &
+    sleep 5
+fi
 
-# Wait for MariaDB to start
+# Wait for MariaDB to start and check if it's running
 sleep 3
+if ! pgrep -x "mysqld" > /dev/null && ! pgrep -x "mariadbd" > /dev/null; then
+    print_error "MariaDB failed to start. Trying alternative startup..."
+    # Try starting with different options
+    sudo mysqld --user=mysql --datadir=/var/lib/mysql --socket=/var/run/mysqld/mysqld.sock --pid-file=/var/run/mysqld/mysqld.pid &
+    sleep 5
+fi
+
+# Final check if MariaDB is running
+if pgrep -x "mysqld" > /dev/null || pgrep -x "mariadbd" > /dev/null; then
+    print_success "MariaDB is running"
+else
+    print_error "MariaDB still not running. Manual intervention required."
+    exit 1
+fi
 
 # Secure MariaDB installation (automated)
 print_step "Configuring MariaDB..."
 
-# Set root password and secure installation
-mysql -u root << EOF
--- Set root password
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'Brainwave786@';
+# Try to connect as root (might already have password or no password)
+MYSQL_ROOT_ACCESS=false
 
+# Try different root access methods
+if mysql -u root -e "SELECT 1;" 2>/dev/null; then
+    MYSQL_ROOT_ACCESS=true
+    MYSQL_CMD="mysql -u root"
+    print_info "Root access: no password required"
+elif mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
+    MYSQL_ROOT_ACCESS=true
+    MYSQL_CMD="mysql -u root -p'Brainwave786@'"
+    print_info "Root access: using existing password"
+else
+    print_warning "Cannot access MySQL as root, attempting to reset..."
+    # Try to reset root password
+    sudo systemctl stop mariadb
+    sudo mysqld_safe --skip-grant-tables --user=mysql &
+    sleep 5
+
+    mysql -u root << EOF
+UPDATE mysql.user SET authentication_string = PASSWORD('Brainwave786@') WHERE User = 'root';
+UPDATE mysql.user SET plugin = '' WHERE User = 'root';
+FLUSH PRIVILEGES;
+EOF
+
+    sudo killall mysqld
+    sleep 2
+    sudo systemctl start mariadb
+    sleep 3
+
+    if mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
+        MYSQL_ROOT_ACCESS=true
+        MYSQL_CMD="mysql -u root -p'Brainwave786@'"
+        print_success "Root password reset successful"
+    fi
+fi
+
+if [ "$MYSQL_ROOT_ACCESS" = true ]; then
+    # Secure the installation
+    $MYSQL_CMD << EOF
 -- Remove anonymous users
 DELETE FROM mysql.user WHERE User='';
 
@@ -129,13 +200,22 @@ DELETE FROM mysql.user WHERE User='';
 DROP DATABASE IF EXISTS test;
 DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
 
+-- Ensure root has password
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'Brainwave786@';
+
 -- Flush privileges
 FLUSH PRIVILEGES;
 EOF
+    print_success "MariaDB secured successfully"
+else
+    print_error "Cannot configure MariaDB root access"
+    print_warning "You may need to manually configure MariaDB"
+fi
 
 # Create application database and user
 print_step "Creating application database and user..."
-mysql -u root -p'Brainwave786@' << EOF
+if [ "$MYSQL_ROOT_ACCESS" = true ]; then
+    $MYSQL_CMD << EOF
 -- Create database
 CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -148,6 +228,11 @@ FLUSH PRIVILEGES;
 USE $DB_NAME;
 SELECT 'Database and user created successfully!' as status;
 EOF
+    print_success "Database and user created"
+else
+    print_error "Cannot create database - no root access"
+    print_warning "You may need to manually create the database"
+fi
 
 # Test database connection
 print_step "Testing database connection..."
