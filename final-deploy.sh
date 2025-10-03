@@ -303,6 +303,27 @@ cp -r public "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy public"; exit 1; }
 echo "Copying src directory..."
 cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
 
+# Ensure lib directory is copied properly
+echo "Ensuring lib directory structure..."
+if [ ! -d "$FRONTEND_DIR/src/lib" ]; then
+    echo "Creating lib directory..."
+    mkdir -p "$FRONTEND_DIR/src/lib"
+fi
+
+if [ ! -d "$FRONTEND_DIR/src/lib/api" ]; then
+    echo "Creating lib/api directory..."
+    mkdir -p "$FRONTEND_DIR/src/lib/api"
+fi
+
+# Copy lib files individually if needed
+if [ -f "src/lib/api.ts" ]; then
+    cp src/lib/api.ts "$FRONTEND_DIR/src/lib/" 2>/dev/null || true
+fi
+
+if [ -d "src/lib/api" ]; then
+    cp -r src/lib/api/* "$FRONTEND_DIR/src/lib/api/" 2>/dev/null || true
+fi
+
 # Debug: Check what was actually copied
 echo "Contents of copied src directory:"
 ls -la "$FRONTEND_DIR/src/" 2>/dev/null || echo "src directory not found"
