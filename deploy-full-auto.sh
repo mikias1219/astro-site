@@ -103,7 +103,10 @@ except mysql.connector.Error as e:
 # Create project directory and copy files
 print_info "Setting up project directory..."
 mkdir -p "$PROJECT_DIR"
-cp -r . "$PROJECT_DIR/"
+# Only copy if we're not already in the project directory
+if [ "$(pwd)" != "$PROJECT_DIR" ]; then
+    cp -r . "$PROJECT_DIR/"
+fi
 
 # Backend deployment
 print_info "Starting backend deployment..."
