@@ -78,6 +78,10 @@ print_info "Database: $DB_NAME"
 print_info "User: $DB_USER"
 print_info "Password: $DB_PASSWORD"
 
+# Install MySQL connector for testing
+print_status "Installing MySQL connector..."
+pip install mysql-connector-python
+
 # Test database connection
 print_status "Testing database connection..."
 python3 -c "
