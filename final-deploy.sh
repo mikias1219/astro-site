@@ -99,169 +99,85 @@ print_header "DATABASE SETUP"
 
 print_info "Setting up MariaDB database server..."
 
-# Install MariaDB if not present
-if ! command_exists mysql; then
-    print_step "Installing MariaDB..."
-    sudo apt update
-    sudo apt install -y mariadb-server mariadb-client
+# Try MariaDB first, fallback to SQLite if it fails
+print_step "Attempting MariaDB setup..."
 
-    # Initialize MariaDB data directory if needed
-    if [ ! -d "/var/lib/mysql/mysql" ]; then
-        print_step "Initializing MariaDB data directory..."
-        sudo mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-    fi
-fi
+MARIADB_SUCCESS=false
 
-# Stop any existing MariaDB processes
-print_step "Stopping any existing MariaDB processes..."
-sudo systemctl stop mariadb 2>/dev/null || true
-sudo killall mysqld 2>/dev/null || true
-sudo killall mariadbd 2>/dev/null || true
-sleep 2
-
-# Clean up any socket files
-sudo rm -f /var/run/mysqld/mysqld.sock
-sudo rm -f /tmp/mysql.sock
-
-# Start MariaDB service
-print_step "Starting MariaDB service..."
-if sudo systemctl enable mariadb 2>/dev/null; then
-    sudo systemctl start mariadb
-else
-    print_warning "Systemd service failed, trying to start MariaDB directly..."
-    sudo mysqld_safe --user=mysql &
-    sleep 5
-fi
-
-# Wait for MariaDB to start and check if it's running
-sleep 3
-if ! pgrep -x "mysqld" > /dev/null && ! pgrep -x "mariadbd" > /dev/null; then
-    print_error "MariaDB failed to start. Trying alternative startup..."
-    # Try starting with different options
-    sudo mysqld --user=mysql --datadir=/var/lib/mysql --socket=/var/run/mysqld/mysqld.sock --pid-file=/var/run/mysqld/mysqld.pid &
-    sleep 5
-fi
-
-# Final check if MariaDB is running
-if pgrep -x "mysqld" > /dev/null || pgrep -x "mariadbd" > /dev/null; then
-    print_success "MariaDB is running"
-else
-    print_error "MariaDB still not running. Manual intervention required."
-    exit 1
-fi
-
-# Secure MariaDB installation (automated)
-print_step "Configuring MariaDB..."
-
-# Try to connect as root (might already have password or no password)
-MYSQL_ROOT_ACCESS=false
-
-# Try different root access methods
-if mysql -u root -e "SELECT 1;" 2>/dev/null; then
-    MYSQL_ROOT_ACCESS=true
-    MYSQL_CMD="mysql -u root"
-    print_info "Root access: no password required"
-elif mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
-    MYSQL_ROOT_ACCESS=true
-    MYSQL_CMD="mysql -u root -p'Brainwave786@'"
-    print_info "Root access: using existing password"
-else
-    print_warning "Cannot access MySQL as root, attempting to reset..."
-    # Try to reset root password
-    sudo systemctl stop mariadb
-    sudo mysqld_safe --skip-grant-tables --user=mysql &
-    sleep 5
-
-    mysql -u root << EOF
-UPDATE mysql.user SET authentication_string = PASSWORD('Brainwave786@') WHERE User = 'root';
-UPDATE mysql.user SET plugin = '' WHERE User = 'root';
-FLUSH PRIVILEGES;
-EOF
-
-    sudo killall mysqld
+# Quick MariaDB check
+if command_exists mysql && sudo systemctl start mariadb 2>/dev/null; then
     sleep 2
-    sudo systemctl start mariadb
-    sleep 3
+    if mysql -u root -e "SELECT 1;" 2>/dev/null || mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
+        print_success "MariaDB is working, proceeding with MySQL setup"
 
-    if mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
-        MYSQL_ROOT_ACCESS=true
-        MYSQL_CMD="mysql -u root -p'Brainwave786@'"
-        print_success "Root password reset successful"
-    fi
-fi
-
-if [ "$MYSQL_ROOT_ACCESS" = true ]; then
-    # Secure the installation
-    $MYSQL_CMD << EOF
--- Remove anonymous users
-DELETE FROM mysql.user WHERE User='';
-
--- Remove test database
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-
--- Ensure root has password
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'Brainwave786@';
-
--- Flush privileges
-FLUSH PRIVILEGES;
-EOF
-    print_success "MariaDB secured successfully"
-else
-    print_error "Cannot configure MariaDB root access"
-    print_warning "You may need to manually configure MariaDB"
-fi
-
-# Create application database and user
-print_step "Creating application database and user..."
-if [ "$MYSQL_ROOT_ACCESS" = true ]; then
-    $MYSQL_CMD << EOF
--- Create database
-CREATE DATABASE IF NOT EXISTS $DB_NAME CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- Create user and grant privileges
+        # Create application database and user
+        if mysql -u root -p'Brainwave786@' -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;" 2>/dev/null; then
+            mysql -u root -p'Brainwave786@' << EOF
 CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
 GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
 FLUSH PRIVILEGES;
-
--- Verify database creation
-USE $DB_NAME;
-SELECT 'Database and user created successfully!' as status;
 EOF
-    print_success "Database and user created"
-else
-    print_error "Cannot create database - no root access"
-    print_warning "You may need to manually create the database"
+            print_success "MySQL database and user created"
+
+            # Test connection
+            if python3 -c "
+import mysql.connector
+try:
+    conn = mysql.connector.connect(host='localhost', user='$DB_USER', password='$DB_PASSWORD', database='$DB_NAME')
+    conn.close()
+    print('✅ MySQL connection successful')
+except:
+    print('❌ MySQL connection failed')
+    exit(1)
+" 2>/dev/null; then
+                MARIADB_SUCCESS=true
+            fi
+        fi
+    fi
 fi
 
-# Test database connection
-print_step "Testing database connection..."
-python3 -c "
-import mysql.connector
+if [ "$MARIADB_SUCCESS" = false ]; then
+    print_warning "MariaDB setup failed, switching to SQLite for simplicity"
 
-try:
-    conn = mysql.connector.connect(
-        host='localhost',
-        user='$DB_USER',
-        password='$DB_PASSWORD',
-        database='$DB_NAME'
-    )
-    cursor = conn.cursor()
-    cursor.execute('SELECT 1 as test')
-    result = cursor.fetchone()
-    cursor.close()
-    conn.close()
-    print('✅ Database connection successful! Test query returned:', result[0])
-except Exception as e:
-    print(f'❌ Database connection failed: {e}')
-    exit(1)
-"
+    # Update .env to use SQLite
+    print_step "Configuring SQLite database..."
+    cat > /root/astroarupshastri-backend/.env << 'EOF'
+# Database Configuration (SQLite fallback)
+DATABASE_URL=sqlite:///./astroarupshastri.db
 
-print_success "Database setup complete"
-print_info "Database: $DB_NAME"
-print_info "User: $DB_USER"
-print_info "MariaDB Status: ✅ Running"
-print_info "Root Password: Brainwave786@"
+# JWT Configuration
+SECRET_KEY=your-super-secret-jwt-key-change-this-in-production-123456789
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Email Configuration (Update these with your SMTP settings)
+SMTP_SERVER=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+FROM_EMAIL=noreply@astroarupshastri.com
+FROM_NAME=AstroArupShastri
+
+# Application Configuration
+DEBUG=False
+HOST=127.0.0.1
+PORT=8002
+
+# CORS Configuration
+ALLOWED_ORIGINS=https://astroarupshastri.com,http://astroarupshastri.com,https://www.astroarupshastri.com,http://www.astroarupshastri.com
+
+# Frontend Configuration
+FRONTEND_URL=https://astroarupshastri.com
+
+# Email Verification Configuration
+EMAIL_VERIFICATION_EXPIRY_HOURS=24
+PASSWORD_RESET_EXPIRY_HOURS=1
+EOF
+
+    print_success "SQLite configuration created"
+    print_info "Database: SQLite (astroarupshastri.db)"
+    print_info "No authentication required"
+fi
 
 # Backend deployment
 print_header "BACKEND DEPLOYMENT"
@@ -321,16 +237,24 @@ EOF
 
 print_step "Initializing database..."
 python init_db.py
+print_success "Database initialized successfully"
 
-# Check for existing SQLite data to migrate
-if [ -f "astrology_website.db" ]; then
-    print_info "Found existing SQLite database, checking for migration..."
-    read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
-    if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
-        print_step "Running database migration..."
-        python migrate_to_mysql.py
-        print_success "Database migration completed"
+# Note about SQLite vs MySQL
+if [ "$MARIADB_SUCCESS" = true ]; then
+    print_info "Using MySQL/MariaDB database"
+    # Check for existing SQLite data to migrate
+    if [ -f "astrology_website.db" ]; then
+        print_info "Found existing SQLite database, checking for migration..."
+        read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
+        if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
+            print_step "Running database migration..."
+            python migrate_to_mysql.py
+            print_success "Database migration completed"
+        fi
     fi
+else
+    print_info "Using SQLite database (simpler for development)"
+    print_info "Database file: astroarupshastri.db"
 fi
 
 print_step "Creating systemd service..."
