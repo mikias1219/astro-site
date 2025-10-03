@@ -285,12 +285,33 @@ mkdir -p "$FRONTEND_DIR"
 print_step "Copying frontend files..."
 cd /root/astro-site  # Go back to project root
 
+# Debug: Check source files before copying
+echo "Checking source files before copying..."
+echo "Source src directory:"
+ls -la src/ 2>/dev/null || echo "Source src not found"
+
+echo "Source lib directory:"
+ls -la src/lib/ 2>/dev/null || echo "Source lib not found"
+
+echo "Source api directory:"
+ls -la src/lib/api/ 2>/dev/null || echo "Source api not found"
+
 # Copy frontend files with verification
 echo "Copying public directory..."
-cp -r public "$FRONTEND_DIR/" || { echo "Failed to copy public"; exit 1; }
+cp -r public "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy public"; exit 1; }
 
 echo "Copying src directory..."
-cp -r src "$FRONTEND_DIR/" || { echo "Failed to copy src"; exit 1; }
+cp -r src "$FRONTEND_DIR/" 2>&1 || { echo "Failed to copy src"; exit 1; }
+
+# Debug: Check what was actually copied
+echo "Contents of copied src directory:"
+ls -la "$FRONTEND_DIR/src/" 2>/dev/null || echo "src directory not found"
+
+echo "Contents of copied lib directory:"
+ls -la "$FRONTEND_DIR/src/lib/" 2>/dev/null || echo "lib directory not found"
+
+echo "Contents of copied api directory:"
+ls -la "$FRONTEND_DIR/src/lib/api/" 2>/dev/null || echo "api directory not found"
 
 echo "Copying root configuration files..."
 cp package.json "$FRONTEND_DIR/" || { echo "Failed to copy package.json"; exit 1; }
