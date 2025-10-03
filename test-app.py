@@ -9,9 +9,14 @@ import os
 os.chdir('/root/astroarupshastri-backend')
 
 # Activate virtual environment
-activate_script = '/root/astroarupshastri-backend/venv/bin/activate_this.py'
-if os.path.exists(activate_script):
-    exec(open(activate_script).read(), {'__file__': activate_script})
+venv_path = '/root/astroarupshastri-backend/venv/bin/activate_this.py'
+if os.path.exists(venv_path):
+    with open(venv_path) as f:
+        exec(f.read(), {'__file__': venv_path})
+else:
+    # Fallback: try to activate using subprocess
+    import subprocess
+    subprocess.run(['source', '/root/astroarupshastri-backend/venv/bin/activate'], shell=True, executable='/bin/bash')
 
 print("Testing FastAPI app loading...")
 
