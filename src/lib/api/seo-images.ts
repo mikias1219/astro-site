@@ -1,5 +1,5 @@
 // SEO Images API - Image Optimization
-const API_BASE_URL = 'http://localhost:8000/api/admin/seo';
+const API_BASE_URL = 'https://astroarupshastri.com/api/admin/seo';
 
 export interface ImageData {
   id?: number;

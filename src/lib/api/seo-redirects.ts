@@ -1,5 +1,5 @@
 // SEO Redirects API - Extra SEO Tools (Redirect Manager)
-const API_BASE_URL = 'http://localhost:8000/api/admin/seo';
+const API_BASE_URL = 'https://astroarupshastri.com/api/admin/seo';
 
 export interface RedirectData {
   id?: number;
