@@ -19,7 +19,7 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/dashboard', {
+      const response = await fetch('https://astroarupshastri.com/api/admin/dashboard', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }

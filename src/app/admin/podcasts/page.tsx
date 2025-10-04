@@ -41,7 +41,7 @@ export default function AdminPodcastsPage() {
 
   const fetchPodcasts = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/podcasts', {
+      const response = await fetch('https://astroarupshastri.com/api/podcasts', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -66,7 +66,7 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch('http://localhost:8000/api/podcasts', {
+      const response = await fetch('https://astroarupshastri.com/api/podcasts', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -101,7 +101,7 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/podcasts/${podcastId}`, {
+      const response = await fetch(`https://astroarupshastri.com/api/podcasts/${podcastId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

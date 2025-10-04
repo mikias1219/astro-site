@@ -31,8 +31,8 @@ export default function PodcastsPage() {
     try {
       setLoading(true);
       const url = selectedCategory === 'all' 
-        ? 'http://localhost:8000/api/podcasts/' 
-        : `http://localhost:8000/api/podcasts/?category=${selectedCategory}`;
+        ? 'https://astroarupshastri.com/api/podcasts/' 
+        : `https://astroarupshastri.com/api/podcasts/?category=${selectedCategory}`;
       
       const response = await fetch(url);
       if (response.ok) {

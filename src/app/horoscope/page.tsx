@@ -46,7 +46,7 @@ export default function HoroscopePage() {
   const fetchHoroscopes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/api/horoscopes/${selectedPeriod}`);
+      const response = await fetch(`https://astroarupshastri.com/api/horoscopes/${selectedPeriod}`);
       if (response.ok) {
         const data = await response.json();
         setHoroscopes(data);

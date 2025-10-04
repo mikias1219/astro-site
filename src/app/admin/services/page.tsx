@@ -40,7 +40,7 @@ export default function AdminServicesPage() {
 
   const fetchServices = async (authToken: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/admin/services', {
+      const response = await fetch('https://astroarupshastri.com/api/admin/services', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -66,8 +66,8 @@ export default function AdminServicesPage() {
 
     try {
       const url = editingService 
-        ? `http://localhost:8000/api/admin/services/${editingService.id}`
-        : 'http://localhost:8000/api/admin/services';
+        ? `https://astroarupshastri.com/api/admin/services/${editingService.id}`
+        : 'https://astroarupshastri.com/api/admin/services';
       
       const method = editingService ? 'PUT' : 'POST';
 
@@ -119,7 +119,7 @@ export default function AdminServicesPage() {
     if (!token || !confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/services/${serviceId}`, {
+      const response = await fetch(`https://astroarupshastri.com/api/admin/services/${serviceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -140,7 +140,7 @@ export default function AdminServicesPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/services/${serviceId}/toggle`, {
+      const response = await fetch(`https://astroarupshastri.com/api/admin/services/${serviceId}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

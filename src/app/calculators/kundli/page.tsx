@@ -112,7 +112,7 @@ export default function KundliCalculatorPage() {
     
     try {
       // Call the backend API
-      const response = await fetch('http://localhost:8000/api/calculators/kundli', {
+      const response = await fetch('https://astroarupshastri.com/api/calculators/kundli', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
