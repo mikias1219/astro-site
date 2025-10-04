@@ -196,7 +196,7 @@ source venv/bin/activate
 print_step "Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
-pip install gunicorn mysql-connector-python
+pip install gunicorn mysql-connector-python uvicorn[standard]
 
 print_step "Generating secure configuration..."
 SECRET_KEY=$(openssl rand -hex 32)
@@ -271,7 +271,7 @@ WorkingDirectory=$BACKEND_DIR
 Environment=PATH=$BACKEND_DIR/venv/bin
 Environment=PYTHONPATH=$BACKEND_DIR
 EnvironmentFile=$BACKEND_DIR/.env
-ExecStart=$BACKEND_DIR/venv/bin/gunicorn main:app -b 127.0.0.1:8002 --log-level info
+ExecStart=$BACKEND_DIR/venv/bin/gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8002 --log-level info --access-logfile $BACKEND_DIR/logs/gunicorn-access.log --error-logfile $BACKEND_DIR/logs/gunicorn-error.log
 Restart=always
 RestartSec=5
 
@@ -343,6 +343,99 @@ print_info "Location: $BACKEND_DIR"
 print_info "Service: astroarupshastri-backend"
 print_info "API URL: http://127.0.0.1:8002"
 print_info "Health Check: http://127.0.0.1:8002/health"
+
+# Nginx configuration
+print_header "NGINX CONFIGURATION"
+
+print_step "Installing and configuring Nginx..."
+if ! command_exists nginx; then
+    print_info "Installing Nginx..."
+    apt update && apt install -y nginx
+fi
+
+print_step "Creating Nginx configuration for $DOMAIN..."
+sudo tee /etc/nginx/sites-available/astroarupshastri > /dev/null << EOF
+# Redirect www to non-www
+server {
+    listen 80;
+    server_name www.$DOMAIN;
+    return 301 \$scheme://$DOMAIN\$request_uri;
+}
+
+# Main App
+server {
+    listen 80;
+    server_name $DOMAIN;
+
+    # For static export, serve from the out directory
+    root $FRONTEND_DIR/out;
+    index index.html;
+
+    # Frontend - serve static files (SPA routing)
+    location / {
+        try_files \$uri \$uri/ /index.html;
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer-when-downgrade" always;
+        add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    }
+
+    # API proxy to backend
+    location /api/ {
+        proxy_pass http://127.0.0.1:8002;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_cache_bypass \$http_upgrade;
+
+        # Timeout settings
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # Static files caching
+    location /_next/static/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Security headers for static files
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # Handle Next.js exported static assets
+    location /static/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+EOF
+
+print_step "Enabling Nginx site..."
+sudo ln -sf /etc/nginx/sites-available/astroarupshastri /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+
+print_step "Testing Nginx configuration..."
+sudo nginx -t
+
+if [ $? -eq 0 ]; then
+    print_success "Nginx configuration is valid"
+    sudo systemctl reload nginx
+    print_success "Nginx reloaded successfully"
+else
+    print_error "Nginx configuration test failed"
+    exit 1
+fi
 
 # Frontend deployment
 print_header "FRONTEND DEPLOYMENT"
@@ -654,6 +747,51 @@ print_info "Build Status: ✅ Ready for production"
 print_info "Serving: Port 3001 via PM2"
 print_info "Build Type: $FRONTEND_BUILD_TYPE"
 
+# SSL/HTTPS Setup
+print_header "SSL/HTTPS SETUP"
+
+print_step "Installing Certbot for SSL certificates..."
+if ! command_exists certbot; then
+    print_info "Installing Certbot and Nginx plugin..."
+    apt update && apt install -y certbot python3-certbot-nginx
+fi
+
+print_step "Obtaining SSL certificate for $DOMAIN..."
+print_info "This will automatically configure HTTPS for your domain"
+print_warning "Make sure your domain DNS is pointing to this server before proceeding!"
+
+# Check if domain is pointing to this server
+SERVER_IP=$(curl -s ifconfig.me || curl -s ipinfo.io/ip || echo "unknown")
+print_info "Server IP: $SERVER_IP"
+print_info "Please ensure $DOMAIN points to $SERVER_IP"
+
+read -p "Is your domain DNS configured correctly? (y/N): " DNS_CONFIGURED
+if [[ $DNS_CONFIGURED =~ ^[Yy]$ ]]; then
+    print_step "Obtaining SSL certificate..."
+    
+    # Run certbot with non-interactive flags
+    if sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN --redirect; then
+        print_success "SSL certificate obtained and configured successfully!"
+        print_info "Your site is now accessible via HTTPS"
+        
+        # Test SSL configuration
+        print_step "Testing SSL configuration..."
+        if curl -s https://$DOMAIN > /dev/null; then
+            print_success "HTTPS is working correctly!"
+        else
+            print_warning "HTTPS test failed, but certificate was installed"
+        fi
+    else
+        print_warning "SSL certificate installation failed"
+        print_info "You can run this manually later:"
+        print_info "sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN"
+    fi
+else
+    print_warning "Skipping SSL setup - configure DNS first"
+    print_info "To set up SSL later, run:"
+    print_info "sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN"
+fi
+
 # Final verification
 print_header "DEPLOYMENT VERIFICATION"
 
@@ -714,111 +852,29 @@ fi
 
 print_success "Deployment verification complete!"
 
-# CloudPanel instructions
-print_header "🎯 CLOUDPANEL CONFIGURATION REQUIRED"
+# Deployment Architecture Summary
+print_header "🚀 DEPLOYMENT ARCHITECTURE SUMMARY"
 
 echo ""
-echo "🔐 CloudPanel Access:"
-echo "   URL: https://88.222.245.41:8443"
-echo "   Username: admin"
-echo "   Password: Brainwave786@"
+echo "✅ COMPLETE FASTAPI + NGINX DEPLOYMENT:"
+echo "   • FastAPI Backend: Gunicorn + Uvicorn Workers"
+echo "   • Frontend: Next.js Static Export"
+echo "   • Reverse Proxy: Nginx"
+echo "   • SSL/HTTPS: Let's Encrypt (if DNS configured)"
+echo "   • Process Management: Systemd + PM2"
 echo ""
 
-echo "📋 Complete these steps in CloudPanel:"
+echo "🔧 DEPLOYMENT COMPONENTS:"
+echo "   • Backend Service: astroarupshastri-backend.service"
+echo "   • Frontend Process: PM2 (astro-frontend)"
+echo "   • Web Server: Nginx (reverse proxy)"
+echo "   • SSL Certificates: Certbot/Let's Encrypt"
 echo ""
 
-echo "1️⃣ CREATE SITE:"
-echo "   • Sites → Add Site"
-echo "   • Domain: astroarupshastri.com"
-echo "   • Root Directory: $FRONTEND_DIR"
-echo "   • PHP Version: (leave empty)"
-echo ""
-
-echo "2️⃣ ENABLE SSL:"
-echo "   • Sites → astroarupshastri.com → SSL/TLS"
-echo "   • Enable Let's Encrypt"
-echo "   • Add domains: astroarupshastri.com, www.astroarupshastri.com"
-echo ""
-
-echo "3️⃣ CONFIGURE NGINX (CRITICAL):"
-echo "   • Sites → astroarupshastri.com → Vhost"
-echo "   • REPLACE the entire server block with:"
-echo ""
-
-cat << 'EOF'
-server {
-    listen 80;
-    listen [::]:80;
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
-    {{ssl_certificate_key}}
-    {{ssl_certificate}}
-    server_name astroarupshastri.com www.astroarupshastri.com;
-
-    # For static export, serve from the out directory
-    root /root/astroarupshastri-frontend/out;
-    index index.html;
-
-    {{nginx_access_log}}
-    {{nginx_error_log}}
-
-    # Frontend - serve static files (SPA routing)
-    location / {
-        try_files $uri $uri/ /index.html;
-
-        # Security headers
-        add_header X-Frame-Options "SAMEORIGIN" always;
-        add_header X-XSS-Protection "1; mode=block" always;
-        add_header X-Content-Type-Options "nosniff" always;
-        add_header Referrer-Policy "no-referrer-when-downgrade" always;
-        add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
-    }
-
-    # API proxy to backend
-    location /api/ {
-        proxy_pass http://127.0.0.1:8002;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_cache_bypass $http_upgrade;
-
-        # Timeout settings
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-
-    # Static files caching for Next.js export
-    location /_next/static/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Security headers for static files
-    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    # Handle Next.js exported static assets
-    location /static/ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-
-    {{settings}}
-}
-EOF
-
-echo ""
-echo "4️⃣ DNS CONFIGURATION:"
-echo "   • Point astroarupshastri.com to: 88.222.245.41"
-echo "   • A record: @ → 88.222.245.41"
-echo "   • CNAME: www → astroarupshastri.com"
+echo "🌐 DNS CONFIGURATION REQUIRED:"
+echo "   • Point $DOMAIN to: $SERVER_IP"
+echo "   • A record: @ → $SERVER_IP"
+echo "   • CNAME: www → $DOMAIN"
 echo ""
 
 # Final summary
@@ -830,11 +886,12 @@ echo "✅ BACKEND: Deployed and running on port 8002"
 echo "✅ FRONTEND: Built and ready for production"
 echo ""
 
-echo "🌐 FINAL URLs (after CloudPanel setup):"
-echo "   Website: https://astroarupshastri.com"
-echo "   API: https://astroarupshastri.com/api"
-echo "   Admin: https://astroarupshastri.com/admin"
-echo "   API Docs: https://astroarupshastri.com/api/docs"
+echo "🌐 FINAL URLs (after DNS configuration):"
+echo "   Website: https://$DOMAIN"
+echo "   API: https://$DOMAIN/api"
+echo "   Admin: https://$DOMAIN/admin"
+echo "   API Docs: https://$DOMAIN/api/docs"
+echo "   Health Check: https://$DOMAIN/api/health"
 echo ""
 
 echo "🛠️ MANAGEMENT COMMANDS:"
@@ -861,9 +918,9 @@ echo "   CloudPanel: https://88.222.245.41:8443"
 echo "   Backend Logs: $BACKEND_DIR/logs/"
 echo ""
 
-print_warning "⚠️ IMPORTANT: Complete the CloudPanel configuration above to make your site live!"
-print_success "🚀 Your AstroArupShastri.com website is ready to serve the world!"
+print_warning "⚠️ IMPORTANT: Configure your domain DNS to point to this server to make your site live!"
+print_success "🚀 Your $DOMAIN website is ready to serve the world!"
 
 echo ""
 echo "🎊 CONGRATULATIONS! Everything deployed successfully!"
-echo "   Just complete the CloudPanel steps and your astrology website will be live! 🌟"
+echo "   Just configure your DNS and your astrology website will be live! 🌟"
