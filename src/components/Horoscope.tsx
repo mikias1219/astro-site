@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '../lib/api';
 
 interface HoroscopeData {
   id: number;
@@ -43,14 +44,15 @@ export function Horoscope() {
   const fetchHoroscopes = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/api/horoscopes/${selectedPeriod}`);
-      if (response.ok) {
-        const data = await response.json();
-        setHoroscopes(data);
+      const result = await apiClient.getHoroscopes();
+      if (result.success && Array.isArray(result.data)) {
+        setHoroscopes(result.data as HoroscopeData[]);
       } else {
         setError('Failed to fetch horoscope data');
       }
-    } catch (error) {
+    } catch (err) {
+      setError('Failed to fetch horoscope data');
+      setHoroscopes([]);
       setError('Failed to fetch horoscope data');
     } finally {
       setLoading(false);

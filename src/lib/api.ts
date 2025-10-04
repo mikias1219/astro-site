@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://astroarupshastri.com/api';
 
 export interface ApiResponse<T> {
   data?: T;
@@ -286,6 +286,10 @@ class ApiClient {
   // Podcasts endpoints
   async getPodcasts() {
     return this.request('/podcasts/');
+  }
+
+  async getFeaturedPodcasts(limit: number = 6) {
+    return this.request(`/podcasts/featured?limit=${limit}`);
   }
 
   async getPodcast(id: number) {

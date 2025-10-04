@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { apiClient } from '../lib/api';
 
 interface PanchangData {
   id: number;
@@ -34,10 +35,9 @@ export function Panchang() {
 
   const fetchPanchang = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/panchang/today');
-      if (response.ok) {
-        const data = await response.json();
-        setPanchang(data);
+      const result = await apiClient.getPanchang();
+      if (result.success && result.data) {
+        setPanchang(result.data);
       } else {
         setError('Failed to fetch panchang data');
       }

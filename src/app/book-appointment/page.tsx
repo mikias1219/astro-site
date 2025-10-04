@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { useAuth } from '../../contexts/AuthContext';
 import { apiClient } from '../../lib/api';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Service {
   id: number;
@@ -53,10 +53,9 @@ export default function BookAppointmentPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch('http://localhost:8000/api/services/');
-        if (response.ok) {
-          const data = await response.json();
-          setServices(data);
+        const result = await apiClient.getServices();
+        if (result.success && Array.isArray(result.data)) {
+          setServices(result.data as Service[]);
         } else {
           console.error('Failed to fetch services');
         }

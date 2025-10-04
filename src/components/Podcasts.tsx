@@ -3,6 +3,7 @@ import 'swiper/css';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { apiClient } from '../lib/api';
 
 interface PodcastData {
   id: number;
@@ -28,10 +29,9 @@ export function Podcasts() {
 
   const fetchPodcasts = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/podcasts/featured?limit=6');
-      if (response.ok) {
-        const data = await response.json();
-        setPodcasts(data);
+      const result = await apiClient.getFeaturedPodcasts(6);
+      if (result.success && result.data) {
+        setPodcasts(result.data);
       } else {
         setError('Failed to fetch podcasts');
       }
