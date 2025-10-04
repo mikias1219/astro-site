@@ -37,7 +37,7 @@ export function Panchang() {
     try {
       const result = await apiClient.getPanchang();
       if (result.success && result.data) {
-        setPanchang(result.data);
+        setPanchang(result.data as PanchangData);
       } else {
         setError('Failed to fetch panchang data');
       }

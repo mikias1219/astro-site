@@ -30,8 +30,8 @@ export function Podcasts() {
   const fetchPodcasts = async () => {
     try {
       const result = await apiClient.getFeaturedPodcasts(6);
-      if (result.success && result.data) {
-        setPodcasts(result.data);
+      if (result.success && Array.isArray(result.data)) {
+        setPodcasts(result.data as PodcastData[]);
       } else {
         setError('Failed to fetch podcasts');
       }
