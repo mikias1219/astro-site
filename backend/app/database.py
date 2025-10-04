@@ -13,7 +13,7 @@ from typing import Generator
 # Database URL configuration
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mysql+pymysql://username:password@localhost/astrology_website"  # Default to MySQL for Hostinger
+    "sqlite:///./astrology_website.db"  # Default to SQLite for simplicity
 )
 
 # Create engine with different configurations for different databases

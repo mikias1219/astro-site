@@ -9,6 +9,10 @@ from fastapi.security import HTTPBearer
 from contextlib import asynccontextmanager
 import uvicorn
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from app.database import engine, Base
 from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators, kundli, matching, numerology

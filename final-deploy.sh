@@ -97,53 +97,13 @@ print_success "System requirements satisfied"
 # Database setup
 print_header "DATABASE SETUP"
 
-print_info "Setting up MariaDB database server..."
+print_info "Setting up SQLite database (primary choice for simplicity)..."
 
-# Try MariaDB first, fallback to SQLite if it fails
-print_step "Attempting MariaDB setup..."
-
-MARIADB_SUCCESS=false
-
-# Quick MariaDB check
-if command_exists mysql && sudo systemctl start mariadb 2>/dev/null; then
-    sleep 2
-    if mysql -u root -e "SELECT 1;" 2>/dev/null || mysql -u root -p'Brainwave786@' -e "SELECT 1;" 2>/dev/null; then
-        print_success "MariaDB is working, proceeding with MySQL setup"
-
-        # Create application database and user
-        if mysql -u root -p'Brainwave786@' -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;" 2>/dev/null; then
-            mysql -u root -p'Brainwave786@' << EOF
-CREATE USER IF NOT EXISTS '$DB_USER'@'localhost' IDENTIFIED BY '$DB_PASSWORD';
-GRANT ALL PRIVILEGES ON $DB_NAME.* TO '$DB_USER'@'localhost';
-FLUSH PRIVILEGES;
-EOF
-            print_success "MySQL database and user created"
-
-            # Test connection
-            if python3 -c "
-import mysql.connector
-try:
-    conn = mysql.connector.connect(host='localhost', user='$DB_USER', password='$DB_PASSWORD', database='$DB_NAME')
-    conn.close()
-    print('✅ MySQL connection successful')
-except:
-    print('❌ MySQL connection failed')
-    exit(1)
-" 2>/dev/null; then
-                MARIADB_SUCCESS=true
-            fi
-        fi
-    fi
-fi
-
-if [ "$MARIADB_SUCCESS" = false ]; then
-    print_warning "MariaDB setup failed, switching to SQLite for simplicity"
-
-    # Update .env to use SQLite
-    print_step "Configuring SQLite database..."
-    cat > /root/astroarupshastri-backend/.env << 'EOF'
-# Database Configuration (SQLite fallback)
-DATABASE_URL=sqlite:///./astroarupshastri.db
+# Use SQLite as the primary database choice
+print_step "Configuring SQLite database..."
+cat > /root/astroarupshastri-backend/.env << 'EOF'
+# Database Configuration (SQLite)
+DATABASE_URL=sqlite:///./astrology_website.db
 
 # JWT Configuration
 SECRET_KEY=your-super-secret-jwt-key-change-this-in-production-123456789
@@ -174,10 +134,9 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-    print_success "SQLite configuration created"
-    print_info "Database: SQLite (astroarupshastri.db)"
-    print_info "No authentication required"
-fi
+print_success "SQLite configuration created"
+print_info "Database: SQLite (astrology_website.db)"
+print_info "No authentication required"
 
 # Backend deployment
 print_header "BACKEND DEPLOYMENT"
