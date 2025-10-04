@@ -196,15 +196,16 @@ source venv/bin/activate
 print_step "Installing Python dependencies..."
 pip install --upgrade pip
 pip install -r requirements.txt
-pip install gunicorn mysql-connector-python uvicorn[standard]
+pip install gunicorn mysql-connector-python uvicorn[standard] python-dotenv
 
 print_step "Generating secure configuration..."
-SECRET_KEY=$(openssl rand -hex 32)
+# Generate shorter SECRET_KEY for bcrypt compatibility (24 bytes = 48 hex chars)
+SECRET_KEY=$(openssl rand -hex 24)
 
 print_step "Creating backend environment configuration..."
 cat > .env << EOF
-# Database Configuration
-DATABASE_URL=$DATABASE_URL
+# Database Configuration (SQLite)
+DATABASE_URL=sqlite:///./astrology_website.db
 
 # JWT Configuration
 SECRET_KEY=$SECRET_KEY
@@ -235,28 +236,49 @@ EMAIL_VERIFICATION_EXPIRY_HOURS=24
 PASSWORD_RESET_EXPIRY_HOURS=1
 EOF
 
-# Note about SQLite vs MySQL
-if [ "$MARIADB_SUCCESS" = true ]; then
-    print_info "Using MySQL/MariaDB database"
-    print_step "Initializing database..."
-    python init_db.py
-    print_success "Database initialized successfully"
+# Configure database.py to use environment variables
+print_step "Configuring database.py for environment variables..."
+cat > app/database.py << 'EOF'
+import os
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-    # Check for existing SQLite data to migrate
-    if [ -f "astrology_website.db" ]; then
-        print_info "Found existing SQLite database, checking for migration..."
-        read -p "Migrate existing SQLite data to MySQL? (y/N): " MIGRATE_DATA
-        if [[ $MIGRATE_DATA =~ ^[Yy]$ ]]; then
-            print_step "Running database migration..."
-            python migrate_to_mysql.py
-            print_success "Database migration completed"
-        fi
-    fi
-else
-    print_info "Using SQLite database (simpler for development)"
-    print_info "Database file will be created automatically when backend starts"
-    print_info "No manual initialization required for SQLite"
+# Read DATABASE_URL from environment variables
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./astrology_website.db")
+
+# Create engine with appropriate configuration
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL, 
+        connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(DATABASE_URL)
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base()
+
+# Dependency to get database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+EOF
+
+# Ensure main.py loads dotenv
+print_step "Ensuring dotenv is loaded in main.py..."
+if ! grep -q "load_dotenv" main.py; then
+    sed -i '1i from dotenv import load_dotenv\nload_dotenv()' main.py
 fi
+
+# Initialize database tables
+print_step "Creating database tables..."
+python -c "from app.database import Base, engine; Base.metadata.create_all(bind=engine)"
+print_success "Database tables created successfully"
 
 print_step "Creating systemd service..."
 sudo tee /etc/systemd/system/astroarupshastri-backend.service > /dev/null << EOF
@@ -271,7 +293,7 @@ WorkingDirectory=$BACKEND_DIR
 Environment=PATH=$BACKEND_DIR/venv/bin
 Environment=PYTHONPATH=$BACKEND_DIR
 EnvironmentFile=$BACKEND_DIR/.env
-ExecStart=$BACKEND_DIR/venv/bin/gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 127.0.0.1:8002 --log-level info --access-logfile $BACKEND_DIR/logs/gunicorn-access.log --error-logfile $BACKEND_DIR/logs/gunicorn-error.log
+ExecStart=$BACKEND_DIR/venv/bin/uvicorn main:app --host 127.0.0.1 --port 8002
 Restart=always
 RestartSec=5
 
@@ -399,6 +421,10 @@ server {
         proxy_connect_timeout 60s;
         proxy_send_timeout 60s;
         proxy_read_timeout 60s;
+        
+        # Request body settings
+        client_max_body_size 10M;
+        proxy_request_buffering off;
     }
 
     # Static files caching
@@ -773,6 +799,39 @@ if [[ $DNS_CONFIGURED =~ ^[Yy]$ ]]; then
     if sudo certbot --nginx -d $DOMAIN -d www.$DOMAIN --non-interactive --agree-tos --email admin@$DOMAIN --redirect; then
         print_success "SSL certificate obtained and configured successfully!"
         print_info "Your site is now accessible via HTTPS"
+        
+        # Fix API proxy configuration that might have been overwritten by Certbot
+        print_step "Ensuring API proxy configuration is preserved..."
+        if ! grep -q "location /api/" /etc/nginx/sites-enabled/astroarupshastri; then
+            print_warning "API proxy configuration was overwritten by Certbot, restoring..."
+            # Add API proxy block to the HTTPS server block
+            sed -i '/server_name '$DOMAIN'/a\
+    # API proxy to backend\
+    location /api/ {\
+        proxy_pass http://127.0.0.1:8002;\
+        proxy_http_version 1.1;\
+        proxy_set_header Upgrade $http_upgrade;\
+        proxy_set_header Connection '"'"'upgrade'"'"';\
+        proxy_set_header Host $host;\
+        proxy_set_header X-Real-IP $remote_addr;\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\
+        proxy_set_header X-Forwarded-Proto $scheme;\
+        proxy_cache_bypass $http_upgrade;\
+        proxy_connect_timeout 60s;\
+        proxy_send_timeout 60s;\
+        proxy_read_timeout 60s;\
+        client_max_body_size 10M;\
+        proxy_request_buffering off;\
+    }' /etc/nginx/sites-enabled/astroarupshastri
+            
+            # Test and reload Nginx
+            if sudo nginx -t; then
+                sudo systemctl reload nginx
+                print_success "API proxy configuration restored"
+            else
+                print_error "Failed to restore API proxy configuration"
+            fi
+        fi
         
         # Test SSL configuration
         print_step "Testing SSL configuration..."
