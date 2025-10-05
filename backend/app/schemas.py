@@ -349,9 +349,12 @@ class PodcastBase(BaseModel):
     title: str
     description: Optional[str] = None
     video_url: Optional[str] = None
+    youtube_video_id: Optional[str] = None
+    embed_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration: Optional[str] = None
     category: Optional[str] = None
+    tags: Optional[str] = None
     is_featured: bool = False
 
 class PodcastCreate(PodcastBase):
@@ -361,9 +364,12 @@ class PodcastUpdate(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     video_url: Optional[str] = None
+    youtube_video_id: Optional[str] = None
+    embed_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration: Optional[str] = None
     category: Optional[str] = None
+    tags: Optional[str] = None
     is_featured: Optional[bool] = None
 
 class PodcastResponse(PodcastBase):
@@ -371,7 +377,7 @@ class PodcastResponse(PodcastBase):
     view_count: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
 

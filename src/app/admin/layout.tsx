@@ -91,6 +91,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   Users
                 </Link>
+                <Link
+                  href="/admin/testimonials"
+                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                >
+                  Testimonials
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

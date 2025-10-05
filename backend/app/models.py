@@ -227,14 +227,17 @@ class Horoscope(Base):
 # Podcast/Video Model
 class Podcast(Base):
     __tablename__ = "podcasts"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     description = Column(Text)
-    video_url = Column(String(500))
+    video_url = Column(String(500))  # YouTube URL or direct video URL
+    youtube_video_id = Column(String(50))  # Extracted YouTube video ID
+    embed_url = Column(String(500))  # YouTube embed URL
     thumbnail_url = Column(String(500))
     duration = Column(String(20))  # Format: "10:30"
     category = Column(String(100))
+    tags = Column(String(500))  # Comma-separated tags
     is_featured = Column(Boolean, default=False)
     view_count = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

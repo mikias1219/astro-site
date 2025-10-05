@@ -4,15 +4,19 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { apiClient } from '../lib/api';
+import { YouTubePlayer } from './YouTubePlayer';
 
 interface PodcastData {
   id: number;
   title: string;
   description: string;
   video_url: string;
+  youtube_video_id?: string;
+  embed_url?: string;
   thumbnail_url: string;
   duration: string;
   category: string;
+  tags?: string;
   is_featured: boolean;
   view_count: number;
   created_at: string;
@@ -42,47 +46,7 @@ export function Podcasts() {
     }
   };
 
-  // Fallback data if API fails
-  const fallbackPodcasts = [
-    {
-      id: 1,
-      title: 'करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित',
-      description: 'जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।',
-      duration: '10:00',
-      category: 'Politics',
-      thumbnail_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop',
-      video_url: 'https://www.youtube.com/watch?v=sample1',
-      is_featured: true,
-      view_count: 1250,
-      created_at: '2024-01-15T10:00:00'
-    },
-    {
-      id: 2,
-      title: 'ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?',
-      description: 'जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।',
-      duration: '07:12',
-      category: 'International',
-      thumbnail_url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=225&fit=crop',
-      video_url: 'https://www.youtube.com/watch?v=sample2',
-      is_featured: true,
-      view_count: 980,
-      created_at: '2024-01-14T15:30:00'
-    },
-    {
-      id: 3,
-      title: 'Share Market Astrology। Stock Market Prediction',
-      description: 'Dr. Vinay Bajrangi के साथ शेयर मार्केट की ज्योतिषीय भविष्यवाणी।',
-      duration: '06:12',
-      category: 'Finance',
-      thumbnail_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=225&fit=crop',
-      video_url: 'https://www.youtube.com/watch?v=sample3',
-      is_featured: false,
-      view_count: 750,
-      created_at: '2024-01-13T12:00:00'
-    }
-  ];
-
-  const displayPodcasts = podcasts.length > 0 ? podcasts : fallbackPodcasts;
+  const displayPodcasts = podcasts;
 
   return (
     <section id="podcasts" className="py-20 bg-gradient-to-br from-gray-50 to-orange-50">
@@ -127,24 +91,19 @@ export function Podcasts() {
                 <SwiperSlide key={`podcast-${podcast.id}-${index}`}>
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group">
                     <div className="relative aspect-video overflow-hidden">
-                      <img 
-                        alt={podcast.title} 
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                        src={podcast.thumbnail_url || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop'}
+                      <YouTubePlayer
+                        videoId={podcast.youtube_video_id}
+                        embedUrl={podcast.embed_url}
+                        title={podcast.title}
+                        thumbnailUrl={podcast.thumbnail_url}
+                        className="aspect-video"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent pointer-events-none"></div>
                       <div className="absolute bottom-3 right-3 bg-black/75 text-white text-sm px-2 py-1 rounded-full">
                         {podcast.duration}
                       </div>
                       <div className="absolute top-3 left-3 bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
                         {podcast.category}
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center">
-                          <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                          </svg>
-                        </div>
                       </div>
                     </div>
                     <div className="p-6">
@@ -162,11 +121,11 @@ export function Podcasts() {
                           {new Date(podcast.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      <a 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className="inline-flex items-center justify-center w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl" 
-                        href={podcast.video_url}
+                      <a
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-2 px-4 rounded-lg text-sm font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                        href={podcast.embed_url || podcast.video_url}
                       >
                         <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>

@@ -15,7 +15,8 @@ class ApiClient {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    retryCount = 0
   ): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseURL}${endpoint}`;
@@ -31,16 +32,38 @@ class ApiClient {
         headers.set('Content-Type', 'application/json');
       }
 
+      // Add timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(url, {
         ...options,
         headers,
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        // Handle rate limiting with retry
+        if (response.status === 429 && retryCount < 3) {
+          const retryAfter = response.headers.get('Retry-After');
+          const delay = retryAfter ? parseInt(retryAfter) * 1000 : Math.pow(2, retryCount) * 1000;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return this.request(endpoint, options, retryCount + 1);
+        }
+
+        // Handle server errors with retry for GET requests
+        if (response.status >= 500 && retryCount < 2 && (!options.method || options.method === 'GET')) {
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+          return this.request(endpoint, options, retryCount + 1);
+        }
+
         return {
           success: false,
-          error: errorData.detail || `HTTP error! status: ${response.status}`,
+          error: errorData.detail || errorData.message || `HTTP error! status: ${response.status}`,
         };
       }
 
@@ -50,9 +73,22 @@ class ApiClient {
         data,
       };
     } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Request timeout. Please check your connection and try again.',
+        };
+      }
+
+      // Retry on network errors
+      if (retryCount < 2) {
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, retryCount) * 1000));
+        return this.request(endpoint, options, retryCount + 1);
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'An unknown error occurred',
+        error: error instanceof Error ? error.message : 'Network error occurred. Please check your connection.',
       };
     }
   }
@@ -135,6 +171,31 @@ class ApiClient {
     return this.request('/auth/reset-password', {
       method: 'POST',
       body: JSON.stringify({ token, new_password: newPassword }),
+    });
+  }
+
+  // Profile management endpoints
+  async updateProfile(token: string, userData: any) {
+    return this.request('/auth/me', {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(userData),
+    });
+  }
+
+  async changePassword(token: string, passwordData: {
+    current_password: string;
+    new_password: string;
+    confirm_password: string;
+  }) {
+    return this.request('/auth/me/change-password', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(passwordData),
     });
   }
 

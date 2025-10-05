@@ -11,10 +11,10 @@ import os
 from app.database import get_db
 from app.models import User, UserRole, UserVerification
 from app.schemas import (
-    UserCreate, UserResponse, Token, LoginRequest, 
+    UserCreate, UserResponse, Token, LoginRequest,
     EmailVerificationRequest, EmailVerificationResponse,
     VerifyEmailRequest, PasswordResetRequest, PasswordResetConfirm,
-    PasswordResetResponse
+    PasswordResetResponse, UserUpdate
 )
 from app.auth import (
     verify_password, get_password_hash, create_access_token, 
@@ -276,22 +276,82 @@ async def read_users_me(current_user: User = Depends(get_current_active_user)):
 
 @router.put("/me", response_model=UserResponse)
 async def update_user_me(
-    user_update: dict,
+    user_update: UserUpdate,
     current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
-    """Update current user information"""
-    # Prevent updating sensitive fields
-    restricted_fields = {"id", "role", "is_active", "is_verified", "verification_token", 
-                        "reset_password_token", "hashed_password"}
-    
-    for field, value in user_update.items():
-        if field not in restricted_fields and hasattr(current_user, field):
+    """Update current user profile information"""
+    update_data = user_update.dict(exclude_unset=True)
+
+    # Check for username uniqueness if username is being updated
+    if update_data.get("username") and update_data["username"] != current_user.username:
+        if db.query(User).filter(User.username == update_data["username"]).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+
+    # Check for email uniqueness if email is being updated
+    if update_data.get("email") and update_data["email"] != current_user.email:
+        if db.query(User).filter(User.email == update_data["email"]).first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+
+    # Update allowed fields
+    allowed_fields = {"email", "username", "full_name", "phone", "preferred_language"}
+    for field, value in update_data.items():
+        if field in allowed_fields:
             setattr(current_user, field, value)
-    
+
+    current_user.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(current_user)
     return current_user
+
+@router.post("/me/change-password")
+async def change_password(
+    password_data: dict,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    """Change current user's password"""
+    current_password = password_data.get("current_password")
+    new_password = password_data.get("new_password")
+    confirm_password = password_data.get("confirm_password")
+
+    if not current_password or not new_password or not confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="All password fields are required"
+        )
+
+    if new_password != confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New passwords don't match"
+        )
+
+    if len(new_password) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 8 characters long"
+        )
+
+    # Verify current password
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect"
+        )
+
+    # Update password
+    current_user.hashed_password = get_password_hash(new_password)
+    current_user.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {"message": "Password changed successfully"}
 
 @router.post("/register-admin", response_model=UserResponse)
 async def register_admin(user: UserCreate, db: Session = Depends(get_db)):

@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from sqlalchemy import desc
+import re
 
 from app.database import get_db
 from app.models import Podcast, User
@@ -13,6 +14,31 @@ from app.schemas import PodcastCreate, PodcastUpdate, PodcastResponse
 from app.auth import get_admin_or_editor_user
 
 router = APIRouter()
+
+def extract_youtube_info(video_url: str) -> tuple[str, str, str]:
+    """Extract YouTube video ID and create embed URL and thumbnail URL"""
+    if not video_url:
+        return "", "", ""
+
+    # YouTube URL patterns
+    patterns = [
+        r'(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com\/v\/([a-zA-Z0-9_-]{11})',
+    ]
+
+    video_id = ""
+    for pattern in patterns:
+        match = re.search(pattern, video_url)
+        if match:
+            video_id = match.group(1)
+            break
+
+    if video_id:
+        embed_url = f"https://www.youtube.com/embed/{video_id}"
+        thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+        return video_id, embed_url, thumbnail_url
+
+    return "", "", ""
 
 @router.get("/", response_model=List[PodcastResponse])
 async def get_podcasts(
@@ -24,59 +50,13 @@ async def get_podcasts(
 ):
     """Get podcasts with optional filters"""
     query = db.query(Podcast)
-    
+
     if category:
         query = query.filter(Podcast.category == category)
     if featured_only:
         query = query.filter(Podcast.is_featured == True)
-    
+
     podcasts = query.order_by(desc(Podcast.created_at)).offset(skip).limit(limit).all()
-    
-    # If no podcasts exist, return sample data
-    if not podcasts:
-        sample_podcasts = [
-            PodcastResponse(
-                id=999001,
-                title="करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित",
-                description="जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।",
-                video_url="https://www.youtube.com/watch?v=sample1",
-                thumbnail_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop",
-                duration="10:00",
-                category="Politics",
-                is_featured=True,
-                view_count=1250,
-                created_at="2024-01-15T10:00:00",
-                updated_at=None
-            ),
-            PodcastResponse(
-                id=999002,
-                title="ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?",
-                description="जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।",
-                video_url="https://www.youtube.com/watch?v=sample2",
-                thumbnail_url="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=225&fit=crop",
-                duration="07:12",
-                category="International",
-                is_featured=True,
-                view_count=980,
-                created_at="2024-01-14T15:30:00",
-                updated_at=None
-            ),
-            PodcastResponse(
-                id=999003,
-                title="Share Market Astrology। Stock Market Prediction",
-                description="Dr. Vinay Bajrangi के साथ शेयर मार्केट की ज्योतिषीय भविष्यवाणी।",
-                video_url="https://www.youtube.com/watch?v=sample3",
-                thumbnail_url="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=225&fit=crop",
-                duration="06:12",
-                category="Finance",
-                is_featured=False,
-                view_count=750,
-                created_at="2024-01-13T12:00:00",
-                updated_at=None
-            )
-        ]
-        return sample_podcasts
-    
     return podcasts
 
 @router.get("/featured", response_model=List[PodcastResponse])
@@ -88,39 +68,7 @@ async def get_featured_podcasts(
     podcasts = db.query(Podcast).filter(
         Podcast.is_featured == True
     ).order_by(desc(Podcast.created_at)).limit(limit).all()
-    
-    # If no featured podcasts exist, return sample data
-    if not podcasts:
-        sample_podcasts = [
-            PodcastResponse(
-                id=999001,
-                title="करोड़ों की सेना, अरबों का बजट… फिर भी असुरक्षित",
-                description="जानिए पर्दे के पीछे की साजिश और ज्योतिष की दृष्टि से क्या कहता है भविष्य।",
-                video_url="https://www.youtube.com/watch?v=sample1",
-                thumbnail_url="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=225&fit=crop",
-                duration="10:00",
-                category="Politics",
-                is_featured=True,
-                view_count=1250,
-                created_at="2024-01-15T10:00:00",
-                updated_at=None
-            ),
-            PodcastResponse(
-                id=999002,
-                title="ईरान इज़राइल युद्ध या अमेरिकी स्क्रिप्ट?",
-                description="जानिए पर्दे के पीछे की साजिश। Israel Iran Ceasefire, Trump Politics या अनीति।",
-                video_url="https://www.youtube.com/watch?v=sample2",
-                thumbnail_url="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=400&h=225&fit=crop",
-                duration="07:12",
-                category="International",
-                is_featured=True,
-                view_count=980,
-                created_at="2024-01-14T15:30:00",
-                updated_at=None
-            )
-        ]
-        return sample_podcasts
-    
+
     return podcasts
 
 @router.get("/{podcast_id}", response_model=PodcastResponse)
@@ -145,11 +93,7 @@ async def get_podcast_categories(db: Session = Depends(get_db)):
     """Get list of podcast categories"""
     categories = db.query(Podcast.category).distinct().all()
     category_list = [cat[0] for cat in categories if cat[0]]
-    
-    # If no categories exist, return sample categories
-    if not category_list:
-        category_list = ["Politics", "International", "Finance", "Astrology", "Spirituality"]
-    
+
     return {"categories": category_list}
 
 @router.post("/", response_model=PodcastResponse)
@@ -159,7 +103,19 @@ async def create_podcast(
     db: Session = Depends(get_db)
 ):
     """Create a new podcast (Admin/Editor only)"""
-    db_podcast = Podcast(**podcast.dict())
+    podcast_data = podcast.dict()
+
+    # Process YouTube URL if provided
+    if podcast_data.get('video_url'):
+        video_id, embed_url, thumbnail = extract_youtube_info(podcast_data['video_url'])
+        if video_id:
+            podcast_data['youtube_video_id'] = video_id
+            podcast_data['embed_url'] = embed_url
+            # Only set thumbnail if not already provided
+            if not podcast_data.get('thumbnail_url'):
+                podcast_data['thumbnail_url'] = thumbnail
+
+    db_podcast = Podcast(**podcast_data)
     db.add(db_podcast)
     db.commit()
     db.refresh(db_podcast)
@@ -179,11 +135,22 @@ async def update_podcast(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Podcast not found"
         )
-    
+
     update_data = podcast_update.dict(exclude_unset=True)
+
+    # Process YouTube URL if it's being updated
+    if 'video_url' in update_data and update_data['video_url']:
+        video_id, embed_url, thumbnail = extract_youtube_info(update_data['video_url'])
+        if video_id:
+            update_data['youtube_video_id'] = video_id
+            update_data['embed_url'] = embed_url
+            # Only set thumbnail if not already provided in update
+            if not update_data.get('thumbnail_url'):
+                update_data['thumbnail_url'] = thumbnail
+
     for field, value in update_data.items():
         setattr(podcast, field, value)
-    
+
     db.commit()
     db.refresh(podcast)
     return podcast

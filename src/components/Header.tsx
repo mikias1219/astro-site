@@ -29,9 +29,15 @@ export function Header() {
               {isAuthenticated ? (
                 <>
                   <span className="text-gray-600">Welcome, <span className="font-semibold text-gray-800">{user?.full_name}</span></span>
+                  <Link
+                    href="/profile"
+                    className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-blue-600 transition-colors"
+                  >
+                    Profile
+                  </Link>
                   {user?.role === 'admin' && (
-                    <Link 
-                      href="/admin" 
+                    <Link
+                      href="/admin"
                       className="bg-purple-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-purple-600 transition-colors"
                     >
                       Admin Panel
