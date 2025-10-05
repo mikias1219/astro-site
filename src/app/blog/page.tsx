@@ -76,100 +76,19 @@ export default function BlogPage() {
                 Astrology Blog
               </h1>
               <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                Discover the ancient wisdom of Vedic astrology through our comprehensive blog. 
+                Discover the ancient wisdom of Vedic astrology through our comprehensive blog.
                 Learn about predictions, remedies, and spiritual guidance from expert insights.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Categories Filter */}
-        <section className="py-8 bg-white border-b border-gray-200">
-          <div className="max-w-7xl mx-auto px-4">
-            <div className="flex flex-wrap justify-center gap-4">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-6 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
-                    selectedCategory === category
-                      ? 'bg-orange-500 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-orange-100 hover:text-orange-600'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Post */}
-        {filteredBlogs.length > 0 && (
-          <section className="py-16 bg-gray-50">
-            <div className="max-w-7xl mx-auto px-4">
-              <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-                <div className="md:flex">
-                  <div className="md:w-1/2">
-                    {filteredBlogs[0].featured_image ? (
-                      <img
-                        src={filteredBlogs[0].featured_image}
-                        alt={filteredBlogs[0].title}
-                        className="w-full h-64 md:h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-64 md:h-full bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
-                        <div className="text-6xl">📚</div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="md:w-1/2 p-8 md:p-12">
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm font-semibold">
-                        Astrology
-                      </span>
-                      <span className="text-gray-500 text-sm">{filteredBlogs[0].view_count} views</span>
-                    </div>
-                    <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                      {filteredBlogs[0].title}
-                    </h2>
-                    {filteredBlogs[0].excerpt && (
-                      <p className="text-gray-600 mb-6 leading-relaxed">
-                        {filteredBlogs[0].excerpt}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          DA
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-800">Dr. Arup Shastri</p>
-                          <p className="text-gray-500 text-sm">
-                            {new Date(filteredBlogs[0].published_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                      <Link
-                        href={`/blog/${filteredBlogs[0].slug}`}
-                        className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300"
-                      >
-                        Read More
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Blog Posts Grid */}
         <section className="py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
-                Latest Articles
+                Latest Articles ({blogs.length})
               </h2>
               <p className="text-lg text-gray-600">
                 Stay updated with the latest insights and predictions
@@ -177,38 +96,44 @@ export default function BlogPage() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {blogPosts.slice(1).map((post) => (
+              {blogs.slice(0, 6).map((post) => (
                 <article key={post.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group">
                   <div className="relative overflow-hidden">
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    {post.featured_image ? (
+                      <img
+                        src={post.featured_image}
+                        alt={post.title}
+                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+                        <div className="text-4xl">📚</div>
+                      </div>
+                    )}
                     <div className="absolute top-4 left-4">
                       <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        {post.category}
+                        Astrology
                       </span>
                     </div>
                   </div>
                   <div className="p-6">
                     <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                      <span>{post.date}</span>
+                      <span>{new Date(post.published_at).toLocaleDateString()}</span>
                       <span>•</span>
-                      <span>{post.readTime}</span>
+                      <span>{post.view_count} views</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
                       {post.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed">
+                    <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">
                       {post.excerpt}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center">
-                          <span className="text-white font-bold text-xs">VB</span>
+                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                          DA
                         </div>
-                        <span className="font-semibold text-gray-800 text-sm">{post.author}</span>
+                        <span className="font-semibold text-gray-800 text-sm">Dr. Arup Shastri</span>
                       </div>
                       <Link
                         href={`/blog/${post.slug}`}
@@ -220,34 +145,6 @@ export default function BlogPage() {
                   </div>
                 </article>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Newsletter Signup */}
-        <section className="py-20 bg-gradient-to-br from-orange-50 to-red-50">
-          <div className="max-w-4xl mx-auto px-4 text-center">
-            <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12">
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">
-                Stay Updated with Our Blog
-              </h2>
-              <p className="text-lg text-gray-600 mb-8">
-                Subscribe to our newsletter and get the latest astrology insights, predictions, 
-                and spiritual guidance delivered to your inbox.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                />
-                <button className="bg-gradient-to-r from-orange-500 to-red-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300">
-                  Subscribe
-                </button>
-              </div>
-              <p className="text-sm text-gray-500 mt-4">
-                We respect your privacy. Unsubscribe at any time.
-              </p>
             </div>
           </div>
         </section>
