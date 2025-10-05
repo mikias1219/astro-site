@@ -484,7 +484,7 @@ export default function AdminPagesPage() {
               <h3 className="font-semibold text-green-800 mb-3">🚀 Dynamic Pages Guide</h3>
               <div className="text-sm text-green-700 space-y-2">
                 <p><strong>✅ What are Dynamic Pages?</strong> Pages created through this admin panel that are stored in your database.</p>
-                <p><strong>📍 How to Access:</strong> Your dynamic pages will be available at <code className="bg-green-100 px-1 rounded">yourdomain.com/your-page-slug</code></p>
+                <p><strong>📍 How to Access:</strong> Your dynamic pages will be available at <code className="bg-green-100 px-1 rounded">yourdomain.com/view?type=page&slug=your-page-slug</code></p>
                 <p><strong>🖼️ Adding Images:</strong> Use the "Insert Image from Gallery" button when creating content.</p>
                 <p><strong>📝 Content Format:</strong> You can use HTML tags in the content field for rich formatting.</p>
               </div>
@@ -682,7 +682,7 @@ export default function AdminPagesPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <a
-                          href={`/${page.slug}`}
+                          href={`/view?type=page&slug=${page.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-green-600 hover:text-green-900 bg-green-50 px-3 py-1 rounded-md hover:bg-green-100 transition-colors"
@@ -719,7 +719,7 @@ export default function AdminPagesPage() {
             <p className="mt-1 text-sm text-gray-500">Create your first dynamic page to get started.</p>
             <div className="mt-4">
               <p className="text-xs text-gray-400 mb-2">💡 <strong>Tip:</strong> Dynamic pages will be accessible at:</p>
-              <code className="text-xs bg-gray-100 px-2 py-1 rounded">yourdomain.com/your-page-slug</code>
+              <code className="text-xs bg-gray-100 px-2 py-1 rounded">yourdomain.com/view?type=page&slug=your-page-slug</code>
             </div>
           </div>
         )}
