@@ -15,6 +15,7 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
   const [formData, setFormData] = useState({
     original_url: '',
     optimized_url: '',
+    canonical_url: '',
     url_status: 'active' as 'active' | 'redirect' | 'broken'
   });
 
@@ -30,8 +31,7 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
         setEditingItem(null);
         resetForm();
       } else {
-        // For new URLs, use analyze method
-        await seoUrlsAPI.analyze(token, formData.original_url);
+        await seoUrlsAPI.create(token, formData);
         onRefresh();
         setShowForm(false);
         resetForm();
@@ -45,6 +45,7 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
     setFormData({
       original_url: '',
       optimized_url: '',
+      canonical_url: '',
       url_status: 'active'
     });
   };
@@ -52,8 +53,9 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
   const handleEdit = (item: URLData) => {
     setEditingItem(item);
     setFormData({
-      original_url: item.original_url,
-      optimized_url: item.optimized_url || '',
+      original_url: item.original_url || item.page_url || '',
+      optimized_url: item.optimized_url || item.custom_slug || '',
+      canonical_url: item.canonical_url || '',
       url_status: item.url_status
     });
     setShowForm(true);
@@ -62,8 +64,8 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
   const handleDelete = async (id: number) => {
     if (!token || !confirm('Are you sure you want to delete this URL data?')) return;
     try {
-      // Delete method not available in API
-      alert('Delete functionality not yet implemented');
+      await seoUrlsAPI.delete(token, id);
+      onRefresh();
     } catch (error) {
       console.error('Failed to delete URL data:', error);
     }
@@ -72,8 +74,8 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
   const generateSlug = async () => {
     if (!token || !formData.original_url) return;
     try {
-      // Generate slug feature not yet implemented
-      alert('Slug generation feature not yet implemented');
+      const { slug } = await seoUrlsAPI.generateSlug(token, formData.original_url);
+      setFormData(prev => ({ ...prev, optimized_url: slug }));
     } catch (error) {
       console.error('Failed to generate slug:', error);
     }
@@ -82,10 +84,22 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
   const checkSlugAvailability = async () => {
     if (!token || !formData.optimized_url) return;
     try {
-      // Check slug availability feature not yet implemented
-      alert('Slug availability check feature not yet implemented');
+      const { available } = await seoUrlsAPI.checkSlug(token, formData.optimized_url);
+      alert(available ? 'Slug is available ✅' : 'Slug is already taken ❌');
     } catch (error) {
       console.error('Failed to check slug availability:', error);
+    }
+  };
+
+  const saveCanonical = async () => {
+    if (!token || !formData.original_url || !formData.canonical_url) return;
+    try {
+      await seoUrlsAPI.setCanonical(token, formData.original_url, formData.canonical_url);
+      alert('Canonical URL saved');
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to set canonical URL:', error);
+      alert('Failed to set canonical URL');
     }
   };
 
@@ -147,6 +161,25 @@ export default function URLManager({ data, token, onRefresh }: URLManagerProps) 
                     className="bg-green-500 text-white px-3 py-2 rounded-lg hover:bg-green-600 transition-colors"
                   >
                     Check
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Canonical URL</label>
+                <div className="flex space-x-2">
+                  <input
+                    type="url"
+                    value={formData.canonical_url}
+                    onChange={(e) => setFormData({...formData, canonical_url: e.target.value})}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                    placeholder="https://example.com/page"
+                  />
+                  <button
+                    type="button"
+                    onClick={saveCanonical}
+                    className="bg-purple-500 text-white px-3 py-2 rounded-lg hover:bg-purple-600 transition-colors"
+                  >
+                    Save
                   </button>
                 </div>
               </div>

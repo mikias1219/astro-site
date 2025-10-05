@@ -27,6 +27,22 @@ export const seoSchemaAPI = {
     return response.json();
   },
 
+  // Auto-generate schema by page type
+  autoGenerate: async (token: string, payload: { page_url: string; page_type: string }): Promise<SchemaData> => {
+    const response = await fetch(`${API_BASE_URL}/schema/auto-generate`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      throw new Error('Failed to auto-generate schema');
+    }
+    return response.json();
+  },
+
   // Create new schema data
   create: async (token: string, data: Omit<SchemaData, 'id' | 'created_at' | 'updated_at'>): Promise<SchemaData> => {
     const response = await fetch(`${API_BASE_URL}/schema`, {

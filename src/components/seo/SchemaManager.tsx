@@ -70,10 +70,18 @@ export default function SchemaManager({ data, token, onRefresh }: SchemaManagerP
   const autoGenerateSchema = async () => {
     if (!token || !formData.page_url) return;
     try {
-      // Auto-generation feature not yet implemented
-      alert('Auto-generation feature not yet implemented');
+      const result = await seoSchemaAPI.autoGenerate(token, {
+        page_url: formData.page_url,
+        page_type: selectedSchemaType
+      } as any);
+      setFormData({
+        page_url: result.page_url,
+        schema_type: result.schema_type as any,
+        schema_data: result.schema_data
+      });
     } catch (error) {
       console.error('Failed to auto-generate schema:', error);
+      alert('Auto-generation failed');
     }
   };
 
