@@ -308,7 +308,7 @@ async def create_blog(
     db: Session = Depends(get_db)
 ):
     """Create a new blog (Admin only)"""
-    db_blog = Blog(**blog.dict(), author_id=current_user.id)
+    db_blog = Blog(**blog.dict(), author_id=current_user.id, is_published=True, published_at=datetime.now())
     db.add(db_blog)
     db.commit()
     db.refresh(db_blog)

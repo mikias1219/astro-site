@@ -2,6 +2,7 @@ import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { Services } from '@/components/Services';
 import { Podcasts } from '@/components/Podcasts';
+import { Blogs } from '@/components/Blogs';
 import { Footer } from '@/components/Footer';
 import Link from 'next/link';
 
@@ -206,6 +207,8 @@ export default function HomePage() {
         </section>
 
         <Podcasts />
+
+        <Blogs />
 
         {/* Testimonials Section */}
         <section className="py-16 bg-gray-50">
