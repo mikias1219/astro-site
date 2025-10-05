@@ -364,6 +364,18 @@ server {
         add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
     }
 
+    # Admin routes - ensure they fall back to index.html for SPA routing
+    location ^~ /admin {
+        try_files /index.html =404;
+
+        # Security headers
+        add_header X-Frame-Options "SAMEORIGIN" always;
+        add_header X-XSS-Protection "1; mode=block" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "no-referrer-when-downgrade" always;
+        add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
+    }
+
     # API proxy to backend
     location /api/ {
         proxy_pass http://127.0.0.1:8002;

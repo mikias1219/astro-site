@@ -21,11 +21,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   useEffect(() => {
     if (!loading && !isPublicPage) {
       if (!isAuthenticated) {
-        // Redirect to login if not authenticated
-        router.push('/admin/login');
+        // Only redirect to login after a delay to allow page to load first
+        const timer = setTimeout(() => {
+          router.push('/admin/login');
+        }, 2000); // 2 second delay
+        return () => clearTimeout(timer);
       } else if (!isAdmin) {
-        // Redirect to main site if not admin
-        router.push('/');
+        // Only redirect to main site if clearly not admin
+        const timer = setTimeout(() => {
+          router.push('/');
+        }, 3000); // 3 second delay
+        return () => clearTimeout(timer);
       }
     }
   }, [loading, isAuthenticated, isAdmin, router, isPublicPage]);
