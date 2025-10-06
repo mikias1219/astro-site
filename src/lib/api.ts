@@ -1,4 +1,32 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' && window.location.hostname === 'localhost' ? 'http://localhost:8000/api' : 'https://astroarupshastri.com/api');
+// Dynamic API URL based on environment
+const getApiBaseUrl = () => {
+  // Check if we're in production
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+
+    // Production domains
+    if (hostname === 'astroarupshastri.com' || hostname === 'www.astroarupshastri.com') {
+      return 'https://astroarupshastri.com/api';
+    }
+
+    // Development localhost
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:8000/api';
+    }
+  }
+
+  // Fallback to environment variable or localhost
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Debug logging for API URL
+if (typeof window !== 'undefined') {
+  console.log('Client-side API Base URL:', API_BASE_URL);
+  console.log('NEXT_PUBLIC_API_URL env:', process.env.NEXT_PUBLIC_API_URL);
+  console.log('Window location hostname:', window.location.hostname);
+}
 
 export interface ApiResponse<T> {
   data?: T;
