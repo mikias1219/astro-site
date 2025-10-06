@@ -25,6 +25,10 @@ export default function AdminPodcastsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [podcastsPerPage] = useState(10);
   const { token } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -125,33 +129,63 @@ export default function AdminPodcastsPage() {
     }
   };
 
+  // Filter and search podcasts
+  const filteredPodcasts = podcasts.filter(podcast => {
+    const matchesSearch = podcast.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         podcast.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         podcast.category.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = filterStatus === 'all' ||
+                         (filterStatus === 'featured' && podcast.is_featured) ||
+                         (filterStatus === 'regular' && !podcast.is_featured);
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Pagination
+  const indexOfLastPodcast = currentPage * podcastsPerPage;
+  const indexOfFirstPodcast = indexOfLastPodcast - podcastsPerPage;
+  const currentPodcasts = filteredPodcasts.slice(indexOfFirstPodcast, indexOfLastPodcast);
+  const totalPages = Math.ceil(filteredPodcasts.length / podcastsPerPage);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-orange-500 mx-auto mb-4"></div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading Podcasts</h2>
-          <p className="text-gray-600">Please wait while we fetch your data...</p>
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-1/4 mb-8"></div>
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="h-16 bg-gray-300 rounded"></div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 to-purple-100 p-8">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Content Management</h1>
-            <p className="text-gray-600">Manage podcasts, blogs, and other content</p>
+        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-2">🎧 Podcast Management</h1>
+              <p className="text-gray-600">Upload, manage, and feature your video content</p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-gradient-to-r from-pink-500 to-purple-600 text-white px-8 py-4 rounded-xl hover:from-pink-600 hover:to-purple-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+              >
+                ➕ Upload New Video
+              </button>
+            </div>
           </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition-colors font-semibold"
-          >
-            Add New Podcast
-          </button>
         </div>
 
         {/* Stats Cards */}
