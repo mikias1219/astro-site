@@ -9,14 +9,14 @@ const getApiBaseUrl = () => {
       return 'https://astroarupshastri.com/api';
     }
 
-    // Development localhost
+    // Development localhost - use the running backend on port 8001
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:8000/api';
+      return 'http://localhost:8001/api';
     }
   }
 
   // Fallback to environment variable or localhost
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
 };
 
 const API_BASE_URL = getApiBaseUrl();
