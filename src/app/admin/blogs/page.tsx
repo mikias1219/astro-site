@@ -108,7 +108,12 @@ export default function AdminBlogsPage() {
           featured_image: '',
           meta_description: '',
           meta_keywords: '',
-          is_published: false
+          is_published: false,
+          meta_title: '',
+          canonical_url: '',
+          schema_markup: '',
+          image_alt_text: '',
+          redirect_url: ''
         });
       } else {
         setError('Failed to save blog post');
@@ -369,7 +374,12 @@ export default function AdminBlogsPage() {
                         featured_image: '',
                         meta_description: '',
                         meta_keywords: '',
-                        is_published: false
+                        is_published: false,
+                        meta_title: '',
+                        canonical_url: '',
+                        schema_markup: '',
+                        image_alt_text: '',
+                        redirect_url: ''
                       });
                     }}
                     className="text-gray-400 hover:text-gray-600 text-2xl"
