@@ -22,13 +22,23 @@ async def get_blogs(
     db: Session = Depends(get_db)
 ):
     """Get all blog posts"""
-    query = db.query(Blog)
-    
-    if published_only:
-        query = query.filter(Blog.is_published == True)
-    
-    blogs = query.order_by(Blog.published_at.desc()).offset(skip).limit(limit).all()
-    return blogs
+    try:
+        query = db.query(Blog)
+
+        if published_only:
+            query = query.filter(Blog.is_published == True)
+
+        blogs = query.order_by(Blog.published_at.desc()).offset(skip).limit(limit).all()
+
+        # Log for debugging
+        print(f"Found {len(blogs)} blogs")
+
+        return blogs
+    except Exception as e:
+        print(f"Error in get_blogs: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 @router.get("/{blog_id}", response_model=BlogResponse)
 async def get_blog(blog_id: int, db: Session = Depends(get_db)):

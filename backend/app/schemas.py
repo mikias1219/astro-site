@@ -36,8 +36,9 @@ class UserResponse(UserBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Auth Schemas
 class Token(BaseModel):
@@ -102,8 +103,9 @@ class ServiceResponse(ServiceBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Booking Schemas
 class BookingBase(BaseModel):
@@ -141,8 +143,9 @@ class BookingResponse(BookingBase):
     updated_at: Optional[datetime] = None
     service: ServiceResponse
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Page Schemas
 class PageBase(BaseModel):
@@ -172,8 +175,9 @@ class PageResponse(PageBase):
     updated_at: Optional[datetime] = None
     author_id: Optional[int] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Blog Schemas
 class BlogBase(BaseModel):
@@ -201,9 +205,10 @@ class BlogResponse(BlogBase):
     updated_at: Optional[datetime] = None
     author_id: Optional[int] = None
     view_count: int
-    
-    class Config:
-        from_attributes = True
+
+    model_config = {
+        "from_attributes": True
+    }
 
 # FAQ Schemas
 class FAQBase(BaseModel):
@@ -228,8 +233,9 @@ class FAQResponse(FAQBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Testimonial Schemas
 class TestimonialBase(BaseModel):
@@ -257,8 +263,9 @@ class TestimonialResponse(TestimonialBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # SEO Schemas
 class SEOBase(BaseModel):
@@ -285,8 +292,9 @@ class SEOResponse(SEOBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Panchang Schemas
 class PanchangBase(BaseModel):
@@ -316,8 +324,9 @@ class PanchangResponse(PanchangBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Horoscope Schemas
 class HoroscopeBase(BaseModel):
@@ -339,8 +348,9 @@ class HoroscopeResponse(HoroscopeBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Podcast Schemas
 class PodcastBase(BaseModel):
@@ -376,8 +386,9 @@ class PodcastResponse(PodcastBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Dashboard Schemas
 class DashboardStats(BaseModel):
@@ -431,8 +442,9 @@ class KundliResponse(KundliBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Matching Schemas
 class MatchingBase(BaseModel):
@@ -466,8 +478,9 @@ class MatchingResponse(MatchingBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Numerology Schemas
 class NumerologyBase(BaseModel):
@@ -498,8 +511,9 @@ class NumerologyResponse(NumerologyBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Transit Schemas
 class TransitBase(BaseModel):
@@ -521,8 +535,9 @@ class TransitResponse(TransitBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Prediction Schemas
 class PredictionBase(BaseModel):
@@ -552,8 +567,9 @@ class PredictionResponse(PredictionBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Panchang Detail Schemas
 class PanchangDetailBase(BaseModel):
@@ -582,8 +598,9 @@ class PanchangDetailResponse(PanchangDetailBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Gemstone Recommendation Schemas
 class GemstoneRecommendationBase(BaseModel):
@@ -610,8 +627,9 @@ class GemstoneRecommendationResponse(GemstoneRecommendationBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Rudraksha Recommendation Schemas
 class RudrakshaRecommendationBase(BaseModel):
@@ -638,8 +656,9 @@ class RudrakshaRecommendationResponse(RudrakshaRecommendationBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # Premium Offer Schemas
 class PremiumOfferBase(BaseModel):
@@ -681,8 +700,9 @@ class PremiumOfferResponse(PremiumOfferBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 # User Premium Purchase Schemas
 class UserPremiumPurchaseBase(BaseModel):
@@ -707,5 +727,6 @@ class UserPremiumPurchaseResponse(UserPremiumPurchaseBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
