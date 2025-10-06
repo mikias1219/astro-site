@@ -63,7 +63,11 @@ export default function AdminSEOpage() {
 
   const fetchSEOSettings = async () => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/seo/settings', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/seo/settings'
+        : 'https://astroarupshastri.com/api/admin/seo/settings';
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -80,7 +84,11 @@ export default function AdminSEOpage() {
 
   const fetchSEOPerformance = async () => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/seo/performance', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/seo/performance'
+        : 'https://astroarupshastri.com/api/admin/seo/performance';
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -99,7 +107,11 @@ export default function AdminSEOpage() {
 
   const updateSEOSettings = async () => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/seo/settings', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/seo/settings'
+        : 'https://astroarupshastri.com/api/admin/seo/settings';
+
+      const response = await fetch(apiUrl, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -110,6 +122,9 @@ export default function AdminSEOpage() {
 
       if (response.ok) {
         alert('SEO settings updated successfully!');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(`Failed to update SEO settings: ${errorData.detail || 'Unknown error'}`);
       }
     } catch (error) {
       alert('Failed to update SEO settings');

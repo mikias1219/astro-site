@@ -20,7 +20,11 @@ export function Blogs() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('https://astroarupshastri.com/api/blogs/?limit=3');
+        const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+          ? 'http://localhost:8000/api/blogs/?limit=3'
+          : 'https://astroarupshastri.com/api/blogs/?limit=3';
+
+        const response = await fetch(apiUrl);
         if (response.ok) {
           const data = await response.json();
           setBlogs(data);

@@ -37,7 +37,11 @@ export default function AdminBookingsPage() {
 
   const fetchBookings = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/bookings', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/bookings'
+        : 'https://astroarupshastri.com/api/admin/bookings';
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -61,7 +65,11 @@ export default function AdminBookingsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/bookings/${bookingId}/status`, {
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/bookings'
+        : 'https://astroarupshastri.com/api/bookings';
+
+      const response = await fetch(`${baseUrl}/${bookingId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

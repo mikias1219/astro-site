@@ -53,7 +53,11 @@ export default function AdminPagesPage() {
 
   const fetchPages = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/pages', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/pages'
+        : 'https://astroarupshastri.com/api/admin/pages';
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -78,9 +82,13 @@ export default function AdminPagesPage() {
     if (!token) return;
 
     try {
-      const url = editingPage
-        ? `https://astroarupshastri.com/api/admin/pages/${editingPage.id}`
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/pages'
         : 'https://astroarupshastri.com/api/admin/pages';
+
+      const url = editingPage
+        ? `${baseUrl}/${editingPage.id}`
+        : baseUrl;
 
       const method = editingPage ? 'PUT' : 'POST';
 
@@ -142,7 +150,11 @@ export default function AdminPagesPage() {
     if (!token || !confirm('Are you sure you want to delete this page?')) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/pages/${pageId}`, {
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/pages'
+        : 'https://astroarupshastri.com/api/admin/pages';
+
+      const response = await fetch(`${baseUrl}/${pageId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -163,7 +175,11 @@ export default function AdminPagesPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/pages/${pageId}/toggle`, {
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/pages'
+        : 'https://astroarupshastri.com/api/admin/pages';
+
+      const response = await fetch(`${baseUrl}/${pageId}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

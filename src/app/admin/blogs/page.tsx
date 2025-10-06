@@ -56,7 +56,11 @@ export default function AdminBlogsPage() {
 
   const fetchBlogs = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/blogs', {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/blogs'
+        : 'https://astroarupshastri.com/api/admin/blogs';
+
+      const response = await fetch(apiUrl, {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -81,9 +85,13 @@ export default function AdminBlogsPage() {
     if (!token) return;
 
     try {
-      const url = editingBlog 
-        ? `https://astroarupshastri.com/api/admin/blogs/${editingBlog.id}`
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/blogs'
         : 'https://astroarupshastri.com/api/admin/blogs';
+
+      const url = editingBlog
+        ? `${baseUrl}/${editingBlog.id}`
+        : baseUrl;
       
       const method = editingBlog ? 'PUT' : 'POST';
 
@@ -147,7 +155,11 @@ export default function AdminBlogsPage() {
     if (!token || !confirm('Are you sure you want to delete this blog post?')) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/blogs/${blogId}`, {
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/blogs'
+        : 'https://astroarupshastri.com/api/admin/blogs';
+
+      const response = await fetch(`${baseUrl}/${blogId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -168,7 +180,11 @@ export default function AdminBlogsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/blogs/${blogId}/toggle`, {
+      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/blogs'
+        : 'https://astroarupshastri.com/api/admin/blogs';
+
+      const response = await fetch(`${baseUrl}/${blogId}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

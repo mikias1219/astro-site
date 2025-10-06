@@ -1161,3 +1161,114 @@ async def test_redirect_rule(
         "matches": True,
         "result_url": "https://example.com/redirected"
     }
+
+
+# ============================================================================
+# GLOBAL SEO SETTINGS MANAGEMENT
+# ============================================================================
+
+@router.get("/settings")
+async def get_seo_settings(
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get global SEO settings"""
+    # For now, return default settings. In production, this would come from database
+    return {
+        "site_title": "AstroArupShastri - Professional Vedic Astrology Services",
+        "site_description": "Get accurate Vedic astrology consultations, horoscope readings, and spiritual guidance from Dr. Arup Shastri. Trusted astrology services for personal growth and life decisions.",
+        "site_keywords": "astrology, vedic astrology, horoscope, spiritual consultation, Dr. Arup Shastri, birth chart, kundli, panchang, gemstone consultation",
+        "google_analytics_id": "",
+        "facebook_app_id": "",
+        "twitter_handle": "@astroarupshastri",
+        "robots_txt": """User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+
+Sitemap: https://astroarupshastri.com/sitemap.xml""",
+        "sitemap_url": "https://astroarupshastri.com/sitemap.xml",
+        "schema_markup": """{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "AstroArupShastri",
+  "url": "https://astroarupshastri.com",
+  "logo": "https://astroarupshastri.com/logo.svg",
+  "description": "Professional Vedic astrology consultations and spiritual guidance",
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+91-9876543210",
+    "contactType": "customer service"
+  }
+}"""
+    }
+
+
+@router.put("/settings")
+async def update_seo_settings(
+    settings: Dict[str, Any],
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Update global SEO settings"""
+    # For now, just return success. In production, save to database
+    return {
+        "message": "SEO settings updated successfully",
+        "settings": settings
+    }
+
+
+@router.get("/performance")
+async def get_seo_performance(
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get SEO performance metrics"""
+    from app.models import Blog, Page, SEO
+
+    # Count blogs and their SEO data
+    total_blogs = db.query(Blog).count()
+    blogs_with_seo = db.query(Blog).join(SEO, Blog.id == SEO.blog_id, isouter=True).filter(
+        SEO.meta_title.isnot(None), SEO.meta_title != ''
+    ).count()
+    blogs_with_meta_desc = db.query(Blog).join(SEO, Blog.id == SEO.blog_id, isouter=True).filter(
+        SEO.meta_description.isnot(None), SEO.meta_description != ''
+    ).count()
+
+    # Count pages and their SEO data
+    total_pages = db.query(Page).count()
+    pages_with_meta_title = db.query(Page).join(SEO, Page.id == SEO.page_id, isouter=True).filter(
+        SEO.meta_title.isnot(None), SEO.meta_title != ''
+    ).count()
+    pages_with_meta_desc = db.query(Page).join(SEO, Page.id == SEO.page_id, isouter=True).filter(
+        SEO.meta_description.isnot(None), SEO.meta_description != ''
+    ).count()
+    pages_with_canonical = db.query(Page).join(SEO, Page.id == SEO.page_id, isouter=True).filter(
+        SEO.canonical_url.isnot(None), SEO.canonical_url != ''
+    ).count()
+    pages_with_schema = db.query(Page).join(SEO, Page.id == SEO.page_id, isouter=True).filter(
+        SEO.schema_markup.isnot(None), SEO.schema_markup != ''
+    ).count()
+
+    total_content = total_blogs + total_pages
+    total_with_meta_title = blogs_with_seo + pages_with_meta_title
+    total_with_meta_desc = blogs_with_meta_desc + pages_with_meta_desc
+
+    # Calculate SEO score based on completion percentage
+    meta_title_score = (total_with_meta_title / max(total_content, 1)) * 40  # 40% weight
+    meta_desc_score = (total_with_meta_desc / max(total_content, 1)) * 30    # 30% weight
+    canonical_score = (pages_with_canonical / max(total_pages, 1)) * 15      # 15% weight
+    schema_score = (pages_with_schema / max(total_pages, 1)) * 15            # 15% weight
+
+    seo_score = min(100, int(meta_title_score + meta_desc_score + canonical_score + schema_score))
+
+    return {
+        "total_pages": total_content,
+        "pages_with_meta_title": total_with_meta_title,
+        "pages_with_meta_description": total_with_meta_desc,
+        "pages_with_canonical": pages_with_canonical,
+        "pages_with_schema": pages_with_schema,
+        "broken_links": 0,  # Placeholder - would need link checker implementation
+        "seo_score": seo_score
+    }

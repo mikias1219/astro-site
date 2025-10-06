@@ -9,9 +9,9 @@ from typing import List
 from datetime import datetime, timedelta
 
 from app.database import get_db
-from app.models import User, Booking, Service, Blog, Testimonial, BookingStatus, Podcast, Horoscope, Panchang, SEO
+from app.models import User, Booking, Service, Blog, Testimonial, BookingStatus, Podcast, Horoscope, Panchang, SEO, Page
 from app.schemas import PodcastCreate, PodcastUpdate, PodcastResponse
-from app.schemas import DashboardStats, BookingResponse, ServiceResponse, UserResponse, ServiceCreate, ServiceUpdate, BlogCreate, BlogUpdate, BlogResponse, SEOCreate, SEOUpdate, SEOResponse
+from app.schemas import DashboardStats, BookingResponse, ServiceResponse, UserResponse, ServiceCreate, ServiceUpdate, BlogCreate, BlogUpdate, BlogResponse, SEOCreate, SEOUpdate, SEOResponse, PageCreate, PageUpdate, PageResponse
 from app.auth import get_admin_user
 
 router = APIRouter()
@@ -355,6 +355,20 @@ async def delete_blog(
     db.commit()
     return {"message": "Blog deleted successfully"}
 
+
+@router.get("/blogs/{blog_id}", response_model=BlogResponse)
+async def get_admin_blog(
+    blog_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Get a specific blog by ID"""
+    blog = db.query(Blog).filter(Blog.id == blog_id).first()
+    if not blog:
+        raise HTTPException(status_code=404, detail="Blog not found")
+    return blog
+
+
 @router.put("/blogs/{blog_id}/toggle")
 async def toggle_blog_status(
     blog_id: int,
@@ -525,6 +539,20 @@ async def update_podcast(
     db.refresh(db_podcast)
     return db_podcast
 
+
+@router.get("/podcasts/{podcast_id}", response_model=PodcastResponse)
+async def get_admin_podcast(
+    podcast_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Get a specific podcast by ID"""
+    podcast = db.query(Podcast).filter(Podcast.id == podcast_id).first()
+    if not podcast:
+        raise HTTPException(status_code=404, detail="Podcast not found")
+    return podcast
+
+
 @router.delete("/podcasts/{podcast_id}")
 async def delete_podcast(
     podcast_id: int,
@@ -560,3 +588,108 @@ async def toggle_podcast_featured(
     db_podcast.is_featured = not db_podcast.is_featured
     db.commit()
     return {"message": "Podcast status updated successfully"}
+
+
+# ===== PAGES MANAGEMENT =====
+
+@router.get("/pages", response_model=List[PageResponse])
+async def get_admin_pages(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user),
+    skip: int = 0,
+    limit: int = 100
+):
+    """Get all pages for admin management"""
+    pages = db.query(Page).offset(skip).limit(limit).all()
+    return pages
+
+
+@router.get("/pages/{page_id}", response_model=PageResponse)
+async def get_admin_page(
+    page_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Get a specific page by ID"""
+    page = db.query(Page).filter(Page.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    return page
+
+
+@router.post("/pages", response_model=PageResponse)
+async def create_admin_page(
+    page: PageCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Create a new page"""
+    # Check if slug already exists
+    if db.query(Page).filter(Page.slug == page.slug).first():
+        raise HTTPException(status_code=400, detail="Page slug already exists")
+
+    db_page = Page(**page.dict())
+    db.add(db_page)
+    db.commit()
+    db.refresh(db_page)
+    return db_page
+
+
+@router.put("/pages/{page_id}", response_model=PageResponse)
+async def update_admin_page(
+    page_id: int,
+    page_update: PageUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Update an existing page"""
+    page = db.query(Page).filter(Page.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    # Check slug uniqueness if being updated
+    if page_update.slug and page_update.slug != page.slug:
+        if db.query(Page).filter(Page.slug == page_update.slug).first():
+            raise HTTPException(status_code=400, detail="Page slug already exists")
+
+    update_data = page_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(page, field, value)
+
+    page.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(page)
+    return page
+
+
+@router.delete("/pages/{page_id}")
+async def delete_admin_page(
+    page_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Delete a page"""
+    page = db.query(Page).filter(Page.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    db.delete(page)
+    db.commit()
+    return {"message": "Page deleted successfully"}
+
+
+@router.put("/pages/{page_id}/toggle")
+async def toggle_admin_page_status(
+    page_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_admin_user)
+):
+    """Toggle page published status"""
+    page = db.query(Page).filter(Page.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    page.is_published = not page.is_published
+    db.commit()
+    db.refresh(page)
+    return page
