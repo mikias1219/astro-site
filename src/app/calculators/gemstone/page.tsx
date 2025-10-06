@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function GemstoneCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -96,20 +97,50 @@ export default function GemstoneCalculatorPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const gemstoneData = calculateGemstones(formData.birthDate, formData.birthTime, formData.birthPlace);
-      
-      setResult({
+
+    try {
+      // Call the backend API using apiClient
+      const apiResult = await apiClient.calculateGemstone({
         name: formData.name,
-        birthDate: formData.birthDate,
-        birthTime: formData.birthTime,
-        birthPlace: formData.birthPlace,
-        ...gemstoneData
+        birth_date: formData.birthDate,
+        birth_time: formData.birthTime,
+        birth_place: formData.birthPlace,
+        gender: 'male', // Default since not required for gemstone
+        language: 'english'
       });
+
+      if (apiResult.success) {
+        setResult(apiResult.data);
+      } else {
+        // Fallback to local calculation if API fails
+        const gemstoneData = calculateGemstones(formData.birthDate, formData.birthTime, formData.birthPlace);
+        const primaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Primary');
+        const secondaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Secondary');
+        setResult({
+          primary_gemstone: primaryGemstone?.name || 'Ruby',
+          secondary_gemstone: secondaryGemstone?.name || 'Pearl',
+          wearing_finger: primaryGemstone?.finger || 'Ring finger',
+          wearing_day: 'Sunday',
+          benefits: primaryGemstone?.benefits?.join(', ') || 'Enhances planetary strength',
+          metal: primaryGemstone?.metal || 'Gold'
+        });
+      }
+    } catch (error) {
+      // Fallback to local calculation if API fails
+      const gemstoneData = calculateGemstones(formData.birthDate, formData.birthTime, formData.birthPlace);
+      const primaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Primary');
+      const secondaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Secondary');
+      setResult({
+        primary_gemstone: primaryGemstone?.name || 'Ruby',
+        secondary_gemstone: secondaryGemstone?.name || 'Pearl',
+        wearing_finger: primaryGemstone?.finger || 'Ring finger',
+        wearing_day: 'Sunday',
+        benefits: primaryGemstone?.benefits?.join(', ') || 'Enhances planetary strength',
+        metal: primaryGemstone?.metal || 'Gold'
+      });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   const getPriorityColor = (priority) => {

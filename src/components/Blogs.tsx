@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { apiClient } from '../lib/api';
 
 interface Blog {
   id: number;
   title: string;
   slug: string;
-  excerpt?: string;
+  description: string;
   featured_image?: string;
   published_at: string;
   author_id: number;
@@ -20,14 +21,9 @@ export function Blogs() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-          ? 'http://localhost:8000/api/blogs/?limit=3'
-          : 'https://astroarupshastri.com/api/blogs/?limit=3';
-
-        const response = await fetch(apiUrl);
-        if (response.ok) {
-          const data = await response.json();
-          setBlogs(data);
+        const result = await apiClient.getBlogs();
+        if (result.success) {
+          setBlogs((result.data as Blog[]).slice(0, 3)); // Show only first 3 blogs
         }
       } catch (error) {
         console.error('Failed to fetch blogs:', error);
@@ -84,11 +80,9 @@ export function Blogs() {
                 <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
                   {blog.title}
                 </h3>
-                {blog.excerpt && (
-                  <p className="text-gray-600 mb-4 line-clamp-3">
-                    {blog.excerpt}
-                  </p>
-                )}
+                <p className="text-gray-600 mb-4 line-clamp-3">
+                  {blog.description}
+                </p>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">
                     {new Date(blog.published_at).toLocaleDateString()}

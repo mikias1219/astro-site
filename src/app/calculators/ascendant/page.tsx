@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function AscendantCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -172,21 +173,42 @@ export default function AscendantCalculatorPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const ascendantData = calculateAscendant(formData.birthDate, formData.birthTime, formData.birthPlace);
-      
-      setResult({
+
+    try {
+      // Call the backend API using apiClient
+      const apiResult = await apiClient.calculateAscendant({
         name: formData.name,
-        birthDate: formData.birthDate,
-        birthTime: formData.birthTime,
-        birthPlace: formData.birthPlace,
-        ...ascendantData,
+        birth_date: formData.birthDate,
+        birth_time: formData.birthTime,
+        birth_place: formData.birthPlace,
+        gender: 'male', // Default since not required for ascendant
+        language: 'english'
+      });
+
+      if (apiResult.success) {
+        setResult(apiResult.data);
+      } else {
+        // Fallback to local calculation if API fails
+        const ascendantData = calculateAscendant(formData.birthDate, formData.birthTime, formData.birthPlace);
+        setResult({
+          ascendant: ascendantData.ascendant,
+          description: `Your ascendant (rising sign) is ${ascendantData.ascendant}. This represents your outward personality and how others see you.`,
+          characteristics: `People with ${ascendantData.ascendant} ascendant are known for their strong personality and leadership qualities.`,
+          degree: Math.floor(Math.random() * 30) + 1
+        });
+      }
+    } catch (error) {
+      // Fallback to local calculation if API fails
+      const ascendantData = calculateAscendant(formData.birthDate, formData.birthTime, formData.birthPlace);
+      setResult({
+        ascendant: ascendantData.ascendant,
+        description: `Your ascendant (rising sign) is ${ascendantData.ascendant}. This represents your outward personality and how others see you.`,
+        characteristics: `People with ${ascendantData.ascendant} ascendant are known for their strong personality and leadership qualities.`,
         degree: Math.floor(Math.random() * 30) + 1
       });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (

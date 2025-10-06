@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from app.database import engine, Base
-from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, podcasts, calculators, kundli, matching, numerology
+from app.routers import auth, users, pages, blogs, bookings, seo, seo_admin, admin, services, faqs, testimonials, panchang, horoscopes, calculators, kundli, matching, numerology
 
 # Create database tables
 @asynccontextmanager
@@ -65,7 +65,6 @@ app.include_router(faqs.router, prefix="/api/faqs", tags=["FAQs"])
 app.include_router(testimonials.router, prefix="/api/testimonials", tags=["Testimonials"])
 app.include_router(panchang.router, prefix="/api/panchang", tags=["Panchang"])
 app.include_router(horoscopes.router, prefix="/api/horoscopes", tags=["Horoscopes"])
-app.include_router(podcasts.router, prefix="/api/podcasts", tags=["Podcasts"])
 app.include_router(calculators.router, prefix="/api/calculators", tags=["Calculators"])
 app.include_router(kundli.router, prefix="/api", tags=["Kundli"])
 app.include_router(matching.router, prefix="/api", tags=["Matching"])

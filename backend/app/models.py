@@ -99,7 +99,7 @@ class Booking(Base):
     booking_time = Column(String(10), nullable=False)  # Format: "HH:MM"
     status = Column(Enum(BookingStatus), default=BookingStatus.PENDING)
     notes = Column(Text)
-    customer_name = Column(String(255), nullable=False)
+    customer_name = Column(String(255))
     customer_email = Column(String(255), nullable=False)
     customer_phone = Column(String(20), nullable=False)
     birth_date = Column(DateTime)
@@ -134,12 +134,11 @@ class Page(Base):
 # Blog Model
 class Blog(Base):
     __tablename__ = "blogs"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     slug = Column(String(255), unique=True, index=True, nullable=False)
-    content = Column(Text, nullable=False)
-    excerpt = Column(Text)
+    description = Column(Text, nullable=False)
     featured_image = Column(String(500))
     is_published = Column(Boolean, default=False)
     published_at = Column(DateTime)
@@ -224,24 +223,6 @@ class Horoscope(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-# Podcast/Video Model
-class Podcast(Base):
-    __tablename__ = "podcasts"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text)
-    video_url = Column(String(500))  # YouTube URL or direct video URL
-    youtube_video_id = Column(String(50))  # Extracted YouTube video ID
-    embed_url = Column(String(500))  # YouTube embed URL
-    thumbnail_url = Column(String(500))
-    duration = Column(String(20))  # Format: "10:30"
-    category = Column(String(100))
-    tags = Column(String(500))  # Comma-separated tags
-    is_featured = Column(Boolean, default=False)
-    view_count = Column(Integer, default=0)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 # SEO Model
 class SEO(Base):

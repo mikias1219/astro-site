@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function MoonSignCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -146,22 +147,58 @@ export default function MoonSignCalculatorPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const moonData = calculateMoonSign(formData.birthDate, formData.birthTime, formData.birthPlace);
-      
-      setResult({
+
+    try {
+      // Call the backend API using apiClient
+      const apiResult = await apiClient.calculateMoonSign({
         name: formData.name,
-        birthDate: formData.birthDate,
-        birthTime: formData.birthTime,
-        birthPlace: formData.birthPlace,
+        birth_date: formData.birthDate,
+        birth_time: formData.birthTime,
+        birth_place: formData.birthPlace,
+        gender: 'male', // Default since not required for moon sign
+        language: 'english'
+      });
+
+      if (apiResult.success) {
+        setResult(apiResult.data);
+      } else {
+        // Fallback to local calculation if API fails
+        const moonData = calculateMoonSign(formData.birthDate, formData.birthTime, formData.birthPlace);
+        setResult({
+          personal_info: {
+            name: formData.name,
+            birth_date: formData.birthDate,
+            birth_time: formData.birthTime,
+            birth_place: formData.birthPlace
+          },
+          moon_sign: moonData.moonSign,
+          description: `Your moon sign is ${moonData.moonSign}. This represents your emotional nature and inner self.`,
+          characteristics: `People with ${moonData.moonSign} moon sign are known for their emotional depth and intuitive nature.`,
+          ...moonData,
+          moonPhase: 'Waxing Crescent',
+          moonDegree: Math.floor(Math.random() * 30) + 1
+        });
+      }
+    } catch (error) {
+      // Fallback to local calculation if API fails
+      const moonData = calculateMoonSign(formData.birthDate, formData.birthTime, formData.birthPlace);
+      setResult({
+        personal_info: {
+          name: formData.name,
+          birth_date: formData.birthDate,
+          birth_time: formData.birthTime,
+          birth_place: formData.birthPlace
+        },
+        moon_sign: moonData.moonSign,
+        description: `Your moon sign is ${moonData.moonSign}. This represents your emotional nature and inner self.`,
+        characteristics: `People with ${moonData.moonSign} moon sign are known for their emotional depth and intuitive nature.`,
         ...moonData,
         moonPhase: 'Waxing Crescent',
         moonDegree: Math.floor(Math.random() * 30) + 1
       });
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   return (

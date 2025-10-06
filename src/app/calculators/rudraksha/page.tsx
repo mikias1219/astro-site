@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
-import { ProtectedRoute } from '../../../components/auth/ProtectedRoute';
 import { apiClient } from '../../../lib/api';
+import { ProtectedRoute } from '../../../components/auth/ProtectedRoute';
 
 interface RudrakshaResult {
   personal_info: {

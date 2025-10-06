@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import Link from 'next/link';
+import { apiClient } from '../../lib/api';
 
 interface Blog {
   id: number;
   title: string;
   slug: string;
-  content: string;
-  excerpt?: string;
+  description: string;
   featured_image?: string;
   is_published: boolean;
   published_at: string;
@@ -30,10 +30,9 @@ export default function BlogPage() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await fetch('https://astroarupshastri.com/api/blogs/?limit=100');
-        if (response.ok) {
-          const data = await response.json();
-          setBlogs(data);
+        const result = await apiClient.getBlogs();
+        if (result.success) {
+          setBlogs(result.data as Blog[]);
         }
       } catch (error) {
         console.error('Failed to fetch blogs:', error);
@@ -47,7 +46,7 @@ export default function BlogPage() {
 
   const filteredBlogs = selectedCategory === 'All'
     ? blogs
-    : blogs.filter(blog => blog.content.toLowerCase().includes(selectedCategory.toLowerCase()));
+    : blogs.filter(blog => blog.description.toLowerCase().includes(selectedCategory.toLowerCase()));
 
   if (loading) {
     return (
@@ -126,7 +125,7 @@ export default function BlogPage() {
                       {post.title}
                     </h3>
                     <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">
-                      {post.excerpt}
+                      {post.description}
                     </p>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function DoshaCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -103,20 +104,32 @@ export default function DoshaCalculatorPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
-      
-      setResult({
+
+    try {
+      // Call the backend API using apiClient
+      const apiResult = await apiClient.calculateDosha({
         name: formData.name,
-        birthDate: formData.birthDate,
-        birthTime: formData.birthTime,
-        birthPlace: formData.birthPlace,
-        ...doshaData
+        birth_date: formData.birthDate,
+        birth_time: formData.birthTime,
+        birth_place: formData.birthPlace,
+        gender: 'male', // Default since not required for dosha
+        language: 'english'
       });
+
+      if (apiResult.success) {
+        setResult(apiResult.data);
+      } else {
+        // Fallback to local calculation if API fails
+        const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
+        setResult(doshaData);
+      }
+    } catch (error) {
+      // Fallback to local calculation if API fails
+      const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
+      setResult(doshaData);
+    } finally {
       setLoading(false);
-    }, 2000);
+    }
   };
 
   const getSeverityColor = (severity) => {

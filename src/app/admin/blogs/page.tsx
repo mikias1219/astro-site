@@ -7,11 +7,8 @@ interface Blog {
   id: number;
   title: string;
   slug: string;
-  content: string;
-  excerpt?: string;
+  description: string;
   featured_image?: string;
-  meta_description?: string;
-  meta_keywords?: string;
   is_published: boolean;
   author_id: number;
   created_at: string;
@@ -33,17 +30,9 @@ export default function AdminBlogsPage() {
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
-    content: '',
-    excerpt: '',
+    description: '',
     featured_image: '',
-    meta_description: '',
-    meta_keywords: '',
-    is_published: false,
-    meta_title: '',
-    canonical_url: '',
-    schema_markup: '',
-    image_alt_text: '',
-    redirect_url: ''
+    is_published: false
   });
 
   useEffect(() => {
@@ -111,17 +100,9 @@ export default function AdminBlogsPage() {
         setFormData({
           title: '',
           slug: '',
-          content: '',
-          excerpt: '',
+          description: '',
           featured_image: '',
-          meta_description: '',
-          meta_keywords: '',
-          is_published: false,
-          meta_title: '',
-          canonical_url: '',
-          schema_markup: '',
-          image_alt_text: '',
-          redirect_url: ''
+          is_published: false
         });
       } else {
         setError('Failed to save blog post');
@@ -136,17 +117,9 @@ export default function AdminBlogsPage() {
     setFormData({
       title: blog.title,
       slug: blog.slug,
-      content: blog.content,
-      excerpt: blog.excerpt || '',
+      description: blog.description,
       featured_image: blog.featured_image || '',
-      meta_description: blog.meta_description || '',
-      meta_keywords: blog.meta_keywords || '',
-      is_published: blog.is_published,
-      meta_title: (blog as any).meta_title || '',
-      canonical_url: (blog as any).canonical_url || '',
-      schema_markup: (blog as any).schema_markup || '',
-      image_alt_text: (blog as any).image_alt_text || '',
-      redirect_url: (blog as any).redirect_url || ''
+      is_published: blog.is_published
     });
     setShowAddForm(true);
   };
@@ -204,7 +177,7 @@ export default function AdminBlogsPage() {
   // Filter and search blogs
   const filteredBlogs = blogs.filter(blog => {
     const matchesSearch = blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         blog.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         blog.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          blog.slug.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = filterStatus === 'all' ||
@@ -257,17 +230,9 @@ export default function AdminBlogsPage() {
                   setFormData({
                     title: '',
                     slug: '',
-                    content: '',
-                    excerpt: '',
+                    description: '',
                     featured_image: '',
-                    meta_description: '',
-                    meta_keywords: '',
-                    is_published: false,
-                    meta_title: '',
-                    canonical_url: '',
-                    schema_markup: '',
-                    image_alt_text: '',
-                    redirect_url: ''
+                    is_published: false
                   });
                 }}
                 className="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-8 py-4 rounded-xl hover:from-purple-600 hover:to-pink-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1"
@@ -341,7 +306,7 @@ export default function AdminBlogsPage() {
               <div className="relative flex-1">
                 <input
                   type="text"
-                  placeholder="Search blogs by title, excerpt, or slug..."
+                  placeholder="Search blogs by title, description, or slug..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
@@ -385,17 +350,9 @@ export default function AdminBlogsPage() {
                       setFormData({
                         title: '',
                         slug: '',
-                        content: '',
-                        excerpt: '',
+                        description: '',
                         featured_image: '',
-                        meta_description: '',
-                        meta_keywords: '',
-                        is_published: false,
-                        meta_title: '',
-                        canonical_url: '',
-                        schema_markup: '',
-                        image_alt_text: '',
-                        redirect_url: ''
+                        is_published: false
                       });
                     }}
                     className="text-gray-400 hover:text-gray-600 text-2xl"
@@ -430,6 +387,19 @@ export default function AdminBlogsPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                    <textarea
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      rows={6}
+                      placeholder="Write your blog description here..."
+                      required
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{formData.description.length} characters</p>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">Featured Image URL</label>
@@ -441,129 +411,20 @@ export default function AdminBlogsPage() {
                         placeholder="https://example.com/image.jpg"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Keywords</label>
-                      <input
-                        type="text"
-                        value={formData.meta_keywords}
-                        onChange={(e) => setFormData({...formData, meta_keywords: e.target.value})}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="astrology, vedic, horoscope, spiritual"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Excerpt</label>
-                    <textarea
-                      value={formData.excerpt}
-                      onChange={(e) => setFormData({...formData, excerpt: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={3}
-                      placeholder="Brief summary of the blog post (150-200 characters)"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">{formData.excerpt.length}/200 characters</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description</label>
-                    <textarea
-                      value={formData.meta_description}
-                      onChange={(e) => setFormData({...formData, meta_description: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={2}
-                      placeholder="SEO description for search engines (150-160 characters)"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">{formData.meta_description.length}/160 characters</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Title</label>
-                      <input
-                        type="text"
-                        value={formData.meta_title}
-                        onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Custom SEO title (50-60 characters)"
-                      />
-                      <p className="text-sm text-gray-500 mt-1">{formData.meta_title.length}/60 characters</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Image Alt Text</label>
-                      <input
-                        type="text"
-                        value={formData.image_alt_text}
-                        onChange={(e) => setFormData({ ...formData, image_alt_text: e.target.value })}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Alt text for featured image"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Canonical URL</label>
-                    <input
-                      type="url"
-                      value={formData.canonical_url}
-                      onChange={(e) => setFormData({ ...formData, canonical_url: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="https://astroarupshastri.com/blog/your-blog-slug"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Redirect URL (Optional)</label>
-                    <input
-                      type="url"
-                      value={formData.redirect_url}
-                      onChange={(e) => setFormData({ ...formData, redirect_url: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      placeholder="Redirect old URL to this post"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Schema Markup (JSON-LD)</label>
-                    <textarea
-                      value={formData.schema_markup}
-                      onChange={(e) => setFormData({ ...formData, schema_markup: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
-                      rows={6}
-                      placeholder='{"@context": "https://schema.org", "@type": "Article", ...}'
-                    />
-                    <p className="text-sm text-gray-500 mt-1">Auto-generated if left empty</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Blog Content *</label>
-                    <textarea
-                      value={formData.content}
-                      onChange={(e) => setFormData({...formData, content: e.target.value})}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={12}
-                      placeholder="Write your blog content here... (supports HTML and Markdown)"
-                      required
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
                     <div className="flex items-center">
                       <input
                         type="checkbox"
                         id="is_published"
                         checked={formData.is_published}
                         onChange={(e) => setFormData({...formData, is_published: e.target.checked})}
-                        className="h-5 w-5 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
                       />
-                      <label htmlFor="is_published" className="ml-3 text-sm font-medium text-gray-700">
-                        {formData.is_published ? '✅ Publish immediately' : '📝 Save as draft'}
+                      <label htmlFor="is_published" className="ml-2 block text-sm text-gray-900">
+                        Publish immediately
                       </label>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {editingBlog ? 'Update existing post' : 'Create new blog post'}
-                    </div>
                   </div>
+
 
                   <div className="flex justify-end space-x-4 pt-6 border-t">
                     <button
@@ -574,17 +435,9 @@ export default function AdminBlogsPage() {
                         setFormData({
                           title: '',
                           slug: '',
-                          content: '',
-                          excerpt: '',
+                          description: '',
                           featured_image: '',
-                          meta_description: '',
-                          meta_keywords: '',
-                          is_published: false,
-                          meta_title: '',
-                          canonical_url: '',
-                          schema_markup: '',
-                          image_alt_text: '',
-                          redirect_url: ''
+                          is_published: false
                         });
                       }}
                       className="px-8 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
@@ -632,7 +485,7 @@ export default function AdminBlogsPage() {
                         )}
                         <div>
                           <div className="text-sm font-semibold text-gray-900 max-w-xs truncate">{blog.title}</div>
-                          <div className="text-sm text-gray-500 max-w-xs truncate">{blog.excerpt}</div>
+                          <div className="text-sm text-gray-500 max-w-xs truncate">{blog.description}</div>
                           <div className="text-xs text-gray-400">by Admin</div>
                         </div>
                       </div>

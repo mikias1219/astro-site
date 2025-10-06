@@ -20,13 +20,8 @@ interface BookingData {
   service_id: number;
   booking_date: string;
   booking_time: string;
-  customer_name: string;
   customer_email: string;
   customer_phone: string;
-  birth_date?: string;
-  birth_time?: string;
-  birth_place?: string;
-  notes?: string;
 }
 
 export default function BookAppointmentPage() {
@@ -40,13 +35,8 @@ export default function BookAppointmentPage() {
     service_id: 0,
     booking_date: '',
     booking_time: '',
-    customer_name: '',
     customer_email: '',
-    customer_phone: '',
-    birth_date: '',
-    birth_time: '',
-    birth_place: '',
-    notes: ''
+    customer_phone: ''
   });
 
   // Fetch services from backend
@@ -100,22 +90,14 @@ export default function BookAppointmentPage() {
 
       // Build ISO datetimes per backend schema
       const bookingDateIso = new Date(`${formData.booking_date}T${formData.booking_time}:00`).toISOString();
-      const birthDateIso = formData.birth_date && formData.birth_time
-        ? new Date(`${formData.birth_date}T${formData.birth_time}:00`).toISOString()
-        : undefined;
 
       const payload: any = {
         service_id: Number(formData.service_id),
         booking_date: bookingDateIso,
         booking_time: formData.booking_time,
-        customer_name: formData.customer_name,
         customer_email: formData.customer_email,
         customer_phone: formData.customer_phone,
-        notes: formData.notes,
       };
-      if (birthDateIso) payload.birth_date = birthDateIso;
-      if (formData.birth_time) payload.birth_time = formData.birth_time;
-      if (formData.birth_place) payload.birth_place = formData.birth_place;
 
       const response = await apiClient.createBooking(authToken, payload);
       if (response.success && response.data) {
@@ -128,13 +110,8 @@ export default function BookAppointmentPage() {
           service_id: 0,
           booking_date: '',
           booking_time: '',
-          customer_name: '',
           customer_email: '',
-          customer_phone: '',
-          birth_date: '',
-          birth_time: '',
-          birth_place: '',
-          notes: ''
+          customer_phone: ''
         });
       } else {
         throw new Error(response.error || 'Booking failed');
@@ -199,21 +176,6 @@ export default function BookAppointmentPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label htmlFor="customer_name" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      type="text"
-                      id="customer_name"
-                      name="customer_name"
-                      value={formData.customer_name}
-                      onChange={handleInputChange}
-                      required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="Your full name"
-                    />
-                  </div>
 
                   <div>
                     <label htmlFor="customer_email" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -310,58 +272,6 @@ export default function BookAppointmentPage() {
                     </select>
                   </div>
 
-                  <div>
-                    <label htmlFor="birth_details" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Birth Details *
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      <input
-                        type="date"
-                        id="birth_date"
-                        name="birth_date"
-                        value={formData.birth_date}
-                        onChange={handleInputChange}
-                        required
-                        className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Birth Date"
-                      />
-                      <input
-                        type="time"
-                        id="birth_time"
-                        name="birth_time"
-                        value={formData.birth_time}
-                        onChange={handleInputChange}
-                        required
-                        className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Birth Time"
-                      />
-                      <input
-                        type="text"
-                        id="birth_place"
-                        name="birth_place"
-                        value={formData.birth_place}
-                        onChange={handleInputChange}
-                        required
-                        className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                        placeholder="Birth Place"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="notes" className="block text-sm font-semibold text-gray-700 mb-2">
-                      Specific Questions or Concerns
-                    </label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                      placeholder="Please share any specific questions or areas you'd like to focus on during the consultation..."
-                    ></textarea>
-                  </div>
 
                   <button
                     type="submit"

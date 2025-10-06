@@ -344,18 +344,6 @@ class ApiClient {
     return this.request(`/horoscopes/${id}`);
   }
 
-  // Podcasts endpoints
-  async getPodcasts() {
-    return this.request('/podcasts/');
-  }
-
-  async getFeaturedPodcasts(limit: number = 6) {
-    return this.request(`/podcasts/featured?limit=${limit}`);
-  }
-
-  async getPodcast(id: number) {
-    return this.request(`/podcasts/${id}`);
-  }
 
   // Panchang endpoints
   async getPanchang() {
@@ -405,10 +393,10 @@ class ApiClient {
     });
   }
 
-  async calculateHoroscopeMatching(data: any) {
+  async calculateHoroscopeMatching(maleData: any, femaleData: any) {
     return this.request('/calculators/horoscope-matching', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify({ male_details: maleData, female_details: femaleData }),
     });
   }
 
@@ -428,6 +416,13 @@ class ApiClient {
 
   async calculateRudraksha(data: any) {
     return this.request('/calculators/rudraksha', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async calculateNumerology(data: any) {
+    return this.request('/numerology/calculate', {
       method: 'POST',
       body: JSON.stringify(data),
     });

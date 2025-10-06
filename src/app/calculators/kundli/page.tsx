@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function KundliCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -109,26 +110,19 @@ export default function KundliCalculatorPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
-      // Call the backend API
-      const response = await fetch('https://astroarupshastri.com/api/calculators/kundli', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          birth_date: formData.birthDate,
-          birth_time: formData.birthTime,
-          birth_place: formData.birthPlace,
-          gender: formData.gender,
-          language: formData.language
-        })
+      // Call the backend API using apiClient
+      const apiResult = await apiClient.calculateKundli({
+        name: formData.name,
+        birth_date: formData.birthDate,
+        birth_time: formData.birthTime,
+        birth_place: formData.birthPlace,
+        gender: formData.gender,
+        language: formData.language
       });
 
-      if (response.ok) {
-        const apiResult = await response.json();
+      if (apiResult.success) {
         setResult(apiResult.data);
       } else {
         // Fallback to local calculation if API fails

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 import { ProtectedRoute } from '../../../components/auth/ProtectedRoute';
 
 interface NumerologyResult {
@@ -50,25 +51,16 @@ export default function NumerologyCalculatorPage() {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/numerology/calculate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` })
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          birth_date: formData.birthDate
-        })
+      const apiResult = await apiClient.calculateNumerology({
+        name: formData.name,
+        birth_date: formData.birthDate
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to calculate numerology');
+      if (apiResult.success) {
+        setResult(apiResult.data as NumerologyResult);
+      } else {
+        setError(apiResult.error || 'Failed to calculate numerology');
       }
-
-      const data = await response.json();
-      setResult(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {

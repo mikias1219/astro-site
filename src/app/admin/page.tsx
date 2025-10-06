@@ -14,7 +14,6 @@ interface DashboardStats {
   monthly_bookings: number;
   recent_bookings: any[];
   popular_services: any[];
-  total_podcasts: number;
   total_horoscopes: number;
   total_panchang_entries: number;
 }
@@ -283,7 +282,6 @@ export default function AdminDashboard() {
                   { href: '/admin/pages', icon: '📄', title: 'Pages', desc: 'Edit content', color: 'from-purple-500 to-purple-600' },
                   { href: '/admin/blogs', icon: '📝', title: 'Blogs', desc: 'Create articles', color: 'from-indigo-500 to-indigo-600' },
                   { href: '/admin/seo', icon: '🔍', title: 'SEO', desc: 'Optimize ranking', color: 'from-teal-500 to-teal-600' },
-                  { href: '/admin/podcasts', icon: '🎧', title: 'Podcasts', desc: 'Manage videos', color: 'from-pink-500 to-pink-600' },
                   { href: '/admin/testimonials', icon: '⭐', title: 'Reviews', desc: 'Client feedback', color: 'from-yellow-500 to-yellow-600' }
                 ].map((action, index) => (
                   <Link
@@ -374,19 +372,6 @@ export default function AdminDashboard() {
                   </Link>
                 </div>
 
-                <div className="bg-gradient-to-br from-pink-50 to-pink-100 p-6 rounded-xl border border-pink-200">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-pink-500 rounded-xl">
-                      <span className="text-white text-xl">🎧</span>
-                    </div>
-                    <span className="text-2xl font-bold text-pink-600">{stats?.total_podcasts || 0}</span>
-                  </div>
-                  <h3 className="font-semibold text-pink-900 mb-2">Podcasts</h3>
-                  <p className="text-sm text-pink-700">Video and audio content</p>
-                  <Link href="/admin/podcasts" className="mt-4 inline-block bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors text-sm font-medium">
-                    Manage Podcasts →
-            </Link>
-                </div>
 
                 <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-xl border border-indigo-200">
                   <div className="flex items-center justify-between mb-4">

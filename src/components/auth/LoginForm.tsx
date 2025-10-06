@@ -49,18 +49,12 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchToRegis
 
   if (showForgotPassword) {
     return (
-      <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-        <ForgotPassword onBack={() => setShowForgotPassword(false)} />
-      </div>
+      <ForgotPassword onBack={() => setShowForgotPassword(false)} />
     );
   }
 
   return (
     <div className="max-w-md mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-8">
-      <div className="text-center mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-        <p className="text-gray-600 text-sm">Sign in to access your account</p>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>

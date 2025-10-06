@@ -9,8 +9,7 @@ from typing import List
 from datetime import datetime, timedelta
 
 from app.database import get_db
-from app.models import User, Booking, Service, Blog, Testimonial, BookingStatus, Podcast, Horoscope, Panchang, SEO, Page
-from app.schemas import PodcastCreate, PodcastUpdate, PodcastResponse
+from app.models import User, Booking, Service, Blog, Testimonial, BookingStatus, Horoscope, Panchang, SEO, Page
 from app.schemas import DashboardStats, BookingResponse, ServiceResponse, UserResponse, ServiceCreate, ServiceUpdate, BlogCreate, BlogUpdate, BlogResponse, SEOCreate, SEOUpdate, SEOResponse, PageCreate, PageUpdate, PageResponse
 from app.auth import get_admin_user
 
@@ -28,7 +27,7 @@ async def get_dashboard_stats(
     total_services = db.query(Service).filter(Service.is_active == True).count()
     total_blogs = db.query(Blog).filter(Blog.is_published == True).count()
     total_testimonials = db.query(Testimonial).filter(Testimonial.is_approved == True).count()
-    total_podcasts = db.query(Podcast).count()
+    total_podcasts = 0  # Podcasts removed
     total_horoscopes = db.query(Horoscope).count()
     total_panchang_entries = db.query(Panchang).count()
     
@@ -491,103 +490,6 @@ async def update_user_role(
 
     db.commit()
     return {"message": "User role updated successfully"}
-
-# Podcasts Management
-@router.get("/podcasts", response_model=List[PodcastResponse])
-async def get_all_podcasts(
-    skip: int = 0,
-    limit: int = 100,
-    current_user: User = Depends(get_admin_user),
-    db: Session = Depends(get_db)
-):
-    """Get all podcasts (Admin only)"""
-    podcasts = db.query(Podcast).offset(skip).limit(limit).all()
-    return podcasts
-
-@router.post("/podcasts", response_model=PodcastResponse)
-async def create_podcast(
-    podcast: PodcastCreate,
-    current_user: User = Depends(get_admin_user),
-    db: Session = Depends(get_db)
-):
-    """Create a new podcast (Admin only)"""
-    db_podcast = Podcast(**podcast.dict())
-    db.add(db_podcast)
-    db.commit()
-    db.refresh(db_podcast)
-    return db_podcast
-
-@router.put("/podcasts/{podcast_id}", response_model=PodcastResponse)
-async def update_podcast(
-    podcast_id: int,
-    podcast: PodcastUpdate,
-    current_user: User = Depends(get_admin_user),
-    db: Session = Depends(get_db)
-):
-    """Update a podcast (Admin only)"""
-    db_podcast = db.query(Podcast).filter(Podcast.id == podcast_id).first()
-    if not db_podcast:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Podcast not found"
-        )
-
-    for key, value in podcast.dict(exclude_unset=True).items():
-        setattr(db_podcast, key, value)
-
-    db.commit()
-    db.refresh(db_podcast)
-    return db_podcast
-
-
-@router.get("/podcasts/{podcast_id}", response_model=PodcastResponse)
-async def get_admin_podcast(
-    podcast_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_admin_user)
-):
-    """Get a specific podcast by ID"""
-    podcast = db.query(Podcast).filter(Podcast.id == podcast_id).first()
-    if not podcast:
-        raise HTTPException(status_code=404, detail="Podcast not found")
-    return podcast
-
-
-@router.delete("/podcasts/{podcast_id}")
-async def delete_podcast(
-    podcast_id: int,
-    current_user: User = Depends(get_admin_user),
-    db: Session = Depends(get_db)
-):
-    """Delete a podcast (Admin only)"""
-    db_podcast = db.query(Podcast).filter(Podcast.id == podcast_id).first()
-    if not db_podcast:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Podcast not found"
-        )
-
-    db.delete(db_podcast)
-    db.commit()
-    return {"message": "Podcast deleted successfully"}
-
-@router.put("/podcasts/{podcast_id}/toggle")
-async def toggle_podcast_featured(
-    podcast_id: int,
-    current_user: User = Depends(get_admin_user),
-    db: Session = Depends(get_db)
-):
-    """Toggle podcast featured status (Admin only)"""
-    db_podcast = db.query(Podcast).filter(Podcast.id == podcast_id).first()
-    if not db_podcast:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Podcast not found"
-        )
-
-    db_podcast.is_featured = not db_podcast.is_featured
-    db.commit()
-    return {"message": "Podcast status updated successfully"}
 
 
 # ===== PAGES MANAGEMENT =====

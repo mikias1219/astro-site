@@ -111,7 +111,7 @@ class BookingBase(BaseModel):
     booking_date: datetime
     booking_time: str
     notes: Optional[str] = None
-    customer_name: str
+    customer_name: Optional[str] = None
     customer_email: EmailStr
     customer_phone: str
     birth_date: Optional[datetime] = None
@@ -179,8 +179,7 @@ class PageResponse(PageBase):
 class BlogBase(BaseModel):
     title: str
     slug: str
-    content: str
-    excerpt: Optional[str] = None
+    description: str
     featured_image: Optional[str] = None
 
 class BlogCreate(BlogBase):
@@ -189,8 +188,7 @@ class BlogCreate(BlogBase):
 class BlogUpdate(BaseModel):
     title: Optional[str] = None
     slug: Optional[str] = None
-    content: Optional[str] = None
-    excerpt: Optional[str] = None
+    description: Optional[str] = None
     featured_image: Optional[str] = None
     is_published: Optional[bool] = None
     published_at: Optional[datetime] = None

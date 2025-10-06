@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Header } from '../../../components/Header';
 import { Footer } from '../../../components/Footer';
+import { apiClient } from '../../../lib/api';
 
 export default function HoroscopeMatchingPage() {
   const [formData, setFormData] = useState({
@@ -149,21 +150,83 @@ export default function HoroscopeMatchingPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      // Call the backend API using apiClient
+      const maleDetails = {
+        name: formData.maleName,
+        birth_date: formData.maleBirthDate,
+        birth_time: formData.maleBirthTime,
+        birth_place: formData.maleBirthPlace,
+        gender: 'male',
+        language: 'english'
+      };
+
+      const femaleDetails = {
+        name: formData.femaleName,
+        birth_date: formData.femaleBirthDate,
+        birth_time: formData.femaleBirthTime,
+        birth_place: formData.femaleBirthPlace,
+        gender: 'female',
+        language: 'english'
+      };
+
+      const apiResult = await apiClient.calculateHoroscopeMatching(maleDetails, femaleDetails);
+
+      if (apiResult.success) {
+        setResult(apiResult.data);
+      } else {
+        // Fallback to local calculation if API fails
+        const compatibilityData = calculateCompatibility(
+          { birthDate: formData.maleBirthDate },
+          { birthDate: formData.femaleBirthDate }
+        );
+        setResult({
+          male_details: {
+            name: formData.maleName,
+            zodiac_sign: 'Aries', // Simplified for fallback
+            birth_date: formData.maleBirthDate
+          },
+          female_details: {
+            name: formData.femaleName,
+            zodiac_sign: 'Taurus', // Simplified for fallback
+            birth_date: formData.femaleBirthDate
+          },
+          compatibility: {
+            score: compatibilityData.percentage,
+            status: compatibilityData.compatibility,
+            description: `Compatibility score: ${compatibilityData.percentage}%`
+          },
+          recommendation: compatibilityData.recommendation
+        });
+      }
+    } catch (error) {
+      // Fallback to local calculation if API fails
       const compatibilityData = calculateCompatibility(
         { birthDate: formData.maleBirthDate },
         { birthDate: formData.femaleBirthDate }
       );
-      
       setResult({
-        maleName: formData.maleName,
-        femaleName: formData.femaleName,
-        ...compatibilityData
+        male_details: {
+          name: formData.maleName,
+          zodiac_sign: 'Aries', // Simplified for fallback
+          birth_date: formData.maleBirthDate
+        },
+        female_details: {
+          name: formData.femaleName,
+          zodiac_sign: 'Taurus', // Simplified for fallback
+          birth_date: formData.femaleBirthDate
+        },
+        compatibility: {
+          score: compatibilityData.percentage,
+          status: compatibilityData.compatibility,
+          description: `Compatibility score: ${compatibilityData.percentage}%`
+        },
+        recommendation: compatibilityData.recommendation
       });
+    } finally {
       setLoading(false);
-    }, 3000);
+    }
   };
 
   return (

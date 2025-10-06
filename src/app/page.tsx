@@ -4,7 +4,6 @@ import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { HoroscopePreview } from '@/components/HoroscopePreview';
 import { Services } from '@/components/Services';
-import { Podcasts } from '@/components/Podcasts';
 import { Blogs } from '@/components/Blogs';
 import { Testimonials } from '@/components/Testimonials';
 import { Footer } from '@/components/Footer';
@@ -188,7 +187,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        <Podcasts />
 
         <Blogs />
 
