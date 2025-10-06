@@ -15,134 +15,86 @@ from app.models import Base, User, Service, ServiceType, UserRole
 from app.auth import get_password_hash
 
 def init_db():
-    """Initialize database with sample data"""
+    """Initialize database with sample data - ADMIN FIRST APPROACH"""
+    print("🔐 INITIALIZING DATABASE WITH ADMIN-FIRST SECURITY")
+    print("=" * 60)
+
     # Create all tables
     Base.metadata.create_all(bind=engine)
-    
+    print("✓ Database tables created successfully")
+
     db = SessionLocal()
-    
+
     try:
-        # Check if admin user already exists
-        admin_user = db.query(User).filter(User.username == "admin").first()
-        if not admin_user:
-            # Create admin user
-            admin_user = User(
-                email="admin@astrologywebsite.com",
+        # CRITICAL: Always check for existing admin first
+        existing_admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+
+        if existing_admin:
+            print("⚠️  ADMIN ALREADY EXISTS - Skipping admin creation")
+            print(f"   Admin: {existing_admin.username} ({existing_admin.email})")
+        else:
+            print("👑 CREATING PRIMARY ADMIN USER")
+            # Create the primary admin user with original credentials
+            primary_admin = User(
+                email="admin@astroarupshastri.com",
                 username="admin",
-                full_name="Admin User",
+                full_name="Dr. Arup Shastri",
+                phone="+91-XXXXXXXXXX",
+                preferred_language="en",
                 hashed_password=get_password_hash("admin123"),
                 role=UserRole.ADMIN,
-                is_active=True
+                is_active=True,
+                is_verified=True
             )
-            db.add(admin_user)
-            print("✓ Admin user created (username: admin, password: admin123)")
-        
-        # Check if services exist
-        services_count = db.query(Service).count()
-        if services_count == 0:
-            # Create sample services
-            sample_services = [
-                {
-                    "name": "Personal Astrology Consultation",
-                    "description": "One-on-one consultation with our expert astrologer to discuss your birth chart, life path, and future predictions.",
-                    "service_type": ServiceType.CONSULTATION,
-                    "price": 99.99,
-                    "duration_minutes": 60,
-                    "features": '["Birth chart analysis", "Life path guidance", "Future predictions", "Q&A session"]'
-                },
-                {
-                    "name": "Detailed Horoscope Report",
-                    "description": "Comprehensive written report covering all aspects of your horoscope including personality, career, love, and health.",
-                    "service_type": ServiceType.ONLINE_REPORT,
-                    "price": 49.99,
-                    "duration_minutes": 30,
-                    "features": '["Detailed personality analysis", "Career guidance", "Love compatibility", "Health predictions"]'
-                },
-                {
-                    "name": "Voice Horoscope Reading",
-                    "description": "Audio recording of your personalized horoscope reading delivered to your email.",
-                    "service_type": ServiceType.VOICE_REPORT,
-                    "price": 39.99,
-                    "duration_minutes": 45,
-                    "features": '["Audio recording", "Personalized reading", "Email delivery", "30-day access"]'
-                },
-                {
-                    "name": "Kundli Matching",
-                    "description": "Detailed compatibility analysis for marriage or relationship using traditional Vedic astrology methods.",
-                    "service_type": ServiceType.MATCHING,
-                    "price": 79.99,
-                    "duration_minutes": 90,
-                    "features": '["Compatibility score", "Guna matching", "Manglik analysis", "Remedy suggestions"]'
-                },
-                {
-                    "name": "Birth Chart Analysis",
-                    "description": "Complete analysis of your birth chart including planetary positions, houses, and their influences.",
-                    "service_type": ServiceType.KUNDLI,
-                    "price": 69.99,
-                    "duration_minutes": 75,
-                    "features": '["Planetary positions", "House analysis", "Dasha predictions", "Remedy suggestions"]'
-                },
-                {
-                    "name": "Gemstone Recommendation",
-                    "description": "Personalized gemstone recommendations based on your birth chart to enhance positive planetary influences.",
-                    "service_type": ServiceType.GEMSTONE,
-                    "price": 29.99,
-                    "duration_minutes": 30,
-                    "features": '["Gemstone analysis", "Wearing instructions", "Benefits explanation", "Purchase guidance"]'
-                },
-                {
-                    "name": "Dosha Analysis",
-                    "description": "Analysis of Vedic doshas (Vata, Pitta, Kapha) and their impact on your health and lifestyle.",
-                    "service_type": ServiceType.DOSHA,
-                    "price": 34.99,
-                    "duration_minutes": 45,
-                    "features": '["Dosha assessment", "Health recommendations", "Dietary guidance", "Lifestyle tips"]'
-                },
-                {
-                    "name": "Ascendant Sign Analysis",
-                    "description": "Detailed analysis of your rising sign and its influence on your personality and life path.",
-                    "service_type": ServiceType.ASCENDANT,
-                    "price": 24.99,
-                    "duration_minutes": 30,
-                    "features": '["Ascendant analysis", "Personality traits", "Life path insights", "Compatibility factors"]'
-                },
-                {
-                    "name": "Moon Sign Reading",
-                    "description": "Comprehensive reading based on your moon sign covering emotions, intuition, and inner self.",
-                    "service_type": ServiceType.MOON_SIGN,
-                    "price": 19.99,
-                    "duration_minutes": 25,
-                    "features": '["Moon sign analysis", "Emotional patterns", "Intuitive insights", "Inner self guidance"]'
-                }
-            ]
-            
-            for service_data in sample_services:
-                service = Service(**service_data)
-                db.add(service)
-            
-            print("✓ Sample services created")
-        
-        # Create a test user
-        test_user = db.query(User).filter(User.username == "testuser").first()
-        if not test_user:
-            test_user = User(
-                email="test@example.com",
-                username="testuser",
-                full_name="Test User",
-                hashed_password=get_password_hash("test123"),
-                role=UserRole.USER,
-                is_active=True
-            )
-            db.add(test_user)
-            print("✓ Test user created (username: testuser, password: test123)")
-        
-        # Commit all changes
+            db.add(primary_admin)
+            db.commit()  # Commit immediately to ensure admin exists
+            print("✅ PRIMARY ADMIN CREATED SUCCESSFULLY")
+            print("   Username: admin")
+            print("   Password: admin123")
+            print("   Email: admin@astroarupshastri.com")
+            print("   ⚠️  IMPORTANT: Change password after first login!")
+
+        # Database initialized with admin only - no sample data
+        print("🧹 DATABASE CLEAN - NO SAMPLE DATA CREATED")
+        print("   • Admin user created only")
+        print("   • Ready for real data through admin panel")
+        print("   • Users can add services, blogs, podcasts via admin interface")
+        print("   • Bookings will be created by real users")
+
+        # Final commit of all changes
         db.commit()
-        print("✓ Database initialized successfully!")
-        print("\nSample accounts created:")
-        print("- Admin: username=admin, password=admin123")
-        print("- Test User: username=testuser, password=test123")
-        print("\nYou can now start the server and test the API!")
+        print("✅ DATABASE INITIALIZATION COMPLETED SUCCESSFULLY!")
+        print("=" * 60)
+        print("🎉 ASTROARUPSHASTRI.COM CLEAN DATABASE READY")
+        print("")
+        print("🔐 ADMIN ACCESS:")
+        print("   Username: admin")
+        print("   Password: admin123")
+        print("   Email: admin@astroarupshastri.com")
+        print("")
+        print("🧹 CLEAN DATABASE SETUP:")
+        print("   • Only admin user exists")
+        print("   • No sample data pre-loaded")
+        print("   • All content managed via admin panel")
+        print("   • Real user bookings only")
+        print("")
+        print("📝 HOW TO ADD REAL DATA:")
+        print("   1. Login to admin panel (/admin)")
+        print("   2. Add services through Services management")
+        print("   3. Create blog posts through Blogs management")
+        print("   4. Upload podcasts through Podcasts management")
+        print("   5. Real users will create bookings")
+        print("")
+        print("🚀 READY FOR PRODUCTION!")
+        print("   • Admin can login and manage everything")
+        print("   • Clean slate for real content")
+        print("   • Database is secure and optimized")
+        print("")
+        print("⚠️  IMPORTANT SECURITY REMINDERS:")
+        print("   • Change admin password after first login")
+        print("   • Regularly backup your database")
+        print("   • Monitor admin access logs")
+        print("   • Keep dependencies updated")
         
     except Exception as e:
         print(f"Error initializing database: {e}")

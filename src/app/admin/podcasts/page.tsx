@@ -73,7 +73,7 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch('https://astroarupshastri.com/api/podcasts', {
+      const response = await fetch('https://astroarupshastri.com/api/admin/podcasts', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,13 +107,12 @@ export default function AdminPodcastsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/podcasts/${podcastId}`, {
+      const response = await fetch(`https://astroarupshastri.com/api/admin/podcasts/${podcastId}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ is_featured: !currentStatus })
+        }
       });
 
       if (response.ok) {

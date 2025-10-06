@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Block admin pages from search engines
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /login
+Disallow: /register
+Disallow: /reset-password
+Disallow: /verify-email
+
+# Allow important pages
+Allow: /services/
+Allow: /blog/
+Allow: /about/
+Allow: /contact/
+
+# Sitemap
+Sitemap: https://astroarupshastri.com/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
