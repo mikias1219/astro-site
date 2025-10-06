@@ -456,8 +456,12 @@ class ApiClient {
     });
   }
 
-  async getDashboard() {
-    return this.request('/admin/dashboard');
+  async getDashboard(token: string) {
+    return this.request('/admin/dashboard', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 }
 

@@ -7,7 +7,8 @@ interface Service {
   id: number;
   name: string;
   description: string;
-  price: number;
+  service_type: string;
+  price: number | null;
   duration_minutes: number;
   is_active: boolean;
   created_at: string;
@@ -25,6 +26,7 @@ export default function AdminServicesPage() {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
+    service_type: 'consultation',
     price: '',
     duration_minutes: '',
     is_active: true
@@ -79,7 +81,7 @@ export default function AdminServicesPage() {
         },
         body: JSON.stringify({
           ...formData,
-          price: parseFloat(formData.price),
+          price: formData.price ? parseFloat(formData.price) : null,
           duration_minutes: parseInt(formData.duration_minutes)
         })
       });
@@ -91,6 +93,7 @@ export default function AdminServicesPage() {
         setFormData({
           name: '',
           description: '',
+          service_type: 'consultation',
           price: '',
           duration_minutes: '',
           is_active: true
@@ -108,7 +111,8 @@ export default function AdminServicesPage() {
     setFormData({
       name: service.name,
       description: service.description,
-      price: service.price.toString(),
+      service_type: service.service_type || 'consultation',
+      price: service.price?.toString() || '',
       duration_minutes: service.duration_minutes.toString(),
       is_active: service.is_active
     });
@@ -185,6 +189,7 @@ export default function AdminServicesPage() {
               setFormData({
                 name: '',
                 description: '',
+                service_type: 'consultation',
                 price: '',
                 duration_minutes: '',
                 is_active: true
@@ -261,14 +266,43 @@ export default function AdminServicesPage() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Service Type</label>
+                  <select
+                    value={formData.service_type}
+                    onChange={(e) => setFormData({...formData, service_type: e.target.value})}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value="consultation">Consultation</option>
+                    <option value="online_report">Online Report</option>
+                    <option value="voice_report">Voice Report</option>
+                    <option value="horoscope">Horoscope</option>
+                    <option value="matching">Matching</option>
+                    <option value="kundli">Kundli</option>
+                    <option value="gemstone">Gemstone</option>
+                    <option value="dosha">Dosha</option>
+                    <option value="ascendant">Ascendant</option>
+                    <option value="moon_sign">Moon Sign</option>
+                    <option value="numerology">Numerology</option>
+                    <option value="transit">Transit</option>
+                    <option value="panchang">Panchang</option>
+                    <option value="birth_chart">Birth Chart</option>
+                    <option value="compatibility">Compatibility</option>
+                    <option value="career_prediction">Career Prediction</option>
+                    <option value="marriage_prediction">Marriage Prediction</option>
+                    <option value="wealth_prediction">Wealth Prediction</option>
+                    <option value="health_prediction">Health Prediction</option>
+                    <option value="education_prediction">Education Prediction</option>
+                  </select>
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
                   <input
                     type="number"
                     value={formData.price}
                     onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    required
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="Enter price"
+                    placeholder="Enter price (optional)"
                   />
                 </div>
                 <div>
@@ -360,7 +394,9 @@ export default function AdminServicesPage() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">₹{service.price}</div>
+                      <div className="text-sm text-gray-900">
+                        {service.price ? `₹${service.price}` : 'Free'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{service.duration_minutes} min</div>

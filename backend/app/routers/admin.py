@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from app.database import get_db
 from app.models import User, Booking, Service, Blog, Testimonial, BookingStatus, Horoscope, Panchang, SEO, Page
-from app.schemas import DashboardStats, BookingResponse, ServiceResponse, UserResponse, ServiceCreate, ServiceUpdate, BlogCreate, BlogUpdate, BlogResponse, SEOCreate, SEOUpdate, SEOResponse, PageCreate, PageUpdate, PageResponse
+from app.schemas import DashboardStats, BookingResponse, ServiceResponse, UserResponse, ServiceCreate, ServiceUpdate, BlogCreate, BlogUpdate, BlogResponse, SEOCreate, SEOUpdate, SEOResponse, PageCreate, PageUpdate, PageResponse, TestimonialCreate, TestimonialUpdate, TestimonialResponse
 from app.auth import get_admin_user
 
 router = APIRouter()
@@ -595,3 +595,126 @@ async def toggle_admin_page_status(
     db.commit()
     db.refresh(page)
     return page
+
+
+# ===== TESTIMONIALS MANAGEMENT =====
+
+@router.get("/testimonials", response_model=List[TestimonialResponse])
+async def get_admin_testimonials(
+    skip: int = 0,
+    limit: int = 100,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get all testimonials for admin management"""
+    testimonials = db.query(Testimonial).offset(skip).limit(limit).all()
+    return testimonials
+
+@router.get("/testimonials/{testimonial_id}", response_model=TestimonialResponse)
+async def get_admin_testimonial(
+    testimonial_id: int,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Get a specific testimonial by ID"""
+    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    if not testimonial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Testimonial not found"
+        )
+    return testimonial
+
+@router.post("/testimonials", response_model=TestimonialResponse)
+async def create_admin_testimonial(
+    testimonial: TestimonialCreate,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Create a new testimonial (Admin only)"""
+    db_testimonial = Testimonial(
+        **testimonial.dict(),
+        user_id=current_user.id,
+        is_approved=True  # Admin-created testimonials are auto-approved
+    )
+    db.add(db_testimonial)
+    db.commit()
+    db.refresh(db_testimonial)
+    return db_testimonial
+
+@router.put("/testimonials/{testimonial_id}", response_model=TestimonialResponse)
+async def update_admin_testimonial(
+    testimonial_id: int,
+    testimonial_update: TestimonialUpdate,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Update a testimonial (Admin only)"""
+    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    if not testimonial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Testimonial not found"
+        )
+    
+    update_data = testimonial_update.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(testimonial, field, value)
+    
+    db.commit()
+    db.refresh(testimonial)
+    return testimonial
+
+@router.delete("/testimonials/{testimonial_id}")
+async def delete_admin_testimonial(
+    testimonial_id: int,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a testimonial (Admin only)"""
+    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    if not testimonial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Testimonial not found"
+        )
+    
+    db.delete(testimonial)
+    db.commit()
+    return {"message": "Testimonial deleted successfully"}
+
+@router.put("/testimonials/{testimonial_id}/approve")
+async def approve_admin_testimonial(
+    testimonial_id: int,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Approve a testimonial (Admin only)"""
+    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    if not testimonial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Testimonial not found"
+        )
+    
+    testimonial.is_approved = True
+    db.commit()
+    return {"message": "Testimonial approved successfully"}
+
+@router.put("/testimonials/{testimonial_id}/reject")
+async def reject_admin_testimonial(
+    testimonial_id: int,
+    current_user: User = Depends(get_admin_user),
+    db: Session = Depends(get_db)
+):
+    """Reject a testimonial (Admin only)"""
+    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    if not testimonial:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Testimonial not found"
+        )
+    
+    testimonial.is_approved = False
+    db.commit()
+    return {"message": "Testimonial rejected successfully"}

@@ -6,13 +6,14 @@ import { useAuth } from '../../../contexts/AuthContext';
 interface Testimonial {
   id: number;
   name: string;
-  email: string;
-  rating: number;
+  email: string | null;
+  rating: number | null;
   content: string;
   is_approved: boolean;
-  service_used: string;
+  service_used: string | null;
+  user_id: number | null;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
 }
 
 export default function AdminTestimonialsPage() {
@@ -66,7 +67,7 @@ export default function AdminTestimonialsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch('https://astroarupshastri.com/api/testimonials', {
+      const response = await fetch('https://astroarupshastri.com/api/admin/testimonials', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -248,7 +249,7 @@ export default function AdminTestimonialsPage() {
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="Enter email address"
+                    placeholder="Enter email address (optional)"
                   />
                 </div>
                 <div>
@@ -347,15 +348,15 @@ export default function AdminTestimonialsPage() {
                     <td className="px-6 py-4">
                       <div>
                         <div className="text-sm font-medium text-gray-900">{testimonial.name}</div>
-                        <div className="text-sm text-gray-500">{testimonial.email}</div>
-                        <div className="text-xs text-gray-400">{testimonial.service_used}</div>
+                        <div className="text-sm text-gray-500">{testimonial.email || 'No email'}</div>
+                        <div className="text-xs text-gray-400">{testimonial.service_used || 'No service specified'}</div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex text-yellow-400">
-                        {[...Array(testimonial.rating)].map((_, i) => (
+                        {testimonial.rating ? [...Array(testimonial.rating)].map((_, i) => (
                           <span key={i}>⭐</span>
-                        ))}
+                        )) : <span className="text-gray-400">No rating</span>}
                       </div>
                     </td>
                     <td className="px-6 py-4">

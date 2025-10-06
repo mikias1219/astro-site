@@ -36,7 +36,7 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async (authToken: string) => {
     try {
-      const result = await apiClient.getDashboard();
+      const result = await apiClient.getDashboard(authToken);
 
       if (result.success) {
         setStats(result.data as DashboardStats);
