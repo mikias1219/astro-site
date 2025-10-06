@@ -181,6 +181,19 @@ class Testimonial(Base):
     # Relationships
     user = relationship("User", back_populates="testimonials")
 
+# Redirect Model
+class Redirect(Base):
+    __tablename__ = "redirects"
+
+    id = Column(Integer, primary_key=True, index=True)
+    from_url = Column(String(500), nullable=False, unique=True, index=True)
+    to_url = Column(String(500), nullable=False)
+    redirect_type = Column(Integer, default=301)  # 301, 302, 307, 308
+    is_active = Column(Boolean, default=True)
+    description = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
 # Panchang Model
 class Panchang(Base):
     __tablename__ = "panchang"

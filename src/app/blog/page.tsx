@@ -46,7 +46,11 @@ export default function BlogPage() {
 
   const filteredBlogs = selectedCategory === 'All'
     ? blogs
-    : blogs.filter(blog => blog.description.toLowerCase().includes(selectedCategory.toLowerCase()));
+    : blogs.filter(blog => {
+        // Simple category detection based on keywords in title or description
+        const content = `${blog.title} ${blog.description}`.toLowerCase();
+        return content.includes(selectedCategory.toLowerCase());
+      });
 
   if (loading) {
     return (
@@ -127,19 +131,11 @@ export default function BlogPage() {
                     <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">
                       {post.description}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                          DA
-                        </div>
-                        <span className="font-semibold text-gray-800 text-sm">Dr. Arup Shastri</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                        DA
                       </div>
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="text-orange-600 font-semibold text-sm hover:text-orange-700 transition-colors"
-                      >
-                        Read More →
-                      </Link>
+                      <span className="font-semibold text-gray-800 text-sm">Dr. Arup Shastri</span>
                     </div>
                   </div>
                 </article>

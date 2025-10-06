@@ -1011,17 +1011,20 @@ async def get_redirects(
     db: Session = Depends(get_db)
 ):
     """Get all redirects"""
+    from app.models import Redirect
+    redirects = db.query(Redirect).order_by(Redirect.created_at.desc()).all()
     return [
         {
-            "id": 1,
-            "from_url": "https://example.com/old-page",
-            "to_url": "https://example.com/new-page",
-            "redirect_type": 301,
-            "is_active": True,
-            "description": "Permanent redirect for page move",
-            "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z"
+            "id": redirect.id,
+            "from_url": redirect.from_url,
+            "to_url": redirect.to_url,
+            "redirect_type": redirect.redirect_type,
+            "is_active": redirect.is_active,
+            "description": redirect.description,
+            "created_at": redirect.created_at.isoformat() if redirect.created_at else None,
+            "updated_at": redirect.updated_at.isoformat() if redirect.updated_at else None
         }
+        for redirect in redirects
     ]
 
 @router.post("/redirects")
@@ -1031,11 +1034,38 @@ async def add_redirect(
     db: Session = Depends(get_db)
 ):
     """Add redirect"""
+    from app.models import Redirect
+
+    # Validate required fields
+    if not redirect_data.get("from_url") or not redirect_data.get("to_url"):
+        raise HTTPException(status_code=400, detail="from_url and to_url are required")
+
+    # Check if from_url already exists
+    existing = db.query(Redirect).filter(Redirect.from_url == redirect_data["from_url"]).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Redirect from this URL already exists")
+
+    redirect = Redirect(
+        from_url=redirect_data["from_url"],
+        to_url=redirect_data["to_url"],
+        redirect_type=redirect_data.get("redirect_type", 301),
+        is_active=redirect_data.get("is_active", True),
+        description=redirect_data.get("description", "")
+    )
+
+    db.add(redirect)
+    db.commit()
+    db.refresh(redirect)
+
     return {
-        "id": 2,
-        **redirect_data,
-        "created_at": datetime.now().isoformat(),
-        "updated_at": datetime.now().isoformat()
+        "id": redirect.id,
+        "from_url": redirect.from_url,
+        "to_url": redirect.to_url,
+        "redirect_type": redirect.redirect_type,
+        "is_active": redirect.is_active,
+        "description": redirect.description,
+        "created_at": redirect.created_at.isoformat() if redirect.created_at else None,
+        "updated_at": redirect.updated_at.isoformat() if redirect.updated_at else None
     }
 
 @router.put("/redirects/{redirect_id}")
@@ -1046,10 +1076,38 @@ async def update_redirect(
     db: Session = Depends(get_db)
 ):
     """Update redirect"""
+    from app.models import Redirect
+
+    redirect = db.query(Redirect).filter(Redirect.id == redirect_id).first()
+    if not redirect:
+        raise HTTPException(status_code=404, detail="Redirect not found")
+
+    # Check if from_url is being changed and if it conflicts
+    if "from_url" in redirect_data and redirect_data["from_url"] != redirect.from_url:
+        existing = db.query(Redirect).filter(
+            Redirect.from_url == redirect_data["from_url"],
+            Redirect.id != redirect_id
+        ).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Redirect from this URL already exists")
+
+    # Update fields
+    for field in ["from_url", "to_url", "redirect_type", "is_active", "description"]:
+        if field in redirect_data:
+            setattr(redirect, field, redirect_data[field])
+
+    db.commit()
+    db.refresh(redirect)
+
     return {
-        "id": redirect_id,
-        **redirect_data,
-        "updated_at": datetime.now().isoformat()
+        "id": redirect.id,
+        "from_url": redirect.from_url,
+        "to_url": redirect.to_url,
+        "redirect_type": redirect.redirect_type,
+        "is_active": redirect.is_active,
+        "description": redirect.description,
+        "created_at": redirect.created_at.isoformat() if redirect.created_at else None,
+        "updated_at": redirect.updated_at.isoformat() if redirect.updated_at else None
     }
 
 @router.delete("/redirects/{redirect_id}")
@@ -1059,6 +1117,15 @@ async def delete_redirect(
     db: Session = Depends(get_db)
 ):
     """Delete redirect"""
+    from app.models import Redirect
+
+    redirect = db.query(Redirect).filter(Redirect.id == redirect_id).first()
+    if not redirect:
+        raise HTTPException(status_code=404, detail="Redirect not found")
+
+    db.delete(redirect)
+    db.commit()
+
     return {"message": "Redirect deleted successfully"}
 
 @router.post("/redirects/test")

@@ -25,6 +25,41 @@ interface SEOPerformance {
   seo_score: number;
 }
 
+interface PageSEO {
+  id: number;
+  page_url: string;
+  title: string;
+  meta_description: string;
+  meta_keywords: string;
+  canonical_url: string;
+  schema_markup: string;
+  is_published: boolean;
+  last_updated: string;
+}
+
+interface BlogSEO {
+  id: number;
+  title: string;
+  slug: string;
+  meta_title: string;
+  meta_description: string;
+  meta_keywords: string;
+  canonical_url: string;
+  schema_markup: string;
+  is_published: boolean;
+  last_updated: string;
+}
+
+interface ImageSEO {
+  id: number;
+  image_url: string;
+  alt_text: string;
+  title_attribute: string;
+  caption: string;
+  page_url: string;
+  is_optimized: boolean;
+}
+
 export default function AdminSEOpage() {
   const [settings, setSettings] = useState<SEOSettings>({
     site_title: '',
@@ -48,6 +83,17 @@ export default function AdminSEOpage() {
     seo_score: 0
   });
 
+  const [pages, setPages] = useState<PageSEO[]>([]);
+  const [blogs, setBlogs] = useState<BlogSEO[]>([]);
+  const [images, setImages] = useState<ImageSEO[]>([]);
+  const [redirects, setRedirects] = useState<any[]>([]);
+  const [editingPage, setEditingPage] = useState<PageSEO | null>(null);
+  const [editingBlog, setEditingBlog] = useState<BlogSEO | null>(null);
+  const [editingRedirect, setEditingRedirect] = useState<any>(null);
+  const [showPageModal, setShowPageModal] = useState(false);
+  const [showBlogModal, setShowBlogModal] = useState(false);
+  const [showRedirectModal, setShowRedirectModal] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const { token } = useAuth();
@@ -56,6 +102,10 @@ export default function AdminSEOpage() {
     if (token) {
       fetchSEOSettings();
       fetchSEOPerformance();
+      fetchPages();
+      fetchBlogs();
+      fetchImages();
+      fetchRedirects();
     } else {
       setLoading(false);
     }
@@ -102,6 +152,214 @@ export default function AdminSEOpage() {
       console.error('Failed to fetch SEO performance');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPages = async () => {
+    try {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/pages'
+        : 'https://astroarupshastri.com/api/pages';
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const pagesData = await response.json();
+
+        // Fetch SEO data for each page
+        const pagesWithSEO = await Promise.all(
+          pagesData.map(async (page: any) => {
+            try {
+              const seoApiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                ? `http://localhost:8000/api/seo/page/${page.slug}`
+                : `https://astroarupshastri.com/api/seo/page/${page.slug}`;
+
+              const seoResponse = await fetch(seoApiUrl, {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              let seoData = null;
+              if (seoResponse.ok) {
+                seoData = await seoResponse.json();
+              }
+
+              return {
+                id: page.id,
+                page_url: `/${page.slug}`,
+                title: seoData?.meta_title || page.title,
+                meta_description: seoData?.meta_description || '',
+                meta_keywords: seoData?.meta_keywords || '',
+                canonical_url: seoData?.canonical_url || `https://astroarupshastri.com/${page.slug}`,
+                schema_markup: seoData?.schema_markup || '',
+                is_published: page.is_published,
+                last_updated: page.updated_at || page.created_at
+              };
+            } catch (error) {
+              // Return page data without SEO
+              return {
+                id: page.id,
+                page_url: `/${page.slug}`,
+                title: page.title,
+                meta_description: '',
+                meta_keywords: '',
+                canonical_url: `https://astroarupshastri.com/${page.slug}`,
+                schema_markup: '',
+                is_published: page.is_published,
+                last_updated: page.updated_at || page.created_at
+              };
+            }
+          })
+        );
+
+        setPages(pagesWithSEO);
+      }
+    } catch (error) {
+      console.error('Failed to fetch pages');
+    }
+  };
+
+  const fetchBlogs = async () => {
+    try {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/blogs'
+        : 'https://astroarupshastri.com/api/blogs';
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blogsData = await response.json();
+
+        // Fetch SEO data for each blog
+        const blogsWithSEO = await Promise.all(
+          blogsData.map(async (blog: any) => {
+            try {
+              const seoApiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                ? `http://localhost:8000/api/seo/blog/${blog.slug}`
+                : `https://astroarupshastri.com/api/seo/blog/${blog.slug}`;
+
+              const seoResponse = await fetch(seoApiUrl, {
+                headers: {
+                  'Authorization': `Bearer ${token}`
+                }
+              });
+
+              let seoData = null;
+              if (seoResponse.ok) {
+                seoData = await seoResponse.json();
+              }
+
+              return {
+                id: blog.id,
+                title: blog.title,
+                slug: blog.slug,
+                meta_title: seoData?.meta_title || `${blog.title} - AstroArupShastri`,
+                meta_description: seoData?.meta_description || blog.description.substring(0, 160),
+                meta_keywords: seoData?.meta_keywords || '',
+                canonical_url: seoData?.canonical_url || `https://astroarupshastri.com/blog/${blog.slug}`,
+                schema_markup: seoData?.schema_markup || '',
+                is_published: blog.is_published,
+                last_updated: blog.updated_at || blog.created_at
+              };
+            } catch (error) {
+              // Return blog data without SEO
+              return {
+                id: blog.id,
+                title: blog.title,
+                slug: blog.slug,
+                meta_title: `${blog.title} - AstroArupShastri`,
+                meta_description: blog.description.substring(0, 160),
+                meta_keywords: '',
+                canonical_url: `https://astroarupshastri.com/blog/${blog.slug}`,
+                schema_markup: '',
+                is_published: blog.is_published,
+                last_updated: blog.updated_at || blog.created_at
+              };
+            }
+          })
+        );
+
+        setBlogs(blogsWithSEO);
+      }
+    } catch (error) {
+      console.error('Failed to fetch blogs');
+    }
+  };
+
+  const fetchImages = async () => {
+    try {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/seo/images'
+        : 'https://astroarupshastri.com/api/admin/seo/images';
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setImages(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch images');
+    }
+  };
+
+  const fetchRedirects = async () => {
+    try {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? 'http://localhost:8000/api/admin/seo/redirects'
+        : 'https://astroarupshastri.com/api/admin/seo/redirects';
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setRedirects(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch redirects');
+    }
+  };
+
+  const handleDeleteRedirect = async (redirectId: number) => {
+    if (!confirm('Are you sure you want to delete this redirect?')) return;
+
+    try {
+      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+        ? `http://localhost:8000/api/admin/seo/redirects/${redirectId}`
+        : `https://astroarupshastri.com/api/admin/seo/redirects/${redirectId}`;
+
+      const response = await fetch(apiUrl, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        setRedirects(redirects.filter(r => r.id !== redirectId));
+        alert('Redirect deleted successfully!');
+      } else {
+        alert('Failed to delete redirect');
+      }
+    } catch (error) {
+      alert('Failed to delete redirect');
     }
   };
 
@@ -218,12 +476,14 @@ export default function AdminSEOpage() {
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-100 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
             {[
               { id: 'overview', label: 'Overview', icon: '📊', color: 'from-blue-500 to-blue-600' },
-              { id: 'settings', label: 'Settings', icon: '⚙️', color: 'from-green-500 to-green-600' },
-              { id: 'schema', label: 'Schema', icon: '🏗️', color: 'from-purple-500 to-purple-600' },
-              { id: 'tools', label: 'Tools', icon: '🛠️', color: 'from-orange-500 to-orange-600' }
+              { id: 'pages', label: 'Pages', icon: '📄', color: 'from-green-500 to-green-600' },
+              { id: 'blogs', label: 'Blogs', icon: '📝', color: 'from-purple-500 to-purple-600' },
+              { id: 'images', label: 'Images', icon: '🖼️', color: 'from-orange-500 to-orange-600' },
+              { id: 'redirects', label: 'Redirects', icon: '🔀', color: 'from-red-500 to-red-600' },
+              { id: 'tools', label: 'Tools', icon: '🛠️', color: 'from-indigo-500 to-indigo-600' }
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -459,9 +719,39 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
         )}
 
         {activeTab === 'schema' && (
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Schema Markup Generator</h2>
-            <div className="space-y-6">
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Schema Markup Auto-Generator</h2>
+
+              <div className="mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Page Type</label>
+                    <select className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                      <option value="article">Article/Blog Post</option>
+                      <option value="product">Product/Service</option>
+                      <option value="organization">Organization</option>
+                      <option value="local-business">Local Business</option>
+                      <option value="faq">FAQ Page</option>
+                      <option value="event">Event</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Page URL</label>
+                    <input
+                      type="text"
+                      placeholder="/blog/my-article"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <button className="w-full bg-purple-500 text-white px-6 py-3 rounded-xl hover:bg-purple-600 transition-colors font-semibold">
+                      Generate Schema
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-6 bg-gray-50 rounded-xl">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Organization Schema</h3>
@@ -469,15 +759,19 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
 {`{
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "AstroArupShastri",
+  "name": "${settings.site_title || 'AstroArupShastri'}",
   "url": "https://astroarupshastri.com",
-  "logo": "https://astroarupshastri.com/logo.png",
+  "logo": "https://astroarupshastri.com/logo.svg",
   "description": "${settings.site_description}",
   "contactPoint": {
     "@type": "ContactPoint",
-    "telephone": "+91-XXXXXXXXXX",
+    "telephone": "+91-9876543210",
     "contactType": "customer service"
-  }
+  },
+  "sameAs": [
+    "https://facebook.com/astroarupshastri",
+    "https://twitter.com/astroarupshastri"
+  ]
 }`}
                   </pre>
                   <button className="mt-4 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm">
@@ -486,23 +780,27 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
                 </div>
 
                 <div className="p-6 bg-gray-50 rounded-xl">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Local Business Schema</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Article Schema</h3>
                   <pre className="text-xs bg-white p-4 rounded border overflow-x-auto">
 {`{
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "AstroArupShastri",
-  "image": "https://astroarupshastri.com/featured-image.jpg",
-  "description": "${settings.site_description}",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Your Address",
-    "addressLocality": "Your City",
-    "addressRegion": "Your State",
-    "postalCode": "Your PIN",
-    "addressCountry": "IN"
+  "@type": "Article",
+  "headline": "Your Article Title",
+  "description": "Article description here",
+  "author": {
+    "@type": "Person",
+    "name": "Dr. Arup Shastri"
   },
-  "telephone": "+91-XXXXXXXXXX"
+  "publisher": {
+    "@type": "Organization",
+    "name": "${settings.site_title || 'AstroArupShastri'}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://astroarupshastri.com/logo.svg"
+    }
+  },
+  "datePublished": "2024-01-01T00:00:00Z",
+  "dateModified": "2024-01-01T00:00:00Z"
 }`}
                   </pre>
                   <button className="mt-4 bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm">
@@ -517,19 +815,36 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
 {`{
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  "name": "Vedic Astrology Consultation",
-  "provider": {
-    "@type": "Organization",
-    "name": "AstroArupShastri"
+  "@id": "https://astroarupshastri.com/#organization",
+  "name": "Vedic Astrology Consultation Services",
+  "description": "${settings.site_description}",
+  "url": "https://astroarupshastri.com",
+  "logo": "https://astroarupshastri.com/logo.svg",
+  "image": "https://astroarupshastri.com/featured-image.jpg",
+  "telephone": "+91-9876543210",
+  "priceRange": "₹1500-₹10000",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "IN"
   },
-  "serviceType": "Astrology Consultation",
-  "areaServed": "Worldwide",
-  "description": "Professional Vedic astrology consultations and horoscope readings",
-  "offers": {
-    "@type": "Offer",
-    "priceCurrency": "INR",
-    "price": "1500",
-    "description": "Detailed astrology consultation"
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Astrology Services",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Birth Chart Analysis",
+          "description": "Detailed Vedic birth chart analysis"
+        }
+      }
+    ]
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "500"
   }
 }`}
                 </pre>
@@ -537,6 +852,244 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
                   Copy Schema
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'pages' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Page SEO Management</h2>
+              <span className="text-sm text-gray-500">{pages.length} pages</span>
+            </div>
+
+            <div className="space-y-4">
+              {pages.map((page) => (
+                <div key={page.id} className="border border-gray-200 rounded-xl p-6 hover:border-green-300 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-2">{page.page_url}</h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          page.is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {page.is_published ? 'Published' : 'Draft'}
+                        </span>
+                        <span>Updated: {new Date(page.last_updated).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingPage(page);
+                        setShowPageModal(true);
+                      }}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm"
+                    >
+                      Edit SEO
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <label className="font-medium text-gray-700">Meta Title:</label>
+                      <p className={`mt-1 ${page.title ? 'text-gray-900' : 'text-red-500 italic'}`}>
+                        {page.title || 'Not set'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-700">Meta Description:</label>
+                      <p className={`mt-1 ${page.meta_description ? 'text-gray-900' : 'text-red-500 italic'}`}>
+                        {page.meta_description || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'blogs' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Blog SEO Management</h2>
+              <span className="text-sm text-gray-500">{blogs.length} blogs</span>
+            </div>
+
+            <div className="space-y-4">
+              {blogs.map((blog) => (
+                <div key={blog.id} className="border border-gray-200 rounded-xl p-6 hover:border-purple-300 transition-colors">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-2">{blog.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className={`px-2 py-1 rounded-full text-xs ${
+                          blog.is_published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                        }`}>
+                          {blog.is_published ? 'Published' : 'Draft'}
+                        </span>
+                        <span>Slug: {blog.slug}</span>
+                        <span>Updated: {new Date(blog.last_updated).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setEditingBlog(blog);
+                        setShowBlogModal(true);
+                      }}
+                      className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition-colors text-sm"
+                    >
+                      Edit SEO
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <label className="font-medium text-gray-700">Meta Title:</label>
+                      <p className={`mt-1 ${blog.meta_title ? 'text-gray-900' : 'text-red-500 italic'}`}>
+                        {blog.meta_title || 'Not set'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-700">Meta Description:</label>
+                      <p className={`mt-1 ${blog.meta_description ? 'text-gray-900' : 'text-red-500 italic'}`}>
+                        {blog.meta_description || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'images' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Image SEO Optimization</h2>
+              <span className="text-sm text-gray-500">{images.length} images</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {images.map((image) => (
+                <div key={image.id} className="border border-gray-200 rounded-xl p-4 hover:border-orange-300 transition-colors">
+                  <div className="aspect-video bg-gray-100 rounded-lg mb-3 overflow-hidden">
+                    <img
+                      src={image.image_url}
+                      alt={image.alt_text || 'Image'}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <div>
+                      <label className="font-medium text-gray-700">Alt Text:</label>
+                      <p className={`mt-1 ${image.alt_text ? 'text-gray-900' : 'text-red-500 italic'}`}>
+                        {image.alt_text || 'Not set'}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="font-medium text-gray-700">Title:</label>
+                      <p className={`mt-1 ${image.title_attribute ? 'text-gray-900' : 'text-gray-500 italic'}`}>
+                        {image.title_attribute || 'Not set'}
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        image.is_optimized ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {image.is_optimized ? 'Optimized' : 'Not Optimized'}
+                      </span>
+                      <button className="text-orange-600 hover:text-orange-700 text-sm font-medium">
+                        Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'redirects' && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">URL Redirects</h2>
+              <button
+                onClick={() => setShowRedirectModal(true)}
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors text-sm"
+              >
+                ➕ Add Redirect
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {redirects.map((redirect: any) => (
+                <div key={redirect.id} className="border border-gray-200 rounded-xl p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-4 mb-2">
+                        <span className={`font-mono text-sm px-2 py-1 rounded ${
+                          redirect.redirect_type === 301 ? 'bg-green-100 text-green-800' :
+                          redirect.redirect_type === 302 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-blue-100 text-blue-800'
+                        }`}>
+                          {redirect.redirect_type}
+                        </span>
+                        <span className={`font-medium ${
+                          redirect.is_active ? 'text-green-600' : 'text-gray-500'
+                        }`}>
+                          {redirect.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        <div>
+                          <span className="font-medium text-gray-700">From:</span>
+                          <span className="font-mono ml-2 text-red-600">{redirect.from_url}</span>
+                        </div>
+                        <div>
+                          <span className="font-medium text-gray-700">To:</span>
+                          <span className="font-mono ml-2 text-green-600">{redirect.to_url}</span>
+                        </div>
+                        {redirect.description && (
+                          <div>
+                            <span className="font-medium text-gray-700">Description:</span>
+                            <span className="ml-2 text-gray-600">{redirect.description}</span>
+                          </div>
+                        )}
+                        <div className="text-xs text-gray-500">
+                          Created: {new Date(redirect.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingRedirect(redirect);
+                          setShowRedirectModal(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-700 text-sm"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteRedirect(redirect.id)}
+                        className="text-red-600 hover:text-red-700 text-sm"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {redirects.length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="text-4xl mb-4">🔀</div>
+                  <p className="text-lg mb-2">No redirects configured</p>
+                  <p className="text-sm">Add your first redirect to manage URL changes and migrations.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -670,6 +1223,349 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
                     Optimize
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Page SEO Edit Modal */}
+        {showPageModal && editingPage && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Edit SEO for {editingPage.page_url}</h2>
+                  <button
+                    onClick={() => setShowPageModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Title</label>
+                    <input
+                      type="text"
+                      value={editingPage.title}
+                      onChange={(e) => setEditingPage({...editingPage, title: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter meta title..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{editingPage.title.length}/60 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description</label>
+                    <textarea
+                      value={editingPage.meta_description}
+                      onChange={(e) => setEditingPage({...editingPage, meta_description: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Enter meta description..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{editingPage.meta_description.length}/160 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Keywords</label>
+                    <input
+                      type="text"
+                      value={editingPage.meta_keywords}
+                      onChange={(e) => setEditingPage({...editingPage, meta_keywords: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="keyword1, keyword2, keyword3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Canonical URL</label>
+                    <input
+                      type="url"
+                      value={editingPage.canonical_url}
+                      onChange={(e) => setEditingPage({...editingPage, canonical_url: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://astroarupshastri.com/page-url"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Schema Markup (JSON-LD)</label>
+                    <textarea
+                      value={editingPage.schema_markup}
+                      onChange={(e) => setEditingPage({...editingPage, schema_markup: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      rows={8}
+                      placeholder='{"@context": "https://schema.org", "@type": "WebPage", ...}'
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <button
+                    onClick={() => setShowPageModal(false)}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {/* Save logic */}}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Blog SEO Edit Modal */}
+        {showBlogModal && editingBlog && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Edit SEO for "{editingBlog.title}"</h2>
+                  <button
+                    onClick={() => setShowBlogModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Title</label>
+                    <input
+                      type="text"
+                      value={editingBlog.meta_title}
+                      onChange={(e) => setEditingBlog({...editingBlog, meta_title: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="Enter meta title..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{editingBlog.meta_title.length}/60 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description</label>
+                    <textarea
+                      value={editingBlog.meta_description}
+                      onChange={(e) => setEditingBlog({...editingBlog, meta_description: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Enter meta description..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{editingBlog.meta_description.length}/160 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Keywords</label>
+                    <input
+                      type="text"
+                      value={editingBlog.meta_keywords}
+                      onChange={(e) => setEditingBlog({...editingBlog, meta_keywords: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="keyword1, keyword2, keyword3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Canonical URL</label>
+                    <input
+                      type="url"
+                      value={editingBlog.canonical_url}
+                      onChange={(e) => setEditingBlog({...editingBlog, canonical_url: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="https://astroarupshastri.com/blog/slug"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Schema Markup (JSON-LD)</label>
+                    <textarea
+                      value={editingBlog.schema_markup}
+                      onChange={(e) => setEditingBlog({...editingBlog, schema_markup: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-sm"
+                      rows={8}
+                      placeholder='{"@context": "https://schema.org", "@type": "Article", ...}'
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <button
+                    onClick={() => setShowBlogModal(false)}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {/* Save logic */}}
+                    className="px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Redirect Modal */}
+        {showRedirectModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {editingRedirect ? 'Edit Redirect' : 'Add New Redirect'}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowRedirectModal(false);
+                      setEditingRedirect(null);
+                    }}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target as HTMLFormElement);
+                  const redirectData = {
+                    from_url: formData.get('from_url'),
+                    to_url: formData.get('to_url'),
+                    redirect_type: parseInt(formData.get('redirect_type') as string),
+                    is_active: formData.get('is_active') === 'on',
+                    description: formData.get('description')
+                  };
+
+                  try {
+                    const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                      ? 'http://localhost:8000/api/admin/seo/redirects'
+                      : 'https://astroarupshastri.com/api/admin/seo/redirects';
+
+                    const method = editingRedirect ? 'PUT' : 'POST';
+                    const url = editingRedirect ? `${apiUrl}/${editingRedirect.id}` : apiUrl;
+
+                    const response = await fetch(url, {
+                      method,
+                      headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify(redirectData)
+                    });
+
+                    if (response.ok) {
+                      const result = await response.json();
+                      if (editingRedirect) {
+                        setRedirects(redirects.map(r => r.id === editingRedirect.id ? result : r));
+                      } else {
+                        setRedirects([...redirects, result]);
+                      }
+                      setShowRedirectModal(false);
+                      setEditingRedirect(null);
+                      alert(editingRedirect ? 'Redirect updated successfully!' : 'Redirect created successfully!');
+                    } else {
+                      const error = await response.json();
+                      alert(`Error: ${error.detail || 'Failed to save redirect'}`);
+                    }
+                  } catch (error) {
+                    alert('Failed to save redirect');
+                  }
+                }} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">From URL *</label>
+                      <input
+                        type="text"
+                        name="from_url"
+                        defaultValue={editingRedirect?.from_url || ''}
+                        placeholder="/old-page"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        required
+                      />
+                      <p className="text-sm text-gray-500 mt-1">The URL to redirect from (e.g., /old-page)</p>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">To URL *</label>
+                      <input
+                        type="text"
+                        name="to_url"
+                        defaultValue={editingRedirect?.to_url || ''}
+                        placeholder="/new-page"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        required
+                      />
+                      <p className="text-sm text-gray-500 mt-1">The URL to redirect to (e.g., /new-page)</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Redirect Type</label>
+                      <select
+                        name="redirect_type"
+                        defaultValue={editingRedirect?.redirect_type || 301}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      >
+                        <option value={301}>301 - Permanent Redirect</option>
+                        <option value={302}>302 - Temporary Redirect</option>
+                        <option value={307}>307 - Temporary Redirect (HTTP/1.1)</option>
+                        <option value={308}>308 - Permanent Redirect (HTTP/1.1)</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center">
+                      <label className="flex items-center">
+                        <input
+                          type="checkbox"
+                          name="is_active"
+                          defaultChecked={editingRedirect?.is_active ?? true}
+                          className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                        />
+                        <span className="ml-2 text-sm font-semibold text-gray-700">Active</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                    <textarea
+                      name="description"
+                      defaultValue={editingRedirect?.description || ''}
+                      placeholder="Optional description for this redirect"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex gap-4 mt-8">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowRedirectModal(false);
+                        setEditingRedirect(null);
+                      }}
+                      className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
+                    >
+                      {editingRedirect ? 'Update Redirect' : 'Create Redirect'}
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>

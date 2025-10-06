@@ -32,6 +32,7 @@ export default function AdminBlogsPage() {
     slug: '',
     description: '',
     featured_image: '',
+    image_alt_text: '',
     is_published: false
   });
 
@@ -102,6 +103,7 @@ export default function AdminBlogsPage() {
           slug: '',
           description: '',
           featured_image: '',
+          image_alt_text: '',
           is_published: false
         });
       } else {
@@ -119,6 +121,7 @@ export default function AdminBlogsPage() {
       slug: blog.slug,
       description: blog.description,
       featured_image: blog.featured_image || '',
+      image_alt_text: (blog as any).image_alt_text || '',
       is_published: blog.is_published
     });
     setShowAddForm(true);
@@ -232,6 +235,7 @@ export default function AdminBlogsPage() {
                     slug: '',
                     description: '',
                     featured_image: '',
+                    image_alt_text: '',
                     is_published: false
                   });
                 }}
@@ -352,6 +356,7 @@ export default function AdminBlogsPage() {
                         slug: '',
                         description: '',
                         featured_image: '',
+                        image_alt_text: '',
                         is_published: false
                       });
                     }}
@@ -402,14 +407,74 @@ export default function AdminBlogsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Featured Image URL</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Featured Image</label>
+                      <div className="space-y-3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Generate alt text from filename (remove extension and replace dashes/underscores with spaces)
+                              const altText = file.name
+                                .replace(/\.[^/.]+$/, '') // Remove extension
+                                .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
+                                .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+
+                              setFormData({
+                                ...formData,
+                                featured_image: URL.createObjectURL(file),
+                                image_alt_text: altText
+                              });
+                            }
+                          }}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                        />
+                        <div className="text-sm text-gray-500">
+                          Upload an image or enter a URL below. Alt text will be auto-generated from filename.
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Or Image URL</label>
                       <input
                         type="url"
-                        value={formData.featured_image}
-                        onChange={(e) => setFormData({...formData, featured_image: e.target.value})}
+                        value={formData.featured_image.startsWith('blob:') ? '' : formData.featured_image}
+                        onChange={(e) => {
+                          const url = e.target.value;
+                          // Generate alt text from URL if it's a direct image URL
+                          if (url) {
+                            const filename = url.split('/').pop()?.split('.')[0] || '';
+                            const altText = filename
+                              .replace(/[-_]/g, ' ')
+                              .replace(/\b\w/g, l => l.toUpperCase());
+                            setFormData({
+                              ...formData,
+                              featured_image: url,
+                              image_alt_text: altText || formData.image_alt_text
+                            });
+                          } else {
+                            setFormData({...formData, featured_image: url});
+                          }
+                        }}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                         placeholder="https://example.com/image.jpg"
                       />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Image Alt Text</label>
+                      <input
+                        type="text"
+                        value={formData.image_alt_text}
+                        onChange={(e) => setFormData({...formData, image_alt_text: e.target.value})}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                        placeholder="Describe the image for accessibility"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        Auto-generated from filename. Edit if needed for better accessibility.
+                      </p>
                     </div>
                     <div className="flex items-center">
                       <input
@@ -432,13 +497,14 @@ export default function AdminBlogsPage() {
                       onClick={() => {
                         setShowAddForm(false);
                         setEditingBlog(null);
-                        setFormData({
-                          title: '',
-                          slug: '',
-                          description: '',
-                          featured_image: '',
-                          is_published: false
-                        });
+                      setFormData({
+                        title: '',
+                        slug: '',
+                        description: '',
+                        featured_image: '',
+                        image_alt_text: '',
+                        is_published: false
+                      });
                       }}
                       className="px-8 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                     >
