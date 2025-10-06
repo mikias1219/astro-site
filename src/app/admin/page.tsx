@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
+import { apiClient } from '../../lib/api';
 
 interface DashboardStats {
   total_users: number;
@@ -35,18 +36,13 @@ export default function AdminDashboard() {
 
   const fetchDashboardData = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/dashboard', {
-        headers: {
-          'Authorization': `Bearer ${authToken}`
-        }
-      });
+      const result = await apiClient.getDashboard();
 
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data);
+      if (result.success) {
+        setStats(result.data as DashboardStats);
         setError(null);
       } else {
-        setError('Failed to fetch dashboard data');
+        setError(result.error || 'Failed to fetch dashboard data');
       }
     } catch (error) {
       setError('Failed to fetch dashboard data');

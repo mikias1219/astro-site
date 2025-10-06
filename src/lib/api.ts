@@ -427,6 +427,10 @@ class ApiClient {
       body: JSON.stringify(data),
     });
   }
+
+  async getDashboard() {
+    return this.request('/admin/dashboard');
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
