@@ -93,6 +93,12 @@ export default function AdminSEOpage() {
   const [showPageModal, setShowPageModal] = useState(false);
   const [showBlogModal, setShowBlogModal] = useState(false);
   const [showRedirectModal, setShowRedirectModal] = useState(false);
+  const [analyticsConfig, setAnalyticsConfig] = useState({
+    google_analytics_id: '',
+    google_search_console_property: '',
+    google_analytics_enabled: false,
+    google_search_console_enabled: false
+  });
 
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
@@ -476,13 +482,14 @@ export default function AdminSEOpage() {
 
         {/* Navigation Tabs */}
         <div className="bg-white rounded-2xl shadow-xl p-3 border border-gray-100 mb-8">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
             {[
               { id: 'overview', label: 'Overview', icon: '📊', color: 'from-blue-500 to-blue-600' },
               { id: 'pages', label: 'Pages', icon: '📄', color: 'from-green-500 to-green-600' },
               { id: 'blogs', label: 'Blogs', icon: '📝', color: 'from-purple-500 to-purple-600' },
               { id: 'images', label: 'Images', icon: '🖼️', color: 'from-orange-500 to-orange-600' },
               { id: 'redirects', label: 'Redirects', icon: '🔀', color: 'from-red-500 to-red-600' },
+              { id: 'analytics', label: 'Analytics', icon: '📈', color: 'from-teal-500 to-teal-600' },
               { id: 'tools', label: 'Tools', icon: '🛠️', color: 'from-indigo-500 to-indigo-600' }
             ].map((tab) => (
               <button
@@ -1090,6 +1097,209 @@ Sitemap: https://astroarupshastri.com/sitemap.xml`}
                   <p className="text-sm">Add your first redirect to manage URL changes and migrations.</p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'analytics' && (
+          <div className="space-y-8">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">🔍 Google Analytics & Search Console Setup</h2>
+              
+              <div className="space-y-6">
+                {/* Google Analytics Section */}
+                <div className="border border-gray-200 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-3 bg-blue-500 rounded-xl">
+                        <span className="text-white text-2xl">📊</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Google Analytics (GA4)</h3>
+                        <p className="text-sm text-gray-600">Track website traffic and user behavior</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={analyticsConfig.google_analytics_enabled}
+                        onChange={(e) => setAnalyticsConfig({...analyticsConfig, google_analytics_enabled: e.target.checked})}
+                        className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <label className="ml-2 text-sm font-medium text-gray-700">Enabled</label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Measurement ID (GA4)</label>
+                      <input
+                        type="text"
+                        value={analyticsConfig.google_analytics_id}
+                        onChange={(e) => setAnalyticsConfig({...analyticsConfig, google_analytics_id: e.target.value})}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="G-XXXXXXXXXX"
+                      />
+                      <p className="text-sm text-gray-500 mt-1">Enter your Google Analytics 4 Measurement ID</p>
+                    </div>
+
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2">📖 How to Get Your GA4 Measurement ID:</h4>
+                      <ol className="text-sm text-blue-800 space-y-2 list-decimal list-inside">
+                        <li>Go to <a href="https://analytics.google.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-600">Google Analytics</a></li>
+                        <li>Click "Admin" in the bottom left corner</li>
+                        <li>Select your property (or create a new GA4 property)</li>
+                        <li>Go to "Data Streams" → "Web"</li>
+                        <li>Copy your "Measurement ID" (starts with G-)</li>
+                        <li>Paste it in the field above and enable</li>
+                      </ol>
+                    </div>
+
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800">
+                        <strong>⚡ Auto-Integration:</strong> Once enabled, the GA4 tracking code will be automatically added to all pages of your website.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Google Search Console Section */}
+                <div className="border border-gray-200 rounded-xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-3 bg-green-500 rounded-xl">
+                        <span className="text-white text-2xl">🔍</span>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-gray-900">Google Search Console</h3>
+                        <p className="text-sm text-gray-600">Monitor search performance and indexing</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={analyticsConfig.google_search_console_enabled}
+                        onChange={(e) => setAnalyticsConfig({...analyticsConfig, google_search_console_enabled: e.target.checked})}
+                        className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                      />
+                      <label className="ml-2 text-sm font-medium text-gray-700">Enabled</label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Property URL</label>
+                      <input
+                        type="text"
+                        value={analyticsConfig.google_search_console_property}
+                        onChange={(e) => setAnalyticsConfig({...analyticsConfig, google_search_console_property: e.target.value})}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="https://astroarupshastri.com"
+                        disabled
+                      />
+                      <p className="text-sm text-gray-500 mt-1">This is your website URL (automatically set)</p>
+                    </div>
+
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h4 className="font-semibold text-green-900 mb-2">📖 How to Set Up Google Search Console:</h4>
+                      <ol className="text-sm text-green-800 space-y-2 list-decimal list-inside">
+                        <li>Go to <a href="https://search.google.com/search-console" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-600">Google Search Console</a></li>
+                        <li>Click "Add Property" and select "URL prefix"</li>
+                        <li>Enter your website URL: <code className="bg-white px-2 py-1 rounded">https://astroarupshastri.com</code></li>
+                        <li>Verify ownership using one of these methods:
+                          <ul className="ml-6 mt-2 space-y-1 list-disc">
+                            <li><strong>HTML File Upload:</strong> Download and upload the file to your server</li>
+                            <li><strong>HTML Meta Tag:</strong> Add the meta tag to your homepage (Recommended)</li>
+                            <li><strong>Google Analytics:</strong> If you've already set up GA4 above, use this method</li>
+                          </ul>
+                        </li>
+                        <li>After verification, submit your sitemap: <code className="bg-white px-2 py-1 rounded">https://astroarupshastri.com/sitemap.xml</code></li>
+                        <li>Enable the setting above once verified</li>
+                      </ol>
+                    </div>
+
+                    <div className="bg-yellow-50 rounded-lg p-4">
+                      <p className="text-sm text-yellow-800">
+                        <strong>💡 Pro Tip:</strong> It may take 24-48 hours for Google Search Console to start showing data after verification and sitemap submission.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={async () => {
+                      if (!token) return;
+                      try {
+                        const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+                          ? 'http://localhost:8000/api/admin/seo/settings'
+                          : 'https://astroarupshastri.com/api/admin/seo/settings';
+
+                        const updatedSettings = {
+                          ...settings,
+                          google_analytics_id: analyticsConfig.google_analytics_id,
+                          google_search_console_property: analyticsConfig.google_search_console_property
+                        };
+
+                        const response = await fetch(apiUrl, {
+                          method: 'PUT',
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                          },
+                          body: JSON.stringify(updatedSettings)
+                        });
+
+                        if (response.ok) {
+                          alert('✅ Analytics settings saved successfully! Changes will be applied within a few minutes.');
+                        } else {
+                          alert('❌ Failed to save analytics settings. Please try again.');
+                        }
+                      } catch (error) {
+                        alert('❌ Failed to save analytics settings. Please check your connection.');
+                      }
+                    }}
+                    className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-8 py-3 rounded-xl hover:from-teal-600 hover:to-blue-700 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl"
+                  >
+                    💾 Save Analytics Settings
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Integration Status */}
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Integration Status</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`border-2 rounded-xl p-6 ${analyticsConfig.google_analytics_enabled && analyticsConfig.google_analytics_id ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-gray-900">Google Analytics</h3>
+                    {analyticsConfig.google_analytics_enabled && analyticsConfig.google_analytics_id ? (
+                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">✓ ACTIVE</span>
+                    ) : (
+                      <span className="bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">INACTIVE</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {analyticsConfig.google_analytics_id || 'Not configured'}
+                  </p>
+                </div>
+
+                <div className={`border-2 rounded-xl p-6 ${analyticsConfig.google_search_console_enabled ? 'border-green-300 bg-green-50' : 'border-gray-200 bg-gray-50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-bold text-gray-900">Google Search Console</h3>
+                    {analyticsConfig.google_search_console_enabled ? (
+                      <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">✓ ACTIVE</span>
+                    ) : (
+                      <span className="bg-gray-400 text-white px-3 py-1 rounded-full text-xs font-bold">INACTIVE</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {analyticsConfig.google_search_console_property || 'https://astroarupshastri.com'}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
