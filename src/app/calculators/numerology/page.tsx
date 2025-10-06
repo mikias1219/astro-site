@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '../../../components/Header';
-import { Footer } from '../../../components/Footer';
-import { apiClient } from '../../../lib/api';
-import { ProtectedRoute } from '../../../components/auth/ProtectedRoute';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { apiClient } from '@/lib/api';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 
 interface NumerologyResult {
   id: number;

@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '../../../components/Header';
-import { Footer } from '../../../components/Footer';
-import { apiClient } from '../../../lib/api';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
+import { apiClient } from '@/lib/api';
 
 export default function AscendantCalculatorPage() {
   const [formData, setFormData] = useState({
