@@ -28,7 +28,7 @@ async def get_blogs(
         if published_only:
             query = query.filter(Blog.is_published == True)
 
-        blogs = query.order_by(Blog.published_at.desc()).offset(skip).limit(limit).all()
+        blogs = query.order_by(Blog.created_at.desc()).offset(skip).limit(limit).all()
 
         # Log for debugging
         print(f"Found {len(blogs)} blogs")

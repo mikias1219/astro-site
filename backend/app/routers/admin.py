@@ -42,9 +42,13 @@ async def get_dashboard_stats(
     recent_bookings = db.query(Booking).order_by(desc(Booking.created_at)).limit(10).all()
     
     # Get popular services (by booking count)
-    popular_services = db.query(Service).join(Booking).filter(
-        Service.is_active == True
-    ).group_by(Service.id).order_by(desc(func.count(Booking.id))).limit(5).all()
+    try:
+        popular_services = db.query(Service).join(Booking).filter(
+            Service.is_active == True
+        ).group_by(Service.id).order_by(desc(func.count(Booking.id))).limit(5).all()
+    except Exception:
+        # If join fails (no bookings), get all active services
+        popular_services = db.query(Service).filter(Service.is_active == True).limit(5).all()
     
     return DashboardStats(
         total_users=total_users,
