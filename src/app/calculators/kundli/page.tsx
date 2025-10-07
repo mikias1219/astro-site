@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
+import { useAuth } from '@/contexts/AuthContext';
 import BirthChart from '@/components/BirthChart';
 
 export default function KundliCalculatorPage() {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -19,6 +22,7 @@ export default function KundliCalculatorPage() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Type guard to check if position is an object with house and sign
   const isPlanetaryPosition = (position: any): position is { house: number; sign: string } => {
@@ -852,18 +856,22 @@ export default function KundliCalculatorPage() {
                       Get a comprehensive consultation with Dr. Arup Shastri for detailed predictions,
                       personalized remedies, gemstone recommendations, and life guidance based on your complete birth chart.
                     </p>
-                    <a
-                      href="/book-appointment"
+                    <button
+                      onClick={() => {
+                        if (!isAuthenticated) { setShowLoginModal(true); return; }
+                        window.location.href = '/book-appointment';
+                      }}
                       className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Book Personal Consultation
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           </section>
         )}
+        <LoginRequiredModal open={showLoginModal} onClose={() => setShowLoginModal(false)} message="Please login or register to book a personal consultation." />
       </main>
       <Footer />
     </div>

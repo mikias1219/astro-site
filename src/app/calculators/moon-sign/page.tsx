@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function MoonSignCalculatorPage() {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -15,6 +18,7 @@ export default function MoonSignCalculatorPage() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -366,23 +370,21 @@ export default function MoonSignCalculatorPage() {
 
               {/* Navigation Tabs */}
               <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
-                <button className="px-6 py-3 rounded-md font-semibold text-blue-600 bg-blue-50 border-2 border-blue-200">
-                  Overview
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                  Emotions
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                  Inner Self
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                  Relationships
-                </button>
+                {[
+                  { label: 'Overview', id: 'overview' },
+                  { label: 'Emotions', id: 'emotions' },
+                  { label: 'Inner Self', id: 'inner-self' },
+                  { label: 'Relationships', id: 'relationships' },
+                ].map((t, i) => (
+                  <a key={t.id} href={`#${t.id}`} className={`px-6 py-3 rounded-md font-semibold transition-colors ${i===0 ? 'text-blue-600 bg-blue-50 border-2 border-blue-200' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'}`}>
+                    {t.label}
+                  </a>
+                ))}
               </div>
 
               <div className="space-y-8">
                 {/* Moon Sign Overview */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="overview" className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 border-4 border-blue-300 rounded-full mb-4">
                       <span className="text-5xl">🌙</span>
@@ -445,7 +447,7 @@ export default function MoonSignCalculatorPage() {
                 </div>
 
                 {/* Emotional Nature */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="emotions" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">🌊</span> Your Emotional Nature
                   </h3>
@@ -457,7 +459,7 @@ export default function MoonSignCalculatorPage() {
                 </div>
 
                 {/* Inner World Analysis */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="inner-self" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">🔮</span> Your Inner World
                   </h3>
@@ -575,7 +577,7 @@ export default function MoonSignCalculatorPage() {
                 </div>
 
                 {/* Moon Sign Compatibility */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="relationships" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">💕</span> Emotional Compatibility
                   </h3>
@@ -656,14 +658,15 @@ export default function MoonSignCalculatorPage() {
                       Get a comprehensive consultation with Dr. Arup Shastri for detailed moon sign analysis,
                       emotional healing guidance, relationship compatibility, and personalized lunar remedies.
                     </p>
-                    <a
-                      href="/book-appointment"
+                    <button
+                      onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); return; } window.location.href = '/book-appointment'; }}
                       className="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Book Emotional Healing Consultation
-                    </a>
+                    </button>
                   </div>
                 </div>
+                <LoginRequiredModal open={showLoginModal} onClose={() => setShowLoginModal(false)} message="Please login or register to book an emotional healing consultation." />
               </div>
             </div>
           </section>

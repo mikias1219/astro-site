@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HoroscopeMatchingPage() {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     // Male details
     maleName: '',
@@ -22,6 +25,7 @@ export default function HoroscopeMatchingPage() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -417,23 +421,16 @@ export default function HoroscopeMatchingPage() {
 
               {/* Navigation Tabs */}
               <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
-                <button className="px-6 py-3 rounded-md font-semibold text-pink-600 bg-pink-50 border-2 border-pink-200">
-                  Overview
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
-                  Compatibility
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
-                  Strengths
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
-                  Remedies
-                </button>
+                {['Overview','Compatibility','Strengths','Remedies'].map((tab) => (
+                  <a key={tab} href={`#${tab.toLowerCase()}`} className={`px-6 py-3 rounded-md font-semibold transition-colors ${tab==='Overview' ? 'text-pink-600 bg-pink-50 border-2 border-pink-200' : 'text-gray-600 hover:text-pink-600 hover:bg-pink-50'}`}>
+                    {tab}
+                  </a>
+                ))}
               </div>
 
               <div className="space-y-8">
                 {/* Overall Compatibility Score */}
-                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                <div id="overview" className="bg-white rounded-3xl shadow-2xl p-8">
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-40 h-40 bg-gradient-to-br from-pink-100 to-rose-100 border-4 border-pink-300 rounded-full mb-6">
                       <div className="text-center">
@@ -451,12 +448,23 @@ export default function HoroscopeMatchingPage() {
                         </div>
                       </div>
                     </div>
-                    <h3 className="text-4xl font-bold text-gray-800 mb-2">
-                      {result.compatibility?.score || result.percentage}% Compatibility Score
-                    </h3>
-                    <p className="text-xl text-gray-600 mb-6">
-                      {result.totalScore || (result.compatibility?.score || result.percentage)} out of {result.maxScore || 36} points
-                    </p>
+                    {(() => {
+                      const percentRaw = (result.compatibility?.score ?? result.percentage ?? 0) as number;
+                      const percent = Math.max(0, Math.min(100, percentRaw));
+                      const pointsRaw = (result.totalScore ?? result.points ?? Math.round((percent/100)*36)) as number;
+                      const points = Math.max(0, Math.min(36, pointsRaw));
+                      const max = (result.maxScore ?? 36) as number;
+                      return (
+                        <>
+                          <h3 className="text-4xl font-bold text-gray-800 mb-2">
+                            {percent}% Compatibility Score
+                          </h3>
+                          <p className="text-xl text-gray-600 mb-6">
+                            {points} out of {max} points
+                          </p>
+                        </>
+                      );
+                    })()}
                   </div>
 
                   <div className="space-y-6">
@@ -480,14 +488,22 @@ export default function HoroscopeMatchingPage() {
                           'bg-gradient-to-r from-red-400 to-red-600'
                         }`}
                         style={{
-                          width: `${result.compatibility?.score || result.percentage}%`
+                          width: `${Math.max(0, Math.min(100, (result.compatibility?.score ?? result.percentage ?? 0) as number))}%`
                         }}
                       ></div>
                     </div>
-                    <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg border border-pink-200">
+                  <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg border border-pink-200">
                       <p className="text-gray-700 text-lg leading-relaxed">
                         {result.recommendation || result.compatibility?.description || 'This compatibility analysis is based on traditional Vedic astrology principles including the 36 Guna matching system.'}
                       </p>
+                    <div className="mt-6 text-center">
+                      <button
+                        onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); return; } window.location.hash = '#compatibility'; }}
+                        className="inline-block bg-gradient-to-r from-pink-500 to-rose-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-pink-600 hover:to-rose-700 transition-all duration-300 shadow-lg"
+                      >
+                        View Full Premium Analysis
+                      </button>
+                    </div>
                     </div>
                   </div>
                 </div>
@@ -549,7 +565,7 @@ export default function HoroscopeMatchingPage() {
 
                 {/* Detailed 36 Guna Analysis */}
                 {result.details && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <div id="compatibility" className="bg-white rounded-2xl shadow-lg p-8">
                     <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                       <span className="text-2xl">📊</span> 36 Guna Matching Analysis
                     </h3>
@@ -593,7 +609,7 @@ export default function HoroscopeMatchingPage() {
                 )}
 
                 {/* Relationship Strengths & Challenges */}
-                <div className="grid lg:grid-cols-2 gap-8">
+                <div id="strengths" className="grid lg:grid-cols-2 gap-8">
                   <div className="bg-white rounded-2xl shadow-lg p-8">
                     <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                       <span className="text-2xl">💪</span> Relationship Strengths
@@ -617,7 +633,7 @@ export default function HoroscopeMatchingPage() {
                     </div>
                   </div>
 
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <div id="remedies" className="bg-white rounded-2xl shadow-lg p-8">
                     <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                       <span className="text-2xl">⚠️</span> Potential Challenges
                     </h3>
@@ -764,6 +780,7 @@ export default function HoroscopeMatchingPage() {
           </section>
         )}
       </main>
+      <LoginRequiredModal open={showLoginModal} onClose={() => setShowLoginModal(false)} message="Please login or register to view the full premium matching analysis." />
       <Footer />
     </div>
   );

@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function AscendantCalculatorPage() {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     birthDate: '',
@@ -15,6 +18,7 @@ export default function AscendantCalculatorPage() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -377,23 +381,21 @@ export default function AscendantCalculatorPage() {
 
               {/* Navigation Tabs */}
               <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
-                <button className="px-6 py-3 rounded-md font-semibold text-purple-600 bg-purple-50 border-2 border-purple-200">
-                  Overview
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
-                  Personality
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
-                  Appearance
-                </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
-                  Compatibility
-                </button>
+                {[
+                  { label: 'Overview', id: 'overview' },
+                  { label: 'Personality', id: 'personality' },
+                  { label: 'Appearance', id: 'appearance' },
+                  { label: 'Compatibility', id: 'compatibility' },
+                ].map((t, i) => (
+                  <a key={t.id} href={`#${t.id}`} className={`px-6 py-3 rounded-md font-semibold transition-colors ${i===0 ? 'text-purple-600 bg-purple-50 border-2 border-purple-200' : 'text-gray-600 hover:text-purple-600 hover:bg-purple-50'}`}>
+                    {t.label}
+                  </a>
+                ))}
               </div>
 
               <div className="space-y-8">
                 {/* Ascendant Overview */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="overview" className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-purple-100 to-violet-100 border-4 border-purple-300 rounded-full mb-4">
                       <span className="text-5xl font-bold text-purple-600">{result.ascendant}</span>
@@ -401,7 +403,7 @@ export default function AscendantCalculatorPage() {
                     <h3 className="text-3xl font-bold text-gray-800 mb-2">Your Rising Sign</h3>
                     <p className="text-lg text-gray-600">The mask you show to the world</p>
                   </div>
-
+                  
                   <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
                       <div className="text-center">
@@ -440,8 +442,8 @@ export default function AscendantCalculatorPage() {
                       <div key={index} className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
                         <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
                         </div>
                         <span className="text-gray-800 font-medium">{trait}</span>
                       </div>
@@ -455,7 +457,7 @@ export default function AscendantCalculatorPage() {
                 </div>
 
                 {/* Personality Analysis */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="personality" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">🧑</span> Personality Analysis
                   </h3>
@@ -467,7 +469,7 @@ export default function AscendantCalculatorPage() {
                 </div>
 
                 {/* Physical Appearance */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="appearance" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">👤</span> Physical Appearance
                   </h3>
@@ -491,7 +493,7 @@ export default function AscendantCalculatorPage() {
                       <div className="bg-white p-4 rounded-lg border border-indigo-200">
                         <h4 className="font-semibold text-indigo-800 mb-3">Best Career Fields:</h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                          {result.career.split(',').map((field, index) => (
+                          {(result.career ? result.career.split(',').filter(Boolean) : ['Analysis','Leadership','Communication']).map((field, index) => (
                             <div key={index} className="bg-indigo-50 px-3 py-2 rounded text-sm text-indigo-700 text-center">
                               {field.trim()}
                             </div>
@@ -503,7 +505,7 @@ export default function AscendantCalculatorPage() {
                 </div>
 
                 {/* Compatibility Analysis */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
+                <div id="compatibility" className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <span className="text-2xl">❤️</span> Ascendant Compatibility
                   </h3>
@@ -603,25 +605,25 @@ export default function AscendantCalculatorPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
                 </div>
+              </div>
 
-                {/* CTA */}
-                <div className="text-center mt-12">
+              {/* CTA */}
+              <div className="text-center mt-12">
                   <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-2xl shadow-lg p-8 border-2 border-purple-200">
                     <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
                       <span className="text-3xl">👨‍⚕️</span> Want Complete Personality Analysis?
-                    </h3>
+                  </h3>
                     <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                      Get a comprehensive consultation with Dr. Arup Shastri for detailed ascendant analysis,
+                    Get a comprehensive consultation with Dr. Arup Shastri for detailed ascendant analysis, 
                       career guidance, relationship compatibility, and personalized insights based on your complete birth chart.
                     </p>
-                    <a
-                      href="/book-appointment"
+                    <button
+                      onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); return; } window.location.href = '/book-appointment'; }}
                       className="inline-block bg-gradient-to-r from-purple-500 to-violet-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-purple-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       Book Personality Consultation
-                    </a>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -629,6 +631,7 @@ export default function AscendantCalculatorPage() {
           </section>
         )}
       </main>
+      <LoginRequiredModal open={showLoginModal} onClose={() => setShowLoginModal(false)} message="Please login or register to book a personality consultation." />
       <Footer />
     </div>
   );
