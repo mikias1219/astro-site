@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# 🌟 ENHANCED PRODUCTION DEPLOYMENT SCRIPT for AstroArupShastri.com
+# 🌟 ULTRA-ENHANCED PRODUCTION DEPLOYMENT SCRIPT for AstroArupShastri.com
 # Deploys Database, Backend, Frontend, SEO, SSL - COMPLETE AUTOMATION
 # Domain: astroarupshastri.com
-# Includes: SEO Optimization, Image Optimization, Admin Panel, SSL Certificates
+# Includes: ALL BUG FIXES, SEO Optimization, Image Optimization, Admin Panel, SSL Certificates
+# 🔧 CRITICAL FIXES: Admin pages 500 errors, datetime conflicts, authentication issues
 # Modern Admin Dashboard with Full Content Management
 
 set -e  # Exit on any error
@@ -13,16 +14,17 @@ echo "=========================================================="
 echo "Domain: astroarupshastri.com"
 echo "Server: Production Environment"
 echo ""
-echo "This script deploys EVERYTHING with MODERN FEATURES:"
+echo "This script deploys EVERYTHING with ULTRA-MODERN FEATURES & ALL FIXES:"
 echo "  ✅ Clean Database Setup (Admin Only)"
-echo "  ✅ Backend Deployment (FastAPI + Enhanced APIs)"
+echo "  ✅ Backend Deployment (FastAPI + Enhanced APIs + ALL BUG FIXES)"
 echo "  ✅ Frontend Deployment (Next.js + SEO Optimized)"
 echo "  ✅ Modern Admin Dashboard (Full Content Management)"
 echo "  ✅ SEO Optimization (Meta tags, Sitemap, Schema.org)"
 echo "  ✅ Image Optimization & WebP Support"
 echo "  ✅ SSL Certificate Automation with DNS Monitoring"
 echo "  ✅ Performance Optimization & Caching"
-echo "  ✅ Comprehensive Admin Functionality Testing"
+echo "  ✅ ULTRA-COMPREHENSIVE Admin Functionality Testing"
+echo "  ✅ CRITICAL FIXES: 500 errors, datetime conflicts, auth issues"
 echo ""
 echo "🔧 CRITICAL FIXES INCLUDED IN THIS DEPLOYMENT:"
 echo "  ✅ Fixed 404 error for /api/admin/testimonials"
@@ -33,6 +35,10 @@ echo "  ✅ Fixed authentication token handling"
 echo "  ✅ Updated frontend interfaces to match backend schemas"
 echo "  ✅ Added comprehensive admin testimonials management"
 echo "  ✅ Fixed null value handling for optional fields"
+echo "  ✅ FIXED: 500 errors on /api/admin/pages POST/PUT endpoints"
+echo "  ✅ FIXED: Missing author_id in admin page creation"
+echo "  ✅ FIXED: Page model datetime timezone conflicts"
+echo "  ✅ ENHANCED: Admin pages management with proper error handling"
 echo ""
 
 # Configuration
@@ -163,6 +169,24 @@ mkdir -p "$BACKEND_DIR/logs"
 
 print_step "Copying latest backend files with all fixes..."
 cp -r backend/* "$BACKEND_DIR/"
+
+print_step "Verifying critical backend fixes are included..."
+
+# Check if author_id fix is present
+if grep -q "author_id=current_user.id" "$BACKEND_DIR/app/routers/admin.py"; then
+    print_success "✅ Author ID fix verified in admin router"
+else
+    print_warning "⚠️ Author ID fix not found - manual application may be needed"
+fi
+
+# Check if Page model datetime fix is present
+if grep -q "created_at = Column(DateTime," "$BACKEND_DIR/app/models.py" && grep -q "updated_at = Column(DateTime," "$BACKEND_DIR/app/models.py"; then
+    print_success "✅ Page model datetime fixes verified"
+else
+    print_warning "⚠️ Page model datetime fixes not found - manual application may be needed"
+fi
+
+print_info "Backend fixes verification completed"
 
 print_step "Verifying critical backend files are present..."
 if [ ! -f "$BACKEND_DIR/app/routers/admin.py" ]; then
@@ -1559,6 +1583,59 @@ if [ "$ADMIN_TOKEN" != "null" ] && [ -n "$ADMIN_TOKEN" ]; then
         print_warning "Testimonials management: ⚠️ API response issue"
     fi
 
+    # Test pages management (CRITICAL FIX)
+    print_step "Testing admin pages management (CRITICAL FIXES)..."
+
+    # Test GET pages
+    PAGES_RESPONSE=$(curl -s -H "Authorization: Bearer $ADMIN_TOKEN" \
+        "http://127.0.0.1:8002/api/admin/pages")
+
+    if echo "$PAGES_RESPONSE" | jq -e 'length >= 0' >/dev/null 2>&1; then
+        print_success "Pages GET: ✅ API working"
+    else
+        print_error "Pages GET: ❌ API not working"
+    fi
+
+    # Test POST page creation (THE MAIN FIX)
+    CREATE_PAGE_RESPONSE=$(curl -s -X POST \
+        -H "Authorization: Bearer $ADMIN_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{"title":"Deployment Test Page","slug":"deployment-test-'"$(date +%s)"'","content":"Test content for deployment verification","excerpt":"Deployment test"}' \
+        "http://127.0.0.1:8002/api/admin/pages")
+
+    if echo "$CREATE_PAGE_RESPONSE" | grep -q "id"; then
+        print_success "Pages POST (Create): ✅ API working (CRITICAL FIX APPLIED)"
+        CREATED_PAGE_ID=$(echo "$CREATE_PAGE_RESPONSE" | jq -r '.id' 2>/dev/null)
+
+        # Test PUT page update
+        UPDATE_RESPONSE=$(curl -s -X PUT \
+            -H "Authorization: Bearer $ADMIN_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d '{"title":"Updated Deployment Test Page"}' \
+            "http://127.0.0.1:8002/api/admin/pages/$CREATED_PAGE_ID")
+
+        if echo "$UPDATE_RESPONSE" | grep -q "id"; then
+            print_success "Pages PUT (Update): ✅ API working"
+        else
+            print_warning "Pages PUT (Update): ⚠️ API response issue"
+        fi
+
+        # Test page toggle
+        TOGGLE_RESPONSE=$(curl -s -X PUT \
+            -H "Authorization: Bearer $ADMIN_TOKEN" \
+            "http://127.0.0.1:8002/api/admin/pages/$CREATED_PAGE_ID/toggle")
+
+        if echo "$TOGGLE_RESPONSE" | grep -q "is_published"; then
+            print_success "Pages Toggle: ✅ API working"
+        else
+            print_warning "Pages Toggle: ⚠️ API response issue"
+        fi
+
+    else
+        print_error "Pages POST (Create): ❌ API not working - CRITICAL FIX FAILED"
+        echo "Response: $CREATE_PAGE_RESPONSE"
+    fi
+
     # Test service creation with service_type (NEW FIX)
     print_step "Testing service creation with service_type field..."
     SERVICE_CREATE_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer $ADMIN_TOKEN" \
@@ -1820,6 +1897,32 @@ if echo "$SERVICE_TEST_RESPONSE" | jq -e '.id' >/dev/null 2>&1; then
 else
     print_error "❌ /api/admin/services POST - Still failing"
     echo "Response: $SERVICE_TEST_RESPONSE"
+fi
+
+# Test admin pages creation (CRITICAL FIX - was 500)
+PAGES_TEST_RESPONSE=$(curl -s -X POST -H "Authorization: Bearer $ADMIN_TOKEN" \
+    -H "Content-Type: application/json" \
+    -d '{"title":"Final Verification Page","slug":"final-verification-'"$(date +%s)"'","content":"Final test for deployment verification","excerpt":"Final verification"}' \
+    "http://127.0.0.1:8002/api/admin/pages")
+
+if echo "$PAGES_TEST_RESPONSE" | jq -e '.id' >/dev/null 2>&1; then
+    print_success "✅ /api/admin/pages POST - FIXED (was 500 - CRITICAL)"
+else
+    print_error "❌ /api/admin/pages POST - Still failing (CRITICAL ISSUE)"
+    echo "Response: $PAGES_TEST_RESPONSE"
+fi
+
+# Test admin pages toggle (was 500)
+if [ "$CREATED_PAGE_ID" ] && [ "$CREATED_PAGE_ID" != "null" ]; then
+    TOGGLE_TEST_RESPONSE=$(curl -s -X PUT -H "Authorization: Bearer $ADMIN_TOKEN" \
+        "http://127.0.0.1:8002/api/admin/pages/$CREATED_PAGE_ID/toggle")
+
+    if echo "$TOGGLE_TEST_RESPONSE" | jq -e '.is_published' >/dev/null 2>&1; then
+        print_success "✅ /api/admin/pages/{id}/toggle - FIXED (was 500)"
+    else
+        print_error "❌ /api/admin/pages/{id}/toggle - Still failing"
+        echo "Response: $TOGGLE_TEST_RESPONSE"
+    fi
 fi
 
 print_success "🎉 ASTROARUPSHASTRI.COM ULTRA-ENHANCED PRODUCTION DEPLOYMENT COMPLETE!"
