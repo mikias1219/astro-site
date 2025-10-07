@@ -21,6 +21,7 @@ export default function AdminPagesPage() {
   const [pages, setPages] = useState<Page[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [fetching, setFetching] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPage, setEditingPage] = useState<Page | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,14 +40,17 @@ export default function AdminPagesPage() {
   });
 
   useEffect(() => {
-    if (token) {
+    if (token && !loading && !fetching) {
       fetchPages(token);
-    } else {
+    } else if (!token) {
       setLoading(false);
     }
   }, [token]);
 
   const fetchPages = async (authToken: string) => {
+    if (fetching) return; // Prevent multiple simultaneous calls
+
+    setFetching(true);
     try {
       const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
         ? 'http://localhost:8000/api/admin/pages'
@@ -60,15 +64,19 @@ export default function AdminPagesPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setPages(data);
+        setPages(Array.isArray(data) ? data : []);
         setError(null);
       } else {
         setError('Failed to fetch pages');
+        setPages([]);
       }
     } catch (error) {
+      console.error('Error fetching pages:', error);
       setError('Failed to fetch pages');
+      setPages([]);
     } finally {
       setLoading(false);
+      setFetching(false);
     }
   };
 
@@ -92,7 +100,7 @@ export default function AdminPagesPage() {
         title: formData.title,
         slug: formData.slug,
         content: formData.content,
-        excerpt: formData.excerpt || formData.content.substring(0, 200) + '...', // Use provided excerpt or auto-generate
+        excerpt: formData.excerpt || (formData.content ? formData.content.substring(0, 200) + '...' : ''),
         anchor_text: formData.anchor_text || null,
         anchor_link: formData.anchor_link || null,
         is_published: formData.is_active
@@ -220,9 +228,14 @@ export default function AdminPagesPage() {
 
   // Filter and search pages
   const filteredPages = pages.filter(page => {
-    const matchesSearch = page.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         page.slug.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         page.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchLower = searchTerm?.toLowerCase() || '';
+    const titleLower = page.title?.toLowerCase() || '';
+    const slugLower = page.slug?.toLowerCase() || '';
+    const contentLower = page.content?.toLowerCase() || '';
+
+    const matchesSearch = titleLower.includes(searchLower) ||
+                         slugLower.includes(searchLower) ||
+                         contentLower.includes(searchLower);
 
     return matchesSearch;
   });
