@@ -356,50 +356,82 @@ export default function MoonSignCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Moon Sign Analysis</h2>
-                <p className="text-lg text-gray-600">Emotional profile for {result.name}</p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Moon Sign Dashboard</h2>
+                <p className="text-lg text-gray-600">Complete emotional analysis for {result.personal_info?.name || result.name}</p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Moon Sign Details */}
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-blue-600 bg-blue-50 border-2 border-blue-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                  Emotions
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                  Inner Self
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-blue-600 hover:bg-blue-50 transition-colors">
+                  Relationships
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Moon Sign Overview */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-8">
-                    <div className="text-6xl font-bold text-blue-600 mb-4">{result.moonSign}</div>
-                    <div className="text-2xl text-gray-700">Your Moon Sign</div>
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-blue-100 to-indigo-100 border-4 border-blue-300 rounded-full mb-4">
+                      <span className="text-5xl">🌙</span>
+                    </div>
+                    <h3 className="text-4xl font-bold text-blue-600 mb-2">{result.moon_sign || result.moonSign}</h3>
+                    <h4 className="text-2xl text-gray-700 mb-2">Your Moon Sign</h4>
+                    <p className="text-lg text-gray-600">The heart and soul of your emotional world</p>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Element:</span>
-                      <span className="text-gray-800">{result.element}</span>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-blue-700 mb-1">Element</div>
+                        <div className="text-lg font-bold text-blue-800">{result.element}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Quality:</span>
-                      <span className="text-gray-800">{result.quality}</span>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-blue-700 mb-1">Quality</div>
+                        <div className="text-lg font-bold text-blue-800">{result.quality}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Ruler:</span>
-                      <span className="text-gray-800">{result.ruler}</span>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-blue-700 mb-1">Ruling Planet</div>
+                        <div className="text-lg font-bold text-blue-800">{result.ruler}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Degree:</span>
-                      <span className="text-gray-800">{result.moonDegree}°</span>
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-blue-700 mb-1">Degree</div>
+                        <div className="text-lg font-bold text-blue-800">{result.moonDegree || result.moon_degree}°</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Emotional Traits */}
+                {/* Key Emotional Traits */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Key Traits</h3>
-                  <div className="grid grid-cols-2 gap-3">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">💙</span> Key Emotional Traits
+                  </h3>
+                  <div className="grid md:grid-cols-2 gap-4">
                     {result.traits.map((trait, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-gray-700 text-sm">{trait}</span>
+                      <div key={index} className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
+                        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-800 font-medium">{trait}</span>
                       </div>
                     ))}
                   </div>
@@ -407,42 +439,218 @@ export default function MoonSignCalculatorPage() {
 
                 {/* Emotional Nature */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Emotional Nature</h3>
-                  <p className="text-gray-700 leading-relaxed">{result.emotions}</p>
-                </div>
-
-                {/* Compatibility */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Moon Sign Compatibility</h3>
-                  <div className="space-y-2">
-                    {result.compatibility.map((sign, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span className="text-gray-700">{sign}</span>
-                      </div>
-                    ))}
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🌊</span> Your Emotional Nature
+                  </h3>
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-200">
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {result.emotions}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              {/* CTA */}
-              <div className="text-center mt-12">
+                {/* Inner World Analysis */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Want Complete Analysis?
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🔮</span> Your Inner World
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a comprehensive consultation with Dr. Arup Shastri for detailed moon sign analysis, 
-                    emotional guidance, and personalized remedies.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Consultation
-                  </a>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+                        <h4 className="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🏠</span> Emotional Home & Security
+                        </h4>
+                        <p className="text-purple-700 leading-relaxed">
+                          Your moon sign reveals what makes you feel emotionally secure and comfortable.
+                          Understanding these needs helps you create a nurturing environment for yourself.
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-6 rounded-lg border border-cyan-200">
+                        <h4 className="font-bold text-cyan-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🌙</span> Subconscious Patterns
+                        </h4>
+                        <p className="text-cyan-700 leading-relaxed">
+                          Your moon sign governs your subconscious emotional responses and instinctive
+                          reactions to situations. These patterns often operate below conscious awareness.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg border border-emerald-200">
+                      <h4 className="font-bold text-emerald-800 mb-3">Emotional Intelligence Strengths:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">1</span>
+                          </div>
+                          <span className="text-emerald-700">Deep emotional awareness</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">2</span>
+                          </div>
+                          <span className="text-emerald-700">Intuitive understanding</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">3</span>
+                          </div>
+                          <span className="text-emerald-700">Empathetic connections</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">4</span>
+                          </div>
+                          <span className="text-emerald-700">Authentic emotional expression</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Emotional Needs & Healing */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">💚</span> Emotional Needs & Healing
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-rose-50 to-pink-50 p-6 rounded-lg border border-rose-200">
+                        <h4 className="font-bold text-rose-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🛡️</span> What You Need for Emotional Security
+                        </h4>
+                        <ul className="text-rose-700 space-y-2">
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-500 mt-1">•</span>
+                            <span>Understanding and validation of your feelings</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-500 mt-1">•</span>
+                            <span>A safe space to express emotions freely</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-500 mt-1">•</span>
+                            <span>Consistent emotional support from loved ones</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-rose-500 mt-1">•</span>
+                            <span>Time and space for emotional processing</span>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-violet-50 to-purple-50 p-6 rounded-lg border border-violet-200">
+                        <h4 className="font-bold text-violet-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🌱</span> Emotional Healing Practices
+                        </h4>
+                        <ul className="text-violet-700 space-y-2">
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-500 mt-1">•</span>
+                            <span>Moon rituals and lunar cycle awareness</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-500 mt-1">•</span>
+                            <span>Journaling emotional experiences</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-500 mt-1">•</span>
+                            <span>Meditation and mindfulness practices</span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-violet-500 mt-1">•</span>
+                            <span>Creative expression of feelings</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Moon Sign Compatibility */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">💕</span> Emotional Compatibility
+                  </h3>
+                  <div className="space-y-6">
+                    <p className="text-gray-700 text-lg leading-relaxed">
+                      Your moon sign reveals which signs can provide the emotional understanding and support you need most:
+                    </p>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {result.compatibility.map((sign, index) => (
+                        <div key={index} className="bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-lg">💖</span>
+                            </div>
+                            <div>
+                              <div className="font-bold text-pink-800">{sign}</div>
+                              <div className="text-sm text-pink-600">Emotional Harmony</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-200">
+                      <h4 className="font-semibold text-indigo-800 mb-3">Relationship Insight:</h4>
+                      <p className="text-indigo-700">
+                        These signs naturally understand your emotional language and can provide the nurturing
+                        environment your moon sign craves. They know how to make you feel emotionally safe and supported.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Moon Phase Information */}
+                {result.moonPhase && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">🌔</span> Current Moon Phase
+                    </h3>
+                    <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 rounded-lg border border-slate-200">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h4 className="text-xl font-bold text-slate-800">{result.moonPhase}</h4>
+                          <p className="text-slate-600">Current lunar phase at your birth</p>
+                        </div>
+                        <div className="text-4xl">
+                          {result.moonPhase === 'Full Moon' && '🌕'}
+                          {result.moonPhase === 'New Moon' && '🌑'}
+                          {result.moonPhase === 'Waxing Crescent' && '🌒'}
+                          {result.moonPhase === 'Waxing Gibbous' && '🌔'}
+                          {result.moonPhase === 'Waning Gibbous' && '🌖'}
+                          {result.moonPhase === 'Waning Crescent' && '🌘'}
+                          {result.moonPhase === 'First Quarter' && '🌓'}
+                          {result.moonPhase === 'Last Quarter' && '🌗'}
+                        </div>
+                      </div>
+                      <p className="text-slate-700">
+                        The moon phase at your birth influences your natural emotional rhythm and life cycles.
+                        Understanding your birth moon phase can help you align with natural lunar energies.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-8 border-2 border-blue-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">🌙</span> Want Complete Emotional Guidance?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive consultation with Dr. Arup Shastri for detailed moon sign analysis,
+                      emotional healing guidance, relationship compatibility, and personalized lunar remedies.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Emotional Healing Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

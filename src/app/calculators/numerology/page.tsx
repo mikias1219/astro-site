@@ -148,8 +148,8 @@ export default function NumerologyCalculatorPage() {
     >
       <div className="min-h-screen flex flex-col">
         <Header />
-        
-        <main className="flex-1 bg-gray-50">
+
+        <main className="flex-1">
           {/* Hero Section */}
           <section className="bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 py-16">
             <div className="max-w-4xl mx-auto px-4 text-center">
@@ -163,9 +163,10 @@ export default function NumerologyCalculatorPage() {
             </div>
           </section>
 
-          <div className="max-w-7xl mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Calculator Form */}
+          {/* Calculator Form */}
+          <section className="py-20 bg-white">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
                   Calculate Your Numbers
@@ -277,19 +278,65 @@ export default function NumerologyCalculatorPage() {
                 </div>
               </div>
             </div>
+            </div>
+          </section>
 
-            {/* Results Section */}
+          {/* Results Section */}
             {result && (
-              <div className="mt-16">
-                <div className="bg-white rounded-2xl shadow-xl p-8">
+              <section className="py-20 bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4">
                   <div className="text-center mb-12">
-                    <h2 className="text-4xl font-bold text-gray-800 mb-4">
-                      Numerology Report for {result.name}
-                    </h2>
-                    <p className="text-lg text-gray-600">
-                      Born on {new Date(result.birth_date).toLocaleDateString()}
-                    </p>
+                    <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Numerology Dashboard</h2>
+                    <p className="text-lg text-gray-600">Complete number analysis for {result.name}</p>
                   </div>
+
+                  {/* Navigation Tabs */}
+                  <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                    <button className="px-6 py-3 rounded-md font-semibold text-purple-600 bg-purple-50 border-2 border-purple-200">
+                      Overview
+                    </button>
+                    <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                      Core Numbers
+                    </button>
+                    <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                      Lucky Elements
+                    </button>
+                    <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                      Predictions
+                    </button>
+                  </div>
+
+                  <div className="space-y-8">
+                    {/* Overview Summary */}
+                    <div className="bg-white rounded-3xl shadow-2xl p-8">
+                      <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-purple-100 to-indigo-100 border-4 border-purple-300 rounded-full mb-6">
+                          <span className="text-5xl">🔢</span>
+                        </div>
+                        <h3 className="text-4xl font-bold text-gray-800 mb-2">Numerology Analysis Complete</h3>
+                        <p className="text-xl text-gray-600 mb-6">
+                          Born on {new Date(result.birth_date).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <div className="grid md:grid-cols-3 gap-6">
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200 text-center">
+                          <div className="text-4xl mb-2">🎯</div>
+                          <div className="font-bold text-purple-800 text-lg">Life Path Number</div>
+                          <div className="text-3xl font-bold text-purple-600">{result.life_path_number}</div>
+                        </div>
+                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 text-center">
+                          <div className="text-4xl mb-2">🎨</div>
+                          <div className="font-bold text-blue-800 text-lg">Expression Number</div>
+                          <div className="text-3xl font-bold text-blue-600">{result.destiny_number}</div>
+                        </div>
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200 text-center">
+                          <div className="text-4xl mb-2">💚</div>
+                          <div className="font-bold text-green-800 text-lg">Soul Urge Number</div>
+                          <div className="text-3xl font-bold text-green-600">{result.soul_urge_number}</div>
+                        </div>
+                      </div>
+                    </div>
 
                   {/* Core Numbers */}
                   <div className="mb-12">
@@ -414,11 +461,85 @@ export default function NumerologyCalculatorPage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Comprehensive Numerology Insights */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🔮</span> Understanding Your Numbers
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                        <h4 className="font-bold text-indigo-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🎯</span> Life Path Number Meaning
+                        </h4>
+                        <p className="text-indigo-700 leading-relaxed">
+                          Your Life Path Number represents the path you are destined to walk in this lifetime.
+                          It reveals your life's purpose, challenges, and opportunities for growth.
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg border border-emerald-200">
+                        <h4 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🎨</span> Expression Number Insights
+                        </h4>
+                        <p className="text-emerald-700 leading-relaxed">
+                          Your Expression Number reveals how you express yourself to the world and your natural talents.
+                          It shows your potential and the skills you bring to your life's work.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg border border-yellow-200">
+                      <h4 className="font-bold text-yellow-800 mb-3">How to Use Your Lucky Elements:</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-yellow-700">Daily Practices:</h5>
+                          <ul className="text-sm text-yellow-700 space-y-1">
+                            <li>• Wear your lucky colors on important days</li>
+                            <li>• Use lucky numbers in decision making</li>
+                            <li>• Schedule important activities on lucky days</li>
+                            <li>• Surround yourself with lucky gemstones</li>
+                          </ul>
+                        </div>
+                        <div className="space-y-2">
+                          <h5 className="font-semibold text-yellow-700">Long-term Benefits:</h5>
+                          <ul className="text-sm text-yellow-700 space-y-1">
+                            <li>• Enhanced positive energy flow</li>
+                            <li>• Better decision making alignment</li>
+                            <li>• Increased opportunities and success</li>
+                            <li>• Improved overall life harmony</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl shadow-lg p-8 border-2 border-purple-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">🔮</span> Want Detailed Numerology Reading?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive numerology consultation with Dr. Arup Shastri for detailed analysis
+                      of all your core numbers, life cycles, personal year forecasts, and personalized guidance
+                      based on your complete numerological profile.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Numerology Consultation
+                    </a>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
+          </section>
+        )}
         </main>
-        
+
         <Footer />
       </div>
     </ProtectedRoute>

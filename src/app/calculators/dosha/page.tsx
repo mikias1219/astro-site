@@ -297,100 +297,311 @@ export default function DoshaCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Dosha Analysis</h2>
-                <p className="text-lg text-gray-600">Planetary analysis for {result.name}</p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Dosha Analysis Dashboard</h2>
+                <p className="text-lg text-gray-600">Complete planetary dosha assessment for {result.name}</p>
               </div>
 
-              {/* Overall Health Status */}
-              <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-gray-800 mb-2">
-                    {result.overallHealth} Chart Health
-                  </div>
-                  <div className="text-xl text-gray-600 mb-6">
-                    {result.totalDoshas} Dosha{result.totalDoshas !== 1 ? 's' : ''} Found
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4">
-                    <div 
-                      className={`h-4 rounded-full transition-all duration-1000 ${
-                        result.overallHealth === 'Excellent' ? 'bg-green-500' :
-                        result.overallHealth === 'Good' ? 'bg-yellow-500' : 'bg-red-500'
-                      }`}
-                      style={{ 
-                        width: `${result.overallHealth === 'Excellent' ? 100 : 
-                                result.overallHealth === 'Good' ? 75 : 50}%` 
-                      }}
-                    ></div>
-                  </div>
-                </div>
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-green-600 bg-green-50 border-2 border-green-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors">
+                  Doshas
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors">
+                  Remedies
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-green-600 hover:bg-green-50 transition-colors">
+                  Prevention
+                </button>
               </div>
 
-              {/* Dosha Details */}
               <div className="space-y-8">
-                {result.doshas.map((dosha, index) => (
-                  <div key={index} className="bg-white rounded-2xl shadow-lg p-8">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-2xl font-bold text-gray-800">{dosha.name}</h3>
-                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getSeverityColor(dosha.severity)}`}>
-                        {dosha.severity}
+                {/* Overall Health Status */}
+                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-40 h-40 bg-gradient-to-br from-green-100 to-emerald-100 border-4 border-green-300 rounded-full mb-6">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-green-600 mb-1">
+                          {result.overallHealth === 'Excellent' && '🟢'}
+                          {result.overallHealth === 'Good' && '🟡'}
+                          {result.overallHealth === 'Needs Attention' && '🔴'}
+                        </div>
+                        <div className="text-sm font-bold text-green-800">{result.overallHealth}</div>
+                      </div>
+                    </div>
+                    <h3 className="text-4xl font-bold text-gray-800 mb-2">Chart Health Status</h3>
+                    <p className="text-xl text-gray-600 mb-6">
+                      {result.totalDoshas} Planetary Dosha{result.totalDoshas !== 1 ? 's' : ''} Detected
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center text-lg">
+                      <span className="font-semibold text-gray-700">Chart Health:</span>
+                      <span className={`font-bold ${
+                        result.overallHealth === 'Excellent' ? 'text-green-600' :
+                        result.overallHealth === 'Good' ? 'text-yellow-600' : 'text-red-600'
+                      }`}>
+                        {result.overallHealth}
                       </span>
                     </div>
-                    
-                    <p className="text-gray-700 mb-6 leading-relaxed">{dosha.description}</p>
-                    
-                    <div className="grid md:grid-cols-2 gap-8">
-                      {/* Effects */}
+                    <div className="w-full bg-gray-200 rounded-full h-6">
+                      <div
+                        className={`h-6 rounded-full transition-all duration-1000 ${
+                          result.overallHealth === 'Excellent' ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                          result.overallHealth === 'Good' ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                          'bg-gradient-to-r from-red-400 to-red-600'
+                        }`}
+                        style={{
+                          width: `${result.overallHealth === 'Excellent' ? 95 :
+                                  result.overallHealth === 'Good' ? 70 : 45}%`
+                        }}
+                      ></div>
+                    </div>
+                    <div className="text-center text-sm text-gray-600 mt-2">
+                      {result.overallHealth === 'Excellent' && 'Your chart shows excellent planetary harmony with minimal doshas'}
+                      {result.overallHealth === 'Good' && 'Your chart is generally balanced with some minor planetary influences'}
+                      {result.overallHealth === 'Needs Attention' && 'Your chart requires attention to mitigate planetary doshas'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dosha Summary Cards */}
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-red-500">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">♂</span>
+                      </div>
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Possible Effects</h4>
-                        <div className="space-y-2">
-                          {dosha.effects.map((effect, effectIndex) => (
-                            <div key={effectIndex} className="flex items-start gap-3">
-                              <svg className="w-5 h-5 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                              </svg>
-                              <span className="text-gray-700 text-sm">{effect}</span>
-                            </div>
-                          ))}
+                        <div className="font-bold text-gray-800">Mangal Dosha</div>
+                        <div className="text-sm text-gray-600">Mars Influence</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-red-600">
+                      {result.doshas.find(d => d.name === 'Mangal Dosha') ? 'Present' : 'Clear'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">♄</span>
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-800">Shani Dosha</div>
+                        <div className="text-sm text-gray-600">Saturn Influence</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-blue-600">
+                      {result.doshas.find(d => d.name === 'Shani Dosha') ? 'Present' : 'Clear'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">☊☋</span>
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-800">Rahu-Ketu</div>
+                        <div className="text-sm text-gray-600">Eclipse Points</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-purple-600">
+                      {result.doshas.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Present' : 'Clear'}
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-xl shadow-lg p-6 border-l-4 border-cyan-500">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                        <span className="text-xl">☽</span>
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-800">Chandra Dosha</div>
+                        <div className="text-sm text-gray-600">Moon Influence</div>
+                      </div>
+                    </div>
+                    <div className="text-2xl font-bold text-cyan-600">
+                      {result.doshas.find(d => d.name === 'Chandra Dosha') ? 'Present' : 'Clear'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detailed Dosha Analysis */}
+                <div className="space-y-6">
+                  {result.doshas.map((dosha, index) => (
+                    <div key={index} className="bg-white rounded-2xl shadow-lg p-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${
+                            dosha.severity === 'High' ? 'bg-red-100 text-red-600' :
+                            dosha.severity === 'Medium' ? 'bg-yellow-100 text-yellow-600' :
+                            dosha.severity === 'Low' ? 'bg-blue-100 text-blue-600' :
+                            'bg-green-100 text-green-600'
+                          }`}>
+                            {dosha.name === 'Mangal Dosha' && '♂'}
+                            {dosha.name === 'Shani Dosha' && '♄'}
+                            {dosha.name === 'Rahu-Ketu Dosha' && '☊☋'}
+                            {dosha.name === 'Chandra Dosha' && '☽'}
+                            {dosha.name === 'Surya Dosha' && '☉'}
+                            {dosha.name === 'No Major Doshas' && '✅'}
+                          </div>
+                          <div>
+                            <h3 className="text-2xl font-bold text-gray-800">{dosha.name}</h3>
+                            <p className="text-gray-600">Planetary influence analysis</p>
+                          </div>
+                        </div>
+                        <div className={`px-4 py-2 rounded-full text-sm font-semibold ${getSeverityColor(dosha.severity)}`}>
+                          {dosha.severity} Impact
                         </div>
                       </div>
-                      
-                      {/* Remedies */}
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Recommended Remedies</h4>
-                        <div className="space-y-2">
-                          {dosha.remedies.map((remedy, remedyIndex) => (
-                            <div key={remedyIndex} className="flex items-start gap-3">
-                              <svg className="w-5 h-5 text-green-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <span className="text-gray-700 text-sm">{remedy}</span>
-                            </div>
-                          ))}
+
+                      <div className="mb-6">
+                        <p className="text-gray-700 leading-relaxed text-lg">{dosha.description}</p>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-8">
+                        {/* Effects */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <span className="text-red-500">⚠️</span> Potential Effects
+                          </h4>
+                          <div className="space-y-3">
+                            {dosha.effects.map((effect, effectIndex) => (
+                              <div key={effectIndex} className="flex items-start gap-3 bg-red-50 p-3 rounded-lg border border-red-200">
+                                <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                </svg>
+                                <span className="text-gray-700 text-sm">{effect}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Remedies */}
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <span className="text-green-500">🛡️</span> Recommended Remedies
+                          </h4>
+                          <div className="space-y-3">
+                            {dosha.remedies.map((remedy, remedyIndex) => (
+                              <div key={remedyIndex} className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-200">
+                                <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-gray-700 text-sm">{remedy}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Additional Information */}
+                      <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
+                        <h5 className="font-semibold text-blue-800 mb-2">💡 Important Note</h5>
+                        <p className="text-blue-700 text-sm">
+                          {dosha.name === 'No Major Doshas'
+                            ? 'Congratulations! Your birth chart shows excellent planetary harmony. Continue with positive practices to maintain this balance.'
+                            : 'The remedies listed above should be performed under the guidance of an experienced astrologer. Individual results may vary based on the overall chart strength.'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Prevention & Maintenance */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🛡️</span> Dosha Prevention & Maintenance
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Daily Practices</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-orange-600 text-xs font-bold">1</span>
+                          </div>
+                          <span className="text-gray-700">Chant planetary mantras daily</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-orange-600 text-xs font-bold">2</span>
+                          </div>
+                          <span className="text-gray-700">Wear recommended gemstones</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-orange-600 text-xs font-bold">3</span>
+                          </div>
+                          <span className="text-gray-700">Perform charity on auspicious days</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-orange-600 text-xs font-bold">4</span>
+                          </div>
+                          <span className="text-gray-700">Maintain positive karma through good deeds</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h4 className="text-lg font-semibold text-gray-800 mb-3">Lifestyle Recommendations</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 text-xs font-bold">1</span>
+                          </div>
+                          <span className="text-gray-700">Follow planetary friendly colors</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 text-xs font-bold">2</span>
+                          </div>
+                          <span className="text-gray-700">Eat sattvic (pure) foods</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 text-xs font-bold">3</span>
+                          </div>
+                          <span className="text-gray-700">Practice yoga and meditation</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                            <span className="text-blue-600 text-xs font-bold">4</span>
+                          </div>
+                          <span className="text-gray-700">Visit temples and sacred places</span>
                         </div>
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
 
-              {/* CTA */}
-              <div className="text-center mt-12">
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Need Detailed Dosha Analysis?
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a comprehensive consultation with Dr. Arup Shastri for detailed dosha analysis, 
-                    personalized remedies, and guidance on mitigating planetary effects.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Dosha Consultation
-                  </a>
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl shadow-lg p-8 border-2 border-green-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">🔮</span> Need Personalized Dosha Remedies?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive consultation with Dr. Arup Shastri for detailed dosha analysis,
+                      personalized remedies, gemstone recommendations, and guidance on mitigating planetary effects based on your complete birth chart.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Dosha Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

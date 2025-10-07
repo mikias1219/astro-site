@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import BirthChart from '@/components/BirthChart';
 
 export default function KundliCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -367,328 +368,472 @@ export default function KundliCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Kundli Results</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Kundli Dashboard</h2>
                 <p className="text-lg text-gray-600">Complete astrological analysis for {result.personal_info?.name || result.name}</p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Basic Information */}
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-orange-600 bg-orange-50 border-2 border-orange-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Birth Chart
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Predictions
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Remedies
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Birth Chart Visualization */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Basic Information</h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Name:</span>
-                      <span className="text-gray-800">{result.personal_info?.name || result.name}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Birth Date:</span>
-                      <span className="text-gray-800">{result.personal_info?.birth_date || result.birthDate}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Birth Time:</span>
-                      <span className="text-gray-800">{result.personal_info?.birth_time || result.birthTime}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Birth Place:</span>
-                      <span className="text-gray-800">{result.personal_info?.birth_place || result.birthPlace}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Sun Sign:</span>
-                      <span className="text-gray-800">{result.astrological_elements?.sun_sign || result.sunSign}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Moon Sign:</span>
-                      <span className="text-gray-800">{result.astrological_elements?.moon_sign || result.moonSign}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Ascendant:</span>
-                      <span className="text-gray-800">{result.astrological_elements?.ascendant || result.ascendant}</span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                      <span className="font-semibold text-gray-700">Zodiac Sign:</span>
-                      <span className="text-gray-800">{result.astrological_elements?.zodiac_sign || result.sunSign}</span>
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Birth Chart Analysis</h3>
+                  <div className="flex justify-center">
+                    <BirthChart planetaryPositions={result.planetary_positions || result.planets} />
+                  </div>
+                  <div className="mt-6 text-center text-sm text-gray-600">
+                    Traditional Vedic astrology birth chart showing planetary positions in houses
+                  </div>
+                </div>
+
+                {/* Overview Grid */}
+                <div className="grid lg:grid-cols-3 gap-8">
+                  {/* Basic Information */}
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="text-2xl">📋</span> Basic Information
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Name:</span>
+                        <span className="text-gray-800">{result.personal_info?.name || result.name}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Birth Date:</span>
+                        <span className="text-gray-800">{result.personal_info?.birth_date || result.birthDate}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Birth Time:</span>
+                        <span className="text-gray-800">{result.personal_info?.birth_time || result.birthTime}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Birth Place:</span>
+                        <span className="text-gray-800">{result.personal_info?.birth_place || result.birthPlace}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="font-semibold text-gray-700">Language:</span>
+                        <span className="text-gray-800 capitalize">{result.personal_info?.language || result.language || 'English'}</span>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Astrological Elements */}
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                      <span className="text-2xl">⭐</span> Astrological Elements
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Sun Sign:</span>
+                        <span className="text-gray-800">{result.astrological_elements?.sun_sign || result.sunSign}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Moon Sign:</span>
+                        <span className="text-gray-800">{result.astrological_elements?.moon_sign || result.moonSign}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-gray-100">
+                        <span className="font-semibold text-gray-700">Ascendant:</span>
+                        <span className="text-gray-800">{result.astrological_elements?.ascendant || result.ascendant}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="font-semibold text-gray-700">Zodiac Sign:</span>
+                        <span className="text-gray-800">{result.astrological_elements?.zodiac_sign || result.sunSign}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nakshatra Details */}
+                  {result.nakshatra && (
+                    <div className="bg-white rounded-2xl shadow-lg p-6">
+                      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span className="text-2xl">🌙</span> Nakshatra Details
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700">Nakshatra:</span>
+                          <span className="text-gray-800">{result.nakshatra.nakshatra}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700">Pada:</span>
+                          <span className="text-gray-800">{result.nakshatra.pada}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700">Ruling Planet:</span>
+                          <span className="text-gray-800">{result.nakshatra.ruling_planet}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-100">
+                          <span className="font-semibold text-gray-700">Deity:</span>
+                          <span className="text-gray-800">{result.nakshatra.deity}</span>
+                        </div>
+                        <div className="py-2">
+                          <span className="font-semibold text-gray-700 block mb-1">Symbol:</span>
+                          <span className="text-gray-600 text-sm">{result.nakshatra.symbol}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Planetary Positions */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Planetary Positions</h3>
-                  <div className="space-y-4">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-3xl">🪐</span> Planetary Positions
+                  </h3>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(result.planetary_positions || result.planets || {}).map(([planet, position]) => {
-                      // Handle both object format {house, sign} and string format
                       const sign = isPlanetaryPosition(position) ? position.sign : position as string;
                       const house = isPlanetaryPosition(position) ? position.house : null;
 
                       return (
-                        <div key={planet} className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="font-semibold text-gray-700 capitalize">{planet}:</span>
-                          <span className="text-gray-800">
-                            {sign}{house ? ` (House ${house})` : ''}
-                          </span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Special Yogas */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Special Yogas</h3>
-                  <div className="space-y-3">
-                    {(result.yogas || []).map((yoga, index) => {
-                      // Handle both object format {name, description, benefits} and string format
-                      const yogaName = typeof yoga === 'object' && yoga && 'name' in yoga ? (yoga as any).name : yoga as string;
-
-                      return (
-                        <div key={index} className="flex items-center gap-3">
-                          <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-gray-800">{yogaName}</span>
-                        </div>
-                      );
-                    })}
-                    {(!result.yogas || result.yogas.length === 0) && (
-                      <div className="text-gray-500 text-center py-4">
-                        No special yogas found in this chart.
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Nakshatra Details */}
-                {result.nakshatra && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Nakshatra Details</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Birth Nakshatra:</span>
-                        <span className="text-gray-800">{result.nakshatra.nakshatra}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Pada:</span>
-                        <span className="text-gray-800">{result.nakshatra.pada}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Ruling Planet:</span>
-                        <span className="text-gray-800">{result.nakshatra.ruling_planet}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Deity:</span>
-                        <span className="text-gray-800">{result.nakshatra.deity}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Symbol:</span>
-                        <span className="text-gray-800">{result.nakshatra.symbol}</span>
-                      </div>
-                      <div className="py-2">
-                        <span className="font-semibold text-gray-700 block mb-2">Characteristics:</span>
-                        <span className="text-gray-600 text-sm">{result.nakshatra.characteristics}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Dasha Periods */}
-                {result.dasha_periods && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Dasha Periods</h3>
-                    <div className="space-y-4">
-                      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg">
-                        <div className="font-semibold text-gray-700 mb-2">Current Maha Dasha:</div>
-                        <div className="text-xl font-bold text-orange-600">{result.dasha_periods.current_mahadasha}</div>
-                        <div className="text-sm text-gray-600 mt-1">Duration: {result.dasha_periods.current_duration} years</div>
-                        <div className="text-sm text-gray-600 mt-2">{result.dasha_periods.description}</div>
-                      </div>
-                      <div>
-                        <span className="font-semibold text-gray-700 block mb-3">Upcoming Periods:</span>
-                        {result.dasha_periods.upcoming_periods?.map((period, index) => (
-                          <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg">
-                            <div className="flex justify-between items-center mb-1">
-                              <span className="font-semibold text-gray-800">{period.planet} Dasha</span>
-                              <span className="text-sm text-gray-600">{period.duration_years} years</span>
-                            </div>
-                            <div className="text-sm text-gray-600">{period.effects}</div>
+                        <div key={planet} className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-lg text-blue-800 capitalize">{planet}</span>
+                            <span className="text-2xl">
+                              {planet === 'sun' && '☉'}
+                              {planet === 'moon' && '☽'}
+                              {planet === 'mars' && '♂'}
+                              {planet === 'mercury' && '☿'}
+                              {planet === 'jupiter' && '♃'}
+                              {planet === 'venus' && '♀'}
+                              {planet === 'saturn' && '♄'}
+                              {planet === 'rahu' && '☊'}
+                              {planet === 'ketu' && '☋'}
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Yogas */}
-                {result.yogas && result.yogas.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Special Yogas</h3>
-                    <div className="space-y-3">
-                      {result.yogas.map((yoga, index) => (
-                        <div key={index} className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
-                          <div className="font-semibold text-green-800 mb-2">{yoga.name}</div>
-                          <div className="text-sm text-gray-700 mb-1"><strong>Formation:</strong> {yoga.description}</div>
-                          <div className="text-sm text-gray-700"><strong>Benefits:</strong> {yoga.benefits}</div>
+                          <div className="space-y-1">
+                            <div className="text-sm text-gray-700">
+                              <span className="font-semibold">Sign:</span> {sign}
+                            </div>
+                            {house && (
+                              <div className="text-sm text-gray-700">
+                                <span className="font-semibold">House:</span> {house}
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
-                )}
+                </div>
 
-                {/* Doshas */}
-                {result.doshas && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Dosha Analysis</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Total Doshas:</span>
-                        <span className="text-gray-800">{result.doshas.total_doshas}</span>
-                      </div>
-                      <div className="py-2">
-                        <span className="font-semibold text-gray-700 block mb-2">Recommendation:</span>
-                        <span className="text-gray-800">{result.doshas.recommendation}</span>
-                      </div>
-                      {result.doshas.doshas && result.doshas.doshas.length > 0 && (
-                        <div className="py-2">
-                          <span className="font-semibold text-gray-700 block mb-2">Doshas Found:</span>
-                          <div className="space-y-2">
-                            {result.doshas.doshas.map((dosha, index) => (
-                              <div key={index} className="bg-red-50 p-3 rounded-lg">
-                                <div className="font-semibold text-red-800">{dosha.name}</div>
-                                <div className="text-sm text-red-600">{dosha.description}</div>
-                                <div className="text-sm text-red-600 mt-1">Remedy: {dosha.remedy}</div>
+                {/* Dasha Periods & Yogas Row */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Dasha Periods */}
+                  {result.dasha_periods && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <span className="text-2xl">⏳</span> Dasha Periods
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border-2 border-purple-200">
+                          <div className="flex items-center gap-3 mb-2">
+                            <span className="text-3xl">👑</span>
+                            <div>
+                              <div className="font-bold text-xl text-purple-800">Current Maha Dasha</div>
+                              <div className="text-purple-600 font-semibold">{result.dasha_periods.current_mahadasha}</div>
+                            </div>
+                          </div>
+                          <div className="text-sm text-gray-700 mt-2">
+                            <div><strong>Duration:</strong> {result.dasha_periods.current_duration} years</div>
+                            <div className="mt-2">{result.dasha_periods.description}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                            <span className="text-lg">🔮</span> Upcoming Periods
+                          </h4>
+                          <div className="space-y-3">
+                            {result.dasha_periods.upcoming_periods?.map((period, index) => (
+                              <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-bold text-gray-800">{period.planet} Dasha</span>
+                                  <span className="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                    {period.duration_years} years
+                                  </span>
+                                </div>
+                                <div className="text-sm text-gray-700">{period.effects}</div>
                               </div>
                             ))}
                           </div>
                         </div>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Gemstone Recommendations */}
-                {result.gemstone_recommendations && (
+                  {/* Special Yogas */}
                   <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Gemstone Recommendations</h3>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">✨</span> Special Yogas
+                    </h3>
                     <div className="space-y-4">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Primary Gemstone:</span>
-                        <span className="text-gray-800">{result.gemstone_recommendations.primary_gemstone}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Secondary Gemstone:</span>
-                        <span className="text-gray-800">{result.gemstone_recommendations.secondary_gemstone}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Wearing Finger:</span>
-                        <span className="text-gray-800">{result.gemstone_recommendations.wearing_finger}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Wearing Day:</span>
-                        <span className="text-gray-800">{result.gemstone_recommendations.wearing_day}</span>
-                      </div>
-                      {result.gemstone_recommendations.metal && (
-                        <div className="flex justify-between py-2 border-b border-gray-100">
-                          <span className="font-semibold text-gray-700">Metal:</span>
-                          <span className="text-gray-800">{result.gemstone_recommendations.metal}</span>
+                      {result.yogas && result.yogas.length > 0 ? (
+                        result.yogas.map((yoga, index) => (
+                          <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
+                            <div className="flex items-start gap-3">
+                              <span className="text-2xl">🪄</span>
+                              <div className="flex-1">
+                                <div className="font-bold text-green-800 mb-2">{yoga.name}</div>
+                                <div className="text-sm text-gray-700 mb-1">
+                                  <strong>Formation:</strong> {yoga.description}
+                                </div>
+                                <div className="text-sm text-gray-700">
+                                  <strong>Benefits:</strong> {yoga.benefits}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-8 text-gray-500">
+                          <span className="text-4xl mb-2 block">🌟</span>
+                          <p>No special yogas found in this chart.</p>
+                          <p className="text-sm mt-1">This doesn't indicate any problems - many charts don't have rare yogas.</p>
                         </div>
                       )}
-                      <div className="py-2">
-                        <span className="font-semibold text-gray-700 block mb-2">Benefits:</span>
-                        <span className="text-gray-800">{result.gemstone_recommendations.benefits}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Additional Info (fallback for local calculation) */}
-                {!result.doshas && (
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Additional Information</h3>
-                    <div className="space-y-4">
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Guna Score:</span>
-                        <span className="text-gray-800">{result.guna}/36</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="font-semibold text-gray-700">Manglik:</span>
-                        <span className="text-gray-800">{result.manglik}</span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="font-semibold text-gray-700">Rashi:</span>
-                        <span className="text-gray-800">{result.rashi}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-                {/* Detailed Predictions */}
-              {(result.detailed_predictions || result.predictions) && (
-                <div className="bg-white rounded-2xl shadow-lg p-8 lg:col-span-2">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Detailed Predictions</h3>
-                  <div className="space-y-6">
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800 mb-2">🧑 Personality</h4>
-                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.personality || 'No data available for personality.'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800 mb-2">💼 Career</h4>
-                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.career || 'No data available for career.'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800 mb-2">❤️ Relationships</h4>
-                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.relationships || 'No data available for relationships.'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800 mb-2">🏥 Health</h4>
-                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.health || 'No data available for health.'}</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-lg text-gray-800 mb-2">💰 Finance</h4>
-                      <p className="text-gray-700">{(result.detailed_predictions || result.predictions)?.finance || 'No data available for finance.'}</p>
-                    </div>
-                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
-                      <h4 className="font-semibold text-lg text-gray-800 mb-4">🍀 Lucky Elements</h4>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <span className="font-semibold text-gray-700">Color:</span>
-                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.color || '—'}</span>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-gray-700">Day:</span>
-                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.day || '—'}</span>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-gray-700">Number:</span>
-                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.number || '—'}</span>
-                        </div>
-                        <div>
-                          <span className="font-semibold text-gray-700">Gemstone:</span>
-                          <span className="text-gray-800 ml-2">{(result.detailed_predictions || result.predictions)?.lucky_elements?.gemstone || '—'}</span>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
-              )}
-              
-              {/* CTA */}
-              <div className="text-center mt-12 lg:col-span-2">
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Want Detailed Analysis?
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a comprehensive consultation with Dr. Arup Shastri for detailed predictions, 
-                    remedies, and personalized guidance.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Consultation
-                  </a>
+
+                {/* Doshas & Remedies Row */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Dosha Analysis */}
+                  {result.doshas && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <span className="text-2xl">⚠️</span> Dosha Analysis
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="bg-gradient-to-r from-red-50 to-orange-50 p-4 rounded-lg border-2 border-red-200">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-red-800">Total Doshas Found</span>
+                            <span className="text-2xl font-bold text-red-600">{result.doshas.total_doshas}</span>
+                          </div>
+                          <div className="text-sm text-gray-700">{result.doshas.recommendation}</div>
+                        </div>
+
+                        {result.doshas.doshas && result.doshas.doshas.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold text-gray-800 mb-3">Specific Doshas</h4>
+                            <div className="space-y-3">
+                              {result.doshas.doshas.map((dosha, index) => (
+                                <div key={index} className="bg-red-50 p-4 rounded-lg border border-red-200">
+                                  <div className="flex items-start gap-3 mb-2">
+                                    <span className="text-xl">🚨</span>
+                                    <div>
+                                      <div className="font-bold text-red-800">{dosha.name}</div>
+                                      <span className={`text-xs px-2 py-1 rounded ${
+                                        dosha.severity === 'High' ? 'bg-red-200 text-red-800' :
+                                        dosha.severity === 'Medium' ? 'bg-yellow-200 text-yellow-800' :
+                                        'bg-green-200 text-green-800'
+                                      }`}>
+                                        {dosha.severity} Severity
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="text-sm text-red-700 mb-2">{dosha.description}</div>
+                                  <div className="text-sm text-red-700">
+                                    <strong>Remedy:</strong> {dosha.remedy}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gemstone Recommendations */}
+                  {result.gemstone_recommendations && (
+                    <div className="bg-white rounded-2xl shadow-lg p-8">
+                      <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                        <span className="text-2xl">💎</span> Gemstone Recommendations
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
+                            <div className="text-center mb-2">
+                              <span className="text-3xl">💍</span>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-bold text-blue-800 text-lg">Primary</div>
+                              <div className="text-blue-600 font-semibold">{result.gemstone_recommendations.primary_gemstone}</div>
+                            </div>
+                          </div>
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                            <div className="text-center mb-2">
+                              <span className="text-3xl">💎</span>
+                            </div>
+                            <div className="text-center">
+                              <div className="font-bold text-purple-800 text-lg">Secondary</div>
+                              <div className="text-purple-600 font-semibold">{result.gemstone_recommendations.secondary_gemstone}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="font-semibold text-gray-700">Wearing Finger:</span>
+                            <span className="text-gray-800">{result.gemstone_recommendations.wearing_finger}</span>
+                          </div>
+                          <div className="flex justify-between py-2 border-b border-gray-100">
+                            <span className="font-semibold text-gray-700">Wearing Day:</span>
+                            <span className="text-gray-800">{result.gemstone_recommendations.wearing_day}</span>
+                          </div>
+                          {result.gemstone_recommendations.metal && (
+                            <div className="flex justify-between py-2 border-b border-gray-100">
+                              <span className="font-semibold text-gray-700">Metal:</span>
+                              <span className="text-gray-800">{result.gemstone_recommendations.metal}</span>
+                            </div>
+                          )}
+                          <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                            <div className="font-semibold text-yellow-800 mb-1">Benefits:</div>
+                            <div className="text-sm text-yellow-700">{result.gemstone_recommendations.benefits}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Detailed Predictions */}
+                {(result.detailed_predictions || result.predictions) && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">🔮</span> Detailed Life Predictions
+                    </h3>
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="space-y-6">
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+                          <h4 className="font-bold text-xl text-purple-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🧑</span> Personality
+                          </h4>
+                          <p className="text-gray-700 leading-relaxed">
+                            {(result.detailed_predictions || result.predictions)?.personality || 'No personality analysis available.'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                          <h4 className="font-bold text-xl text-blue-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">💼</span> Career
+                          </h4>
+                          <p className="text-gray-700 leading-relaxed">
+                            {(result.detailed_predictions || result.predictions)?.career || 'No career analysis available.'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg border border-pink-200">
+                          <h4 className="font-bold text-xl text-pink-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">❤️</span> Relationships
+                          </h4>
+                          <p className="text-gray-700 leading-relaxed">
+                            {(result.detailed_predictions || result.predictions)?.relationships || 'No relationship analysis available.'}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                          <h4 className="font-bold text-xl text-green-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🏥</span> Health
+                          </h4>
+                          <p className="text-gray-700 leading-relaxed">
+                            {(result.detailed_predictions || result.predictions)?.health || 'No health analysis available.'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg border border-yellow-200">
+                          <h4 className="font-bold text-xl text-yellow-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">💰</span> Finance
+                          </h4>
+                          <p className="text-gray-700 leading-relaxed">
+                            {(result.detailed_predictions || result.predictions)?.finance || 'No financial analysis available.'}
+                          </p>
+                        </div>
+
+                        <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                          <h4 className="font-bold text-xl text-indigo-800 mb-3 flex items-center gap-2">
+                            <span className="text-2xl">🍀</span> Lucky Elements
+                          </h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-semibold text-gray-700 block">Colors</span>
+                              <span className="text-indigo-600">
+                                {(result.detailed_predictions || result.predictions)?.lucky_elements?.color || '—'}
+                              </span>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-semibold text-gray-700 block">Days</span>
+                              <span className="text-indigo-600">
+                                {(result.detailed_predictions || result.predictions)?.lucky_elements?.day || '—'}
+                              </span>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-semibold text-gray-700 block">Numbers</span>
+                              <span className="text-indigo-600">
+                                {(result.detailed_predictions || result.predictions)?.lucky_elements?.number || '—'}
+                              </span>
+                            </div>
+                            <div className="bg-white p-3 rounded border">
+                              <span className="font-semibold text-gray-700 block">Gemstones</span>
+                              <span className="text-indigo-600">
+                                {(result.detailed_predictions || result.predictions)?.lucky_elements?.gemstone || '—'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Nakshatra Characteristics (if available) */}
+                {result.nakshatra?.characteristics && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">🌟</span> Nakshatra Characteristics
+                    </h3>
+                    <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-200">
+                      <p className="text-gray-700 leading-relaxed">
+                        {result.nakshatra.characteristics}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl shadow-lg p-8 border-2 border-orange-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">👨‍⚕️</span> Want Detailed Analysis?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive consultation with Dr. Arup Shastri for detailed predictions,
+                      personalized remedies, gemstone recommendations, and life guidance based on your complete birth chart.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Personal Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

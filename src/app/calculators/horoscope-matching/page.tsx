@@ -405,130 +405,357 @@ export default function HoroscopeMatchingPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Compatibility Results</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Marriage Compatibility Dashboard</h2>
                 <p className="text-lg text-gray-600">
-                  Analysis for {result.maleName} & {result.femaleName}
+                  Comprehensive analysis for {result.male_details?.name || formData.maleName} & {result.female_details?.name || formData.femaleName}
                 </p>
               </div>
 
-              {/* Overall Score */}
-              <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8">
-                <div className="text-center">
-                  <div className="text-6xl font-bold text-pink-600 mb-4">
-                    {result.totalScore}/{result.maxScore}
-                  </div>
-                  <div className="text-3xl font-bold text-gray-800 mb-2">
-                    {result.percentage}% Compatibility
-                  </div>
-                  <div className="text-xl text-gray-600 mb-6">
-                    {result.compatibility} Match
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-4 mb-6">
-                    <div 
-                      className="bg-gradient-to-r from-pink-500 to-rose-600 h-4 rounded-full transition-all duration-1000"
-                      style={{ width: `${result.percentage}%` }}
-                    ></div>
-                  </div>
-                  <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-                    {result.recommendation}
-                  </p>
-                </div>
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-pink-600 bg-pink-50 border-2 border-pink-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
+                  Compatibility
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
+                  Strengths
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-pink-600 hover:bg-pink-50 transition-colors">
+                  Remedies
+                </button>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Detailed Scores */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Detailed Analysis</h3>
-                  <div className="space-y-4">
-                    {Object.entries(result.details).map(([key, detail]) => (
-                      <div key={key} className="flex justify-between items-center py-3 border-b border-gray-100">
-                        <div>
-                          <span className="font-semibold text-gray-800 capitalize">
-                            {key.replace(/([A-Z])/g, ' $1').trim()}:
-                          </span>
-                          <div className="text-sm text-gray-600">
-                            {(detail as { score: number; maxScore: number }).score}/
-                            {(detail as { score: number; maxScore: number }).maxScore} points
+              <div className="space-y-8">
+                {/* Overall Compatibility Score */}
+                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-40 h-40 bg-gradient-to-br from-pink-100 to-rose-100 border-4 border-pink-300 rounded-full mb-6">
+                      <div className="text-center">
+                        <div className={`text-4xl font-bold mb-1 ${
+                          (result.compatibility?.score || result.percentage) >= 75 ? 'text-green-600' :
+                          (result.compatibility?.score || result.percentage) >= 60 ? 'text-yellow-600' :
+                          'text-red-600'
+                        }`}>
+                          {(result.compatibility?.score || result.percentage) >= 75 && '💕'}
+                          {(result.compatibility?.score || result.percentage) >= 60 && (result.compatibility?.score || result.percentage) < 75 && '👍'}
+                          {(result.compatibility?.score || result.percentage) < 60 && '⚠️'}
+                        </div>
+                        <div className="text-sm font-bold text-gray-800">
+                          {result.compatibility?.status || result.compatibility}
+                        </div>
+                      </div>
+                    </div>
+                    <h3 className="text-4xl font-bold text-gray-800 mb-2">
+                      {result.compatibility?.score || result.percentage}% Compatibility Score
+                    </h3>
+                    <p className="text-xl text-gray-600 mb-6">
+                      {result.totalScore || (result.compatibility?.score || result.percentage)} out of {result.maxScore || 36} points
+                    </p>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="flex justify-between items-center text-lg">
+                      <span className="font-semibold text-gray-700">Overall Compatibility:</span>
+                      <span className={`font-bold text-xl ${
+                        (result.compatibility?.score || result.percentage) >= 75 ? 'text-green-600' :
+                        (result.compatibility?.score || result.percentage) >= 60 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {(result.compatibility?.score || result.percentage) >= 75 && 'Excellent Match'}
+                        {(result.compatibility?.score || result.percentage) >= 60 && (result.compatibility?.score || result.percentage) < 75 && 'Good Match'}
+                        {(result.compatibility?.score || result.percentage) < 60 && 'Needs Attention'}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-6">
+                      <div
+                        className={`h-6 rounded-full transition-all duration-1000 ${
+                          (result.compatibility?.score || result.percentage) >= 75 ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                          (result.compatibility?.score || result.percentage) >= 60 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' :
+                          'bg-gradient-to-r from-red-400 to-red-600'
+                        }`}
+                        style={{
+                          width: `${result.compatibility?.score || result.percentage}%`
+                        }}
+                      ></div>
+                    </div>
+                    <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-lg border border-pink-200">
+                      <p className="text-gray-700 text-lg leading-relaxed">
+                        {result.recommendation || result.compatibility?.description || 'This compatibility analysis is based on traditional Vedic astrology principles including the 36 Guna matching system.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partner Profiles */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border-2 border-blue-200">
+                    <div className="text-center mb-6">
+                      <div className="w-20 h-20 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl text-white">👨</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-blue-800">
+                        {result.male_details?.name || formData.maleName}
+                      </h3>
+                      <p className="text-blue-600">Male Partner</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between py-2 border-b border-blue-200">
+                        <span className="font-semibold text-blue-700">Zodiac Sign:</span>
+                        <span className="text-blue-800">{result.male_details?.zodiac_sign || 'Aries'}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-blue-200">
+                        <span className="font-semibold text-blue-700">Birth Date:</span>
+                        <span className="text-blue-800">{result.male_details?.birth_date || formData.maleBirthDate}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="font-semibold text-blue-700">Birth Place:</span>
+                        <span className="text-blue-800">{result.male_details?.birth_place || formData.maleBirthPlace}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-2xl p-8 border-2 border-pink-200">
+                    <div className="text-center mb-6">
+                      <div className="w-20 h-20 bg-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl text-white">👩</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-pink-800">
+                        {result.female_details?.name || formData.femaleName}
+                      </h3>
+                      <p className="text-pink-600">Female Partner</p>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex justify-between py-2 border-b border-pink-200">
+                        <span className="font-semibold text-pink-700">Zodiac Sign:</span>
+                        <span className="text-pink-800">{result.female_details?.zodiac_sign || 'Taurus'}</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-pink-200">
+                        <span className="font-semibold text-pink-700">Birth Date:</span>
+                        <span className="text-pink-800">{result.female_details?.birth_date || formData.femaleBirthDate}</span>
+                      </div>
+                      <div className="flex justify-between py-2">
+                        <span className="font-semibold text-pink-700">Birth Place:</span>
+                        <span className="text-pink-800">{result.female_details?.birth_place || formData.femaleBirthPlace}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detailed 36 Guna Analysis */}
+                {result.details && (
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">📊</span> 36 Guna Matching Analysis
+                    </h3>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      {Object.entries(result.details).map(([key, detail]) => (
+                        <div key={key} className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-lg border border-gray-200">
+                          <div className="text-center mb-3">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
+                              (detail as { status: string }).status === 'Excellent' ? 'bg-green-100 text-green-600' :
+                              (detail as { status: string }).status === 'Good' ? 'bg-blue-100 text-blue-600' :
+                              'bg-red-100 text-red-600'
+                            }`}>
+                              <span className="font-bold text-lg">
+                                {(detail as { score: number }).score}/{(detail as { maxScore: number }).maxScore}
+                              </span>
+                            </div>
+                            <h4 className="font-bold text-gray-800 capitalize">
+                              {key.replace(/([A-Z])/g, ' $1').trim()}
+                            </h4>
+                          </div>
+                          <div className={`text-center px-2 py-1 rounded-full text-xs font-semibold ${
+                            (detail as { status: string }).status === 'Excellent' ? 'bg-green-200 text-green-800' :
+                            (detail as { status: string }).status === 'Good' ? 'bg-blue-200 text-blue-800' :
+                            'bg-red-200 text-red-800'
+                          }`}>
+                            {(detail as { status: string }).status}
                           </div>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                          (detail as { status: string }).status === 'Excellent' ? 'bg-green-100 text-green-800' :
-                          (detail as { status: string }).status === 'Good' ? 'bg-blue-100 text-blue-800' :
-                          (detail as { status: string }).status === 'Average' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
-                        }`}>
-                          {(detail as { status: string }).status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Strengths & Challenges */}
-                <div className="space-y-8">
-                  <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Strengths</h3>
-                    <div className="space-y-3">
-                      {result.strengths.map((strength, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <svg className="w-5 h-5 text-green-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          <span className="text-gray-700">{strength}</span>
-                        </div>
                       ))}
                     </div>
+
+                    <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+                      <h4 className="font-semibold text-indigo-800 mb-2">Understanding the 36 Guna System:</h4>
+                      <p className="text-indigo-700 text-sm">
+                        The 36 Guna matching system evaluates 8 different aspects of compatibility: Varna (Spiritual), Vashya (Dominance),
+                        Tara (Destiny), Yoni (Nature), Graha Maitri (Compatibility), Gana (Temperament), Bhakoot (Love), and Nadi (Health).
+                        Each aspect contributes points towards the overall compatibility score.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Relationship Strengths & Challenges */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">💪</span> Relationship Strengths
+                    </h3>
+                    <div className="space-y-4">
+                      {result.strengths?.map((strength, index) => (
+                        <div key={index} className="flex items-start gap-3 bg-green-50 p-4 rounded-lg border border-green-200">
+                          <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                          <span className="text-gray-700 font-medium">{strength}</span>
+                        </div>
+                      )) || (
+                        <div className="text-center py-8 text-gray-500">
+                          <span className="text-4xl mb-2 block">🌟</span>
+                          <p>No specific strengths identified in this analysis.</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="bg-white rounded-2xl shadow-lg p-8">
-                    <h3 className="text-2xl font-bold text-gray-800 mb-6">Challenges</h3>
-                    <div className="space-y-3">
-                      {result.challenges.map((challenge, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <svg className="w-5 h-5 text-orange-500 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                          <span className="text-gray-700">{challenge}</span>
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                      <span className="text-2xl">⚠️</span> Potential Challenges
+                    </h3>
+                    <div className="space-y-4">
+                      {result.challenges?.map((challenge, index) => (
+                        <div key={index} className="flex items-start gap-3 bg-orange-50 p-4 rounded-lg border border-orange-200">
+                          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                          </div>
+                          <span className="text-gray-700 font-medium">{challenge}</span>
                         </div>
-                      ))}
+                      )) || (
+                        <div className="text-center py-8 text-gray-500">
+                          <span className="text-4xl mb-2 block">✨</span>
+                          <p>No major challenges identified in this analysis.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Remedies */}
-              <div className="mt-8 bg-white rounded-2xl shadow-lg p-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">Recommended Remedies</h3>
-                <div className="grid md:grid-cols-2 gap-6">
-                  {result.remedies.map((remedy, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="w-8 h-8 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="font-bold text-sm">{index + 1}</span>
-                      </div>
-                      <span className="text-gray-700">{remedy}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* CTA */}
-              <div className="text-center mt-12">
+                {/* Remedies & Recommendations */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Need More Detailed Analysis?
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🛡️</span> Remedies & Recommendations
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a comprehensive marriage compatibility consultation with Dr. Arup Shastri 
-                    for detailed predictions and personalized remedies.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-pink-600 hover:to-rose-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Marriage Consultation
-                  </a>
+
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {result.remedies?.map((remedy, index) => (
+                        <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-white font-bold text-sm">{index + 1}</span>
+                            </div>
+                            <span className="text-purple-700 font-medium">{remedy}</span>
+                          </div>
+                        </div>
+                      )) || (
+                        <div className="text-center py-8 text-gray-500 col-span-full">
+                          <span className="text-4xl mb-2 block">🙏</span>
+                          <p>Consult an astrologer for personalized remedies based on your specific charts.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-blue-800 mb-3">General Marriage Tips:</h4>
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">💕</span>
+                            <span className="text-blue-700 text-sm">Communicate openly about expectations</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">🤝</span>
+                            <span className="text-blue-700 text-sm">Respect each other's family traditions</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">🎯</span>
+                            <span className="text-blue-700 text-sm">Set common goals and work together</span>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">🧘</span>
+                            <span className="text-blue-700 text-sm">Practice meditation together</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">🙏</span>
+                            <span className="text-blue-700 text-sm">Visit temples and perform pujas</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-blue-500">💪</span>
+                            <span className="text-blue-700 text-sm">Build mutual understanding and patience</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compatibility Insights */}
+                <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl p-8 border-2 border-emerald-200">
+                  <h3 className="text-2xl font-bold text-emerald-800 mb-6 text-center">
+                    💡 Compatibility Insights
+                  </h3>
+
+                  <div className="grid md:grid-cols-3 gap-6 text-center">
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl mb-2">👥</div>
+                      <h4 className="font-bold text-emerald-800 mb-2">Communication</h4>
+                      <p className="text-sm text-emerald-700">
+                        {(result.compatibility?.score || result.percentage) >= 70 ? 'Excellent communication flow between partners' :
+                         (result.compatibility?.score || result.percentage) >= 50 ? 'Good communication with minor differences' :
+                         'May need to work on communication styles'}
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl mb-2">💰</div>
+                      <h4 className="font-bold text-emerald-800 mb-2">Finance</h4>
+                      <p className="text-sm text-emerald-700">
+                        {(result.compatibility?.score || result.percentage) >= 70 ? 'Harmonious financial planning' :
+                         (result.compatibility?.score || result.percentage) >= 50 ? 'Compatible with some financial discussions needed' :
+                         'May need careful financial planning'}
+                      </p>
+                    </div>
+
+                    <div className="bg-white p-4 rounded-lg shadow-sm">
+                      <div className="text-2xl mb-2">👨‍👩‍👧‍👦</div>
+                      <h4 className="font-bold text-emerald-800 mb-2">Family Life</h4>
+                      <p className="text-sm text-emerald-700">
+                        {(result.compatibility?.score || result.percentage) >= 70 ? 'Strong foundation for family life' :
+                         (result.compatibility?.score || result.percentage) >= 50 ? 'Good potential for happy family life' :
+                         'May require extra effort for family harmony'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-pink-50 to-rose-50 rounded-2xl shadow-lg p-8 border-2 border-pink-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">💒</span> Need Detailed Marriage Consultation?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive marriage compatibility analysis with Dr. Arup Shastri including detailed
+                      predictions, dosha analysis, gemstone recommendations, and personalized remedies for a successful marriage.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-pink-500 to-rose-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-pink-600 hover:to-rose-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Marriage Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

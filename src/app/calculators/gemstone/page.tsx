@@ -307,117 +307,344 @@ export default function GemstoneCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Gemstone Recommendations</h2>
-                <p className="text-lg text-gray-600">Personalized gemstone analysis for {result.name}</p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Gemstone Recommendations Dashboard</h2>
+                <p className="text-lg text-gray-600">Complete gemstone analysis for {result.name}</p>
               </div>
 
-              {/* Gemstone Cards */}
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-yellow-600 bg-yellow-50 border-2 border-yellow-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                  Gemstones
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                  Wearing Guide
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                  Care Tips
+                </button>
+              </div>
+
               <div className="space-y-8">
-                {result.gemstones.map((gemstone, index) => (
-                  <div key={index} className={`bg-white rounded-2xl shadow-lg p-8 border-2 ${getPriorityColor(gemstone.priority)}`}>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-3xl font-bold text-gray-800">{gemstone.name}</h3>
-                      <span className={`px-4 py-2 rounded-full text-sm font-semibold ${getPriorityColor(gemstone.priority)}`}>
-                        {gemstone.priority}
-                      </span>
+                {/* Overview Summary */}
+                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-yellow-100 to-orange-100 border-4 border-yellow-300 rounded-full mb-6">
+                      <span className="text-6xl">💎</span>
                     </div>
-                    
-                    <div className="grid lg:grid-cols-2 gap-8">
-                      <div>
-                        <div className="space-y-4 mb-6">
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Planet:</span>
-                            <span className="text-gray-800">{gemstone.planet}</span>
+                    <h3 className="text-4xl font-bold text-gray-800 mb-2">Gemstone Analysis Complete</h3>
+                    <p className="text-xl text-gray-600 mb-6">
+                      {result.totalRecommendations} Personalized Gemstone{result.totalRecommendations !== 1 ? 's' : ''} Recommended
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg border border-red-200 text-center">
+                      <div className="text-3xl mb-2">💍</div>
+                      <div className="font-bold text-red-800 text-lg">Primary Gemstone</div>
+                      <div className="text-red-600 font-semibold">
+                        {result.gemstones.find(g => g.priority === 'Primary')?.name || 'Not Found'}
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 text-center">
+                      <div className="text-3xl mb-2">💎</div>
+                      <div className="font-bold text-blue-800 text-lg">Secondary Gemstone</div>
+                      <div className="text-blue-600 font-semibold">
+                        {result.gemstones.find(g => g.priority === 'Secondary')?.name || 'Optional'}
+                      </div>
+                    </div>
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200 text-center">
+                      <div className="text-3xl mb-2">✨</div>
+                      <div className="font-bold text-purple-800 text-lg">Best Wearing Time</div>
+                      <div className="text-purple-600 font-semibold">{result.bestWearingTime}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detailed Gemstone Cards */}
+                <div className="space-y-8">
+                  {result.gemstones.map((gemstone, index) => (
+                    <div key={index} className={`bg-white rounded-2xl shadow-lg p-8 border-l-4 ${getPriorityColor(gemstone.priority)}`}>
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-3xl ${
+                            gemstone.priority === 'Primary' ? 'bg-red-100 text-red-600' :
+                            gemstone.priority === 'Secondary' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-blue-100 text-blue-600'
+                          }`}>
+                            💎
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Color:</span>
-                            <span className="text-gray-800">{gemstone.color}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Price Range:</span>
-                            <span className="text-gray-800">{gemstone.price}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Finger:</span>
-                            <span className="text-gray-800">{gemstone.finger}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Metal:</span>
-                            <span className="text-gray-800">{gemstone.metal}</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <span className="font-semibold text-gray-700">Wearing Time:</span>
-                            <span className="text-gray-800">{gemstone.wearingTime}</span>
+                          <div>
+                            <h3 className="text-3xl font-bold text-gray-800">{gemstone.name}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getPriorityColor(gemstone.priority)}`}>
+                                {gemstone.priority}
+                              </span>
+                              <span className="text-gray-600">• {gemstone.planet} Planet</span>
+                            </div>
                           </div>
                         </div>
-                        
-                        <p className="text-gray-700 leading-relaxed mb-4">{gemstone.recommendation}</p>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold text-gray-800">{gemstone.price}</div>
+                          <div className="text-sm text-gray-600">Price Range</div>
+                        </div>
                       </div>
-                      
-                      <div>
-                        <h4 className="text-lg font-semibold text-gray-800 mb-4">Benefits</h4>
-                        <div className="space-y-2">
-                          {gemstone.benefits.map((benefit, benefitIndex) => (
-                            <div key={benefitIndex} className="flex items-center gap-3">
-                              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+
+                      <div className="grid lg:grid-cols-2 gap-8">
+                        <div>
+                          <div className="grid grid-cols-2 gap-4 mb-6">
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <div className="text-sm font-semibold text-gray-700">Color</div>
+                              <div className="font-bold text-gray-800">{gemstone.color}</div>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <div className="text-sm font-semibold text-gray-700">Finger</div>
+                              <div className="font-bold text-gray-800">{gemstone.finger}</div>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <div className="text-sm font-semibold text-gray-700">Metal</div>
+                              <div className="font-bold text-gray-800">{gemstone.metal}</div>
+                            </div>
+                            <div className="bg-gray-50 p-3 rounded-lg">
+                              <div className="text-sm font-semibold text-gray-700">Wearing Time</div>
+                              <div className="font-bold text-gray-800">{gemstone.wearingTime}</div>
+                            </div>
+                          </div>
+
+                          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-200">
+                            <h4 className="font-semibold text-yellow-800 mb-2">Recommendation</h4>
+                            <p className="text-yellow-700 leading-relaxed">{gemstone.recommendation}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                            <span className="text-green-500">✨</span> Benefits & Properties
+                          </h4>
+                          <div className="space-y-3">
+                            {gemstone.benefits.map((benefit, benefitIndex) => (
+                              <div key={benefitIndex} className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-200">
+                                <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span className="text-gray-700">{benefit}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Planetary Connection */}
+                      <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 p-4 rounded-lg border border-indigo-200">
+                        <h4 className="font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+                          <span className="text-xl">🪐</span> Planetary Connection
+                        </h4>
+                        <p className="text-indigo-700">
+                          This gemstone is associated with {gemstone.planet}, the planet that influences {gemstone.planet.toLowerCase()}-related
+                          aspects of your life. Wearing this gemstone can help balance and strengthen the positive influences of this planet in your birth chart.
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Wearing Guidelines */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">📋</span> Wearing Guidelines & Instructions
+                  </h3>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200">
+                        <h4 className="font-bold text-green-800 mb-4 flex items-center gap-2">
+                          <span className="text-xl">⏰</span> Best Wearing Time
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                              <span className="text-green-800 font-bold">1</span>
+                            </div>
+                            <span className="text-green-700">{result.bestWearingTime}</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                              <span className="text-green-800 font-bold">2</span>
+                            </div>
+                            <span className="text-green-700">During planetary hours (consult astrologer)</span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                              <span className="text-green-800 font-bold">3</span>
+                            </div>
+                            <span className="text-green-700">On auspicious days (Wednesday/Thursday)</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                        <h4 className="font-bold text-blue-800 mb-4 flex items-center gap-2">
+                          <span className="text-xl">🔮</span> Wearing Rituals
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-blue-700 text-sm">Clean the gemstone with Gangajal (Ganges water)</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-blue-700 text-sm">Chant the associated planetary mantra 108 times</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-blue-700 text-sm">Wear on the specified finger and metal</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-blue-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-blue-700 text-sm">Face east while wearing and set positive intentions</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200">
+                        <h4 className="font-bold text-orange-800 mb-4 flex items-center gap-2">
+                          <span className="text-xl">⚠️</span> Important Precautions
+                        </h4>
+                        <div className="space-y-3">
+                          {result.precautions.map((precaution, index) => (
+                            <div key={index} className="flex items-start gap-3 bg-orange-50 p-3 rounded-lg border border-orange-200">
+                              <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
                               </svg>
-                              <span className="text-gray-700">{benefit}</span>
+                              <span className="text-gray-700 text-sm">{precaution}</span>
                             </div>
                           ))}
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
 
-              {/* Wearing Guidelines */}
-              <div className="mt-12 bg-white rounded-2xl shadow-lg p-8">
-                <h3 className="text-2xl font-bold text-gray-800 mb-6">Important Guidelines</h3>
-                <div className="grid md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Best Wearing Time</h4>
-                    <p className="text-gray-700 mb-4">{result.bestWearingTime}</p>
-                    <p className="text-gray-600 text-sm">
-                      Gemstones are most effective when worn during their ruling planet's hours.
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">Precautions</h4>
-                    <div className="space-y-2">
-                      {result.precautions.map((precaution, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <svg className="w-5 h-5 text-orange-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                          </svg>
-                          <span className="text-gray-700 text-sm">{precaution}</span>
+                      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+                        <h4 className="font-bold text-purple-800 mb-4 flex items-center gap-2">
+                          <span className="text-xl">🧼</span> Gemstone Maintenance
+                        </h4>
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-purple-700 text-sm">Clean with lukewarm water and mild soap weekly</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-purple-700 text-sm">Energize monthly during full moon or on auspicious days</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-purple-700 text-sm">Store in a clean, sacred place when not wearing</span>
+                          </div>
+                          <div className="flex items-start gap-3">
+                            <div className="w-6 h-6 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-purple-800 font-bold text-xs">•</span>
+                            </div>
+                            <span className="text-purple-700 text-sm">Remove during sleep, bathing, and physical activities</span>
+                          </div>
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {/* CTA */}
-              <div className="text-center mt-12">
+                {/* Gemstone Compatibility */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Need Gemstone Consultation?
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🔄</span> Gemstone Compatibility & Combinations
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a detailed gemstone consultation with Dr. Arup Shastri for personalized recommendations, 
-                    proper wearing instructions, and authentic gemstone sourcing.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Gemstone Consultation
-                  </a>
+
+                  <div className="grid md:grid-cols-2 gap-8">
+                    <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg border border-green-200">
+                      <h4 className="font-bold text-green-800 mb-4">Compatible Combinations</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                            <span className="text-green-800 font-bold">✓</span>
+                          </div>
+                          <span className="text-green-700">Ruby + Pearl (Sun + Moon)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                            <span className="text-green-800 font-bold">✓</span>
+                          </div>
+                          <span className="text-green-700">Emerald + Yellow Sapphire (Mercury + Jupiter)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-green-200 rounded-full flex items-center justify-center">
+                            <span className="text-green-800 font-bold">✓</span>
+                          </div>
+                          <span className="text-green-700">Diamond + Blue Sapphire (Venus + Saturn)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg border border-red-200">
+                      <h4 className="font-bold text-red-800 mb-4">Avoid These Combinations</h4>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-red-200 rounded-full flex items-center justify-center">
+                            <span className="text-red-800 font-bold">✗</span>
+                          </div>
+                          <span className="text-red-700">Ruby + Blue Sapphire (conflicting planets)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-red-200 rounded-full flex items-center justify-center">
+                            <span className="text-red-800 font-bold">✗</span>
+                          </div>
+                          <span className="text-red-700">Pearl + Diamond (moon-venus conflict)</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-red-200 rounded-full flex items-center justify-center">
+                            <span className="text-red-800 font-bold">✗</span>
+                          </div>
+                          <span className="text-red-700">Multiple stones of same planet</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-8 border-2 border-yellow-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">💎</span> Need Authentic Gemstones & Consultation?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive gemstone consultation with Dr. Arup Shastri for authentic gemstone sourcing,
+                      proper energizing rituals, wearing instructions, and personalized recommendations based on your complete birth chart.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-yellow-500 to-orange-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-yellow-600 hover:to-orange-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Gemstone Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

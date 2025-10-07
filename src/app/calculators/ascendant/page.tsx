@@ -367,105 +367,250 @@ export default function AscendantCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Ascendant Analysis</h2>
-                <p className="text-lg text-gray-600">Personality profile for {result.name}</p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Ascendant Dashboard</h2>
+                <p className="text-lg text-gray-600">Complete personality analysis for {result.name}</p>
               </div>
 
-              <div className="grid lg:grid-cols-2 gap-8">
-                {/* Ascendant Details */}
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-purple-600 bg-purple-50 border-2 border-purple-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                  Personality
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                  Appearance
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-colors">
+                  Compatibility
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Ascendant Overview */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-8">
-                    <div className="text-6xl font-bold text-purple-600 mb-4">{result.ascendant}</div>
-                    <div className="text-2xl text-gray-700">Your Rising Sign</div>
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-purple-100 to-violet-100 border-4 border-purple-300 rounded-full mb-4">
+                      <span className="text-5xl font-bold text-purple-600">{result.ascendant}</span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-gray-800 mb-2">Your Rising Sign</h3>
+                    <p className="text-lg text-gray-600">The mask you show to the world</p>
                   </div>
-                  
-                  <div className="space-y-4">
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Element:</span>
-                      <span className="text-gray-800">{result.element}</span>
+
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-purple-700 mb-1">Element</div>
+                        <div className="text-lg font-bold text-purple-800">{result.element}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Quality:</span>
-                      <span className="text-gray-800">{result.quality}</span>
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-purple-700 mb-1">Quality</div>
+                        <div className="text-lg font-bold text-purple-800">{result.quality}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <span className="font-semibold text-gray-700">Ruler:</span>
-                      <span className="text-gray-800">{result.ruler}</span>
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-purple-700 mb-1">Ruling Planet</div>
+                        <div className="text-lg font-bold text-purple-800">{result.ruler}</div>
+                      </div>
                     </div>
-                    <div className="flex justify-between py-2">
-                      <span className="font-semibold text-gray-700">Degree:</span>
-                      <span className="text-gray-800">{result.degree}°</span>
+                    <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-lg border border-purple-200">
+                      <div className="text-center">
+                        <div className="text-sm font-semibold text-purple-700 mb-1">Degree</div>
+                        <div className="text-lg font-bold text-purple-800">{result.degree}°</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Key Traits */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Key Traits</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    {result.traits.map((trait, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span className="text-gray-700 text-sm">{trait}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Personality */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Personality</h3>
-                  <p className="text-gray-700 leading-relaxed">{result.personality}</p>
-                </div>
-
-                {/* Appearance */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Physical Appearance</h3>
-                  <p className="text-gray-700 leading-relaxed">{result.appearance}</p>
-                </div>
-
-                {/* Career */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Career Inclinations</h3>
-                  <p className="text-gray-700">{result.career}</p>
-                </div>
-
-                {/* Compatibility */}
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-6">Ascendant Compatibility</h3>
-                  <div className="space-y-2">
-                    {result.compatibility.map((sign, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <svg className="w-4 h-4 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
-                        <span className="text-gray-700">{sign}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <div className="text-center mt-12">
-                <div className="bg-white rounded-2xl shadow-lg p-8">
-                  <h3 className="text-2xl font-bold text-gray-800 mb-4">
-                    Want Complete Chart Analysis?
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">⭐</span> Key Personality Traits
                   </h3>
-                  <p className="text-gray-600 mb-6">
-                    Get a comprehensive consultation with Dr. Arup Shastri for detailed ascendant analysis, 
-                    career guidance, and personality insights.
-                  </p>
-                  <a
-                    href="/book-appointment"
-                    className="bg-gradient-to-r from-purple-500 to-violet-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-purple-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl"
-                  >
-                    Book Consultation
-                  </a>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {result.traits.map((trait, index) => (
+                      <div key={index} className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
+                        <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <span className="text-gray-800 font-medium">{trait}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Personality Analysis */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🧑</span> Personality Analysis
+                  </h3>
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {result.personality}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Physical Appearance */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">👤</span> Physical Appearance
+                  </h3>
+                  <div className="bg-gradient-to-r from-violet-50 to-purple-50 p-6 rounded-lg border border-violet-200">
+                    <p className="text-gray-700 leading-relaxed text-lg">
+                      {result.appearance}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Career Inclinations */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">💼</span> Career Inclinations
+                  </h3>
+                  <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-200">
+                    <div className="space-y-4">
+                      <p className="text-gray-700 leading-relaxed text-lg">
+                        {result.career}
+                      </p>
+                      <div className="bg-white p-4 rounded-lg border border-indigo-200">
+                        <h4 className="font-semibold text-indigo-800 mb-3">Best Career Fields:</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                          {result.career.split(',').map((field, index) => (
+                            <div key={index} className="bg-indigo-50 px-3 py-2 rounded text-sm text-indigo-700 text-center">
+                              {field.trim()}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Compatibility Analysis */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">❤️</span> Ascendant Compatibility
+                  </h3>
+                  <div className="space-y-6">
+                    <p className="text-gray-700 text-lg leading-relaxed">
+                      Your ascendant sign has natural affinities with certain signs. These are the signs that understand your outward personality best:
+                    </p>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {result.compatibility.map((sign, index) => (
+                        <div key={index} className="bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center">
+                              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <div className="font-bold text-pink-800">{sign}</div>
+                              <div className="text-sm text-pink-600">High Compatibility</div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200">
+                      <h4 className="font-semibold text-blue-800 mb-3">Compatibility Insight:</h4>
+                      <p className="text-blue-700">
+                        People with these ascendant signs will naturally understand your communication style,
+                        first impressions, and how you approach new situations. This creates stronger initial
+                        connections and better long-term understanding.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* First Impressions */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">👀</span> First Impressions & Social Dynamics
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-emerald-50 to-green-50 p-6 rounded-lg border border-emerald-200">
+                        <h4 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🚀</span> How Others See You
+                        </h4>
+                        <p className="text-emerald-700 leading-relaxed">
+                          Your ascendant creates the first impression people have of you. It's like a social mask
+                          that determines how you're perceived in new situations and social settings.
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-lg border border-orange-200">
+                        <h4 className="font-bold text-orange-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">⚡</span> Approach to New Situations
+                        </h4>
+                        <p className="text-orange-700 leading-relaxed">
+                          Your ascendant influences how you initiate projects, meet new people, and adapt to
+                          unfamiliar environments. It governs your instinctive responses to change.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                      <h4 className="font-bold text-indigo-800 mb-3">Key Social Strengths:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">1</span>
+                          </div>
+                          <span className="text-indigo-700">Natural social adaptation</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">2</span>
+                          </div>
+                          <span className="text-indigo-700">Instinctive communication style</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">3</span>
+                          </div>
+                          <span className="text-indigo-700">Immediate situational awareness</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">4</span>
+                          </div>
+                          <span className="text-indigo-700">Adaptive behavioral patterns</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-2xl shadow-lg p-8 border-2 border-purple-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">👨‍⚕️</span> Want Complete Personality Analysis?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get a comprehensive consultation with Dr. Arup Shastri for detailed ascendant analysis,
+                      career guidance, relationship compatibility, and personalized insights based on your complete birth chart.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-purple-500 to-violet-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-purple-600 hover:to-violet-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Personality Consultation
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>

@@ -259,15 +259,62 @@ export default function RudrakshaCalculatorPage() {
         {/* Results Section */}
         {result && (
           <section className="py-20 bg-gray-50">
-            <div className="max-w-6xl mx-auto px-4">
+            <div className="max-w-7xl mx-auto px-4">
               <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-                  Your Rudraksha Recommendations
-                </h2>
-                <p className="text-lg text-gray-600">
-                  Personalized recommendations{result.personal_info?.name ? ` for ${result.personal_info.name}` : ''}
-                </p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">Your Rudraksha Dashboard</h2>
+                <p className="text-lg text-gray-600">Complete sacred bead analysis{result.personal_info?.name ? ` for ${result.personal_info.name}` : ''}</p>
               </div>
+
+              {/* Navigation Tabs */}
+              <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
+                <button className="px-6 py-3 rounded-md font-semibold text-orange-600 bg-orange-50 border-2 border-orange-200">
+                  Overview
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Recommendations
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Benefits
+                </button>
+                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-colors">
+                  Wearing Guide
+                </button>
+              </div>
+
+              <div className="space-y-8">
+                {/* Overview Summary */}
+                <div className="bg-white rounded-3xl shadow-2xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="inline-flex items-center justify-center w-32 h-32 bg-gradient-to-br from-orange-100 to-red-100 border-4 border-orange-300 rounded-full mb-6">
+                      <span className="text-5xl">📿</span>
+                    </div>
+                    <h3 className="text-4xl font-bold text-gray-800 mb-2">Rudraksha Analysis Complete</h3>
+                    <p className="text-xl text-gray-600 mb-6">
+                      Sacred Bead Recommendations Complete
+                    </p>
+                  </div>
+
+                  <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200 text-center">
+                      <div className="text-4xl mb-2">🪄</div>
+                      <div className="font-bold text-orange-800 text-lg">Primary Rudraksha</div>
+                      <div className="text-3xl font-bold text-orange-600">{result.primary_rudraksha?.mukhi || 'N/A'}</div>
+                      <div className="text-sm text-orange-600 mt-1">Mukhi Bead</div>
+                    </div>
+                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 text-center">
+                      <div className="text-4xl mb-2">🔮</div>
+                      <div className="font-bold text-blue-800 text-lg">Secondary Rudraksha</div>
+                      <div className="text-3xl font-bold text-blue-600">{result.secondary_rudraksha?.mukhi || 'Optional'}</div>
+                      <div className="text-sm text-blue-600 mt-1">Mukhi Bead</div>
+                    </div>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg border border-green-200 text-center">
+                      <div className="text-4xl mb-2">✨</div>
+                      <div className="font-bold text-green-800 text-lg">Spiritual Benefits</div>
+                      <div className="text-lg font-bold text-green-600">Enhanced</div>
+                      <div className="text-sm text-green-600 mt-1">Energy & Protection</div>
+                    </div>
+                  </div>
+                </div>
 
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Primary Rudraksha */}
@@ -392,10 +439,97 @@ export default function RudrakshaCalculatorPage() {
                 </div>
               </div>
 
-              {/* Benefits Summary */}
-              <div className="mt-8 bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-8 text-center">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">Benefits Summary</h3>
-                <p className="text-lg text-gray-700">{result.benefits_summary}</p>
+                {/* Benefits Summary */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🌟</span> Spiritual Benefits & Significance
+                  </h3>
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg border border-orange-200">
+                    <p className="text-lg text-orange-800 leading-relaxed">
+                      {result.benefits_summary || 'Rudraksha beads are sacred seeds that carry powerful spiritual energy. They help balance chakras, enhance meditation, and provide protection from negative energies while promoting overall well-being and spiritual growth.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Understanding Rudraksha */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <span className="text-2xl">🕉️</span> Understanding Rudraksha Power
+                  </h3>
+                  <div className="space-y-6">
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200">
+                        <h4 className="font-bold text-purple-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🔬</span> Scientific Perspective
+                        </h4>
+                        <p className="text-purple-700 leading-relaxed">
+                          Rudraksha beads have electromagnetic properties that influence the human bio-energy field.
+                          Each mukhi (face) resonates with different energy frequencies, creating balance in the body and mind.
+                        </p>
+                      </div>
+
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 p-6 rounded-lg border border-emerald-200">
+                        <h4 className="font-bold text-emerald-800 mb-3 flex items-center gap-2">
+                          <span className="text-xl">🧘</span> Spiritual Significance
+                        </h4>
+                        <p className="text-emerald-700 leading-relaxed">
+                          In Vedic tradition, Rudraksha represents Lord Shiva's tears. Wearing these sacred beads
+                          helps in spiritual awakening, enhances meditation, and provides protection from negative influences.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-yellow-50 to-orange-50 p-6 rounded-lg border border-yellow-200">
+                      <h4 className="font-bold text-yellow-800 mb-3">Mukhi Meaning & Benefits:</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">1 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Enlightenment & spiritual growth</p>
+                        </div>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">5 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Health, wealth & peace</p>
+                        </div>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">7 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Prosperity & success</p>
+                        </div>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">9 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Courage & protection</p>
+                        </div>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">11 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Healing & intuition</p>
+                        </div>
+                        <div className="bg-white p-3 rounded border border-yellow-200">
+                          <h5 className="font-semibold text-yellow-800">13 Mukhi</h5>
+                          <p className="text-sm text-yellow-700">Wealth & achievement</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center mt-12">
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl shadow-lg p-8 border-2 border-orange-200">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                      <span className="text-3xl">📿</span> Need Authentic Rudraksha Consultation?
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
+                      Get expert guidance from Dr. Arup Shastri for authentic Rudraksha selection,
+                      proper energization (prana pratishtha), wearing ceremonies, and personalized
+                      spiritual guidance based on your complete astrological profile.
+                    </p>
+                    <a
+                      href="/book-appointment"
+                      className="inline-block bg-gradient-to-r from-orange-500 to-red-600 text-white px-8 py-4 rounded-lg font-semibold hover:from-orange-600 hover:to-red-700 transition-all duration-300 shadow-lg hover:shadow-xl"
+                    >
+                      Book Rudraksha Consultation
+                    </a>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
