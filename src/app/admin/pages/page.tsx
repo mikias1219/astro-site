@@ -8,15 +8,13 @@ interface Page {
   title: string;
   slug: string;
   content: string;
-  meta_title?: string;
-  meta_description?: string;
-  canonical_url?: string;
-  schema_markup?: string;
-  image_alt_text?: string;
-  redirect_url?: string;
-  is_active: boolean;
+  excerpt?: string;
+  anchor_text?: string;
+  anchor_link?: string;
+  is_published: boolean;
   created_at: string;
   updated_at: string;
+  author_id?: number;
 }
 
 export default function AdminPagesPage() {
@@ -34,12 +32,9 @@ export default function AdminPagesPage() {
     title: '',
     slug: '',
     content: '',
-    meta_title: '',
-    meta_description: '',
-    canonical_url: '',
-    schema_markup: '',
-    image_alt_text: '',
-    redirect_url: '',
+    excerpt: '',
+    anchor_text: '',
+    anchor_link: '',
     is_active: true
   });
 
@@ -92,25 +87,46 @@ export default function AdminPagesPage() {
 
       const method = editingPage ? 'PUT' : 'POST';
 
+      // Prepare the data for the API
+      const submitData = {
+        title: formData.title,
+        slug: formData.slug,
+        content: formData.content,
+        excerpt: formData.excerpt || formData.content.substring(0, 200) + '...', // Use provided excerpt or auto-generate
+        anchor_text: formData.anchor_text || null,
+        anchor_link: formData.anchor_link || null,
+        is_published: formData.is_active
+      };
+
+      console.log('Submitting page data:', submitData);
+
       const response = await fetch(url, {
         method,
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(submitData)
       });
 
       if (response.ok) {
+        const result = await response.json();
+        console.log('Page saved successfully:', result);
         await fetchPages(token);
         setShowAddForm(false);
         setEditingPage(null);
         resetForm();
+        alert('✅ Page saved successfully!');
       } else {
-        setError('Failed to save page');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to save page:', errorData);
+        setError(`Failed to save page: ${errorData.detail || 'Unknown error'}`);
+        alert(`❌ Failed to save page: ${errorData.detail || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Error saving page:', error);
       setError('Failed to save page');
+      alert('❌ Failed to save page. Please check your connection.');
     }
   };
 
@@ -119,12 +135,9 @@ export default function AdminPagesPage() {
       title: '',
       slug: '',
       content: '',
-      meta_title: '',
-      meta_description: '',
-      canonical_url: '',
-      schema_markup: '',
-      image_alt_text: '',
-      redirect_url: '',
+      excerpt: '',
+      anchor_text: '',
+      anchor_link: '',
       is_active: true
     });
   };
@@ -135,19 +148,16 @@ export default function AdminPagesPage() {
       title: page.title,
       slug: page.slug,
       content: page.content,
-      meta_title: page.meta_title || '',
-      meta_description: page.meta_description || '',
-      canonical_url: page.canonical_url || '',
-      schema_markup: page.schema_markup || '',
-      image_alt_text: page.image_alt_text || '',
-      redirect_url: page.redirect_url || '',
-      is_active: page.is_active
+      excerpt: page.excerpt || '',
+      anchor_text: page.anchor_text || '',
+      anchor_link: page.anchor_link || '',
+      is_active: page.is_published
     });
     setShowAddForm(true);
   };
 
   const handleDelete = async (pageId: number) => {
-    if (!token || !confirm('Are you sure you want to delete this page?')) return;
+    if (!token || !confirm('Are you sure you want to delete this page? This action cannot be undone.')) return;
 
     try {
       const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
@@ -157,17 +167,23 @@ export default function AdminPagesPage() {
       const response = await fetch(`${baseUrl}/${pageId}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (response.ok) {
         await fetchPages(token);
+        alert('✅ Page deleted successfully!');
       } else {
-        setError('Failed to delete page');
+        const errorData = await response.json().catch(() => ({}));
+        setError(`Failed to delete page: ${errorData.detail || 'Unknown error'}`);
+        alert(`❌ Failed to delete page: ${errorData.detail || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Error deleting page:', error);
       setError('Failed to delete page');
+      alert('❌ Failed to delete page. Please check your connection.');
     }
   };
 
@@ -182,17 +198,23 @@ export default function AdminPagesPage() {
       const response = await fetch(`${baseUrl}/${pageId}/toggle`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
 
       if (response.ok) {
         await fetchPages(token);
+        alert(`✅ Page ${!currentStatus ? 'published' : 'unpublished'} successfully!`);
       } else {
-        setError('Failed to update page status');
+        const errorData = await response.json().catch(() => ({}));
+        setError(`Failed to update page status: ${errorData.detail || 'Unknown error'}`);
+        alert(`❌ Failed to update page status: ${errorData.detail || 'Unknown error'}`);
       }
     } catch (error) {
+      console.error('Error updating page status:', error);
       setError('Failed to update page status');
+      alert('❌ Failed to update page status. Please check your connection.');
     }
   };
 
@@ -273,9 +295,9 @@ export default function AdminPagesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-green-600">{pages.filter(p => p.is_active).length}</span>
+              <span className="text-2xl font-bold text-green-600">{pages.filter(p => p.is_published).length}</span>
             </div>
-            <h3 className="font-semibold text-green-900 mb-1">Active Pages</h3>
+            <h3 className="font-semibold text-green-900 mb-1">Published Pages</h3>
             <p className="text-sm text-green-700">Live on website</p>
           </div>
 
@@ -286,10 +308,10 @@ export default function AdminPagesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m4 0H8l.5 16h7L16 4z" />
                 </svg>
               </div>
-              <span className="text-2xl font-bold text-purple-600">{pages.filter(p => !p.is_active).length}</span>
+              <span className="text-2xl font-bold text-purple-600">{pages.filter(p => !p.is_published).length}</span>
             </div>
-            <h3 className="font-semibold text-purple-900 mb-1">Inactive Pages</h3>
-            <p className="text-sm text-purple-700">Hidden from public</p>
+            <h3 className="font-semibold text-purple-900 mb-1">Draft Pages</h3>
+            <p className="text-sm text-purple-700">Not yet published</p>
           </div>
         </div>
 
@@ -365,74 +387,39 @@ export default function AdminPagesPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Excerpt (Optional)</label>
+                    <textarea
+                      value={formData.excerpt}
+                      onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Brief description of the page (auto-generated from content if left empty)"
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{formData.excerpt.length} characters</p>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Title</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Anchor Text (Optional)</label>
                       <input
                         type="text"
-                        value={formData.meta_title}
-                        onChange={(e) => setFormData({ ...formData, meta_title: e.target.value })}
+                        value={formData.anchor_text}
+                        onChange={(e) => setFormData({ ...formData, anchor_text: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        placeholder="Custom SEO title (50-60 characters)"
+                        placeholder="Text for internal linking"
                       />
-                      <p className="text-sm text-gray-500 mt-1">{formData.meta_title.length}/60 characters</p>
                     </div>
                     <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">Image Alt Text</label>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">Anchor Link (Optional)</label>
                       <input
-                        type="text"
-                        value={formData.image_alt_text}
-                        onChange={(e) => setFormData({ ...formData, image_alt_text: e.target.value })}
+                        type="url"
+                        value={formData.anchor_link}
+                        onChange={(e) => setFormData({ ...formData, anchor_link: e.target.value })}
                         className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                        placeholder="Alt text for page images"
+                        placeholder="https://astroarupshastri.com/related-page"
                       />
                     </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description</label>
-                    <textarea
-                      value={formData.meta_description}
-                      onChange={(e) => setFormData({ ...formData, meta_description: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      rows={2}
-                      placeholder="SEO description for search engines (150-160 characters)"
-                    />
-                    <p className="text-sm text-gray-500 mt-1">{formData.meta_description.length}/160 characters</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Canonical URL</label>
-                    <input
-                      type="url"
-                      value={formData.canonical_url}
-                      onChange={(e) => setFormData({ ...formData, canonical_url: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="https://astroarupshastri.com/about"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Redirect URL (Optional)</label>
-                    <input
-                      type="url"
-                      value={formData.redirect_url}
-                      onChange={(e) => setFormData({ ...formData, redirect_url: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                      placeholder="Redirect old URL to this page"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Schema Markup (JSON-LD)</label>
-                    <textarea
-                      value={formData.schema_markup}
-                      onChange={(e) => setFormData({ ...formData, schema_markup: e.target.value })}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent font-mono text-sm"
-                      rows={6}
-                      placeholder='{"@context": "https://schema.org", "@type": "WebPage", ...}'
-                    />
-                    <p className="text-sm text-gray-500 mt-1">Auto-generated if left empty</p>
                   </div>
 
                   <div>
@@ -515,38 +502,38 @@ export default function AdminPagesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="space-y-1">
                         <div className="flex items-center text-xs">
-                          {page.meta_title ? (
-                            <span className="text-green-600">✓ Title</span>
+                          {page.excerpt ? (
+                            <span className="text-green-600">✓ Excerpt</span>
                           ) : (
-                            <span className="text-gray-400">○ Title</span>
+                            <span className="text-gray-400">○ Excerpt</span>
                           )}
                         </div>
                         <div className="flex items-center text-xs">
-                          {page.meta_description ? (
-                            <span className="text-green-600">✓ Desc</span>
+                          {page.anchor_text ? (
+                            <span className="text-green-600">✓ Anchor</span>
                           ) : (
-                            <span className="text-gray-400">○ Desc</span>
+                            <span className="text-gray-400">○ Anchor</span>
                           )}
                         </div>
                         <div className="flex items-center text-xs">
-                          {page.canonical_url ? (
-                            <span className="text-green-600">✓ Canonical</span>
+                          {page.anchor_link ? (
+                            <span className="text-green-600">✓ Link</span>
                           ) : (
-                            <span className="text-gray-400">○ Canonical</span>
+                            <span className="text-gray-400">○ Link</span>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
-                        onClick={() => togglePageStatus(page.id, page.is_active)}
+                        onClick={() => togglePageStatus(page.id, page.is_published)}
                         className={`px-3 py-1 text-xs font-semibold rounded-full transition-colors ${
-                          page.is_active
+                          page.is_published
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                         }`}
                       >
-                        {page.is_active ? '✅ Active' : '🚫 Inactive'}
+                        {page.is_published ? '✅ Published' : '🚫 Draft'}
                       </button>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -562,15 +549,15 @@ export default function AdminPagesPage() {
                           ✏️
                         </button>
                         <button
-                          onClick={() => togglePageStatus(page.id, page.is_active)}
+                          onClick={() => togglePageStatus(page.id, page.is_published)}
                           className={`p-2 rounded-lg transition-colors ${
-                            page.is_active
+                            page.is_published
                               ? 'text-yellow-600 hover:bg-yellow-50'
                               : 'text-green-600 hover:bg-green-50'
                           }`}
-                          title={page.is_active ? 'Deactivate' : 'Activate'}
+                          title={page.is_published ? 'Unpublish' : 'Publish'}
                         >
-                          {page.is_active ? '🔽' : '🔼'}
+                          {page.is_published ? '📥' : '📤'}
                         </button>
                         <button
                           onClick={() => handleDelete(page.id)}
