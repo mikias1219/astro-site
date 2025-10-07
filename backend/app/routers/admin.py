@@ -534,7 +534,7 @@ async def create_admin_page(
     if db.query(Page).filter(Page.slug == page.slug).first():
         raise HTTPException(status_code=400, detail="Page slug already exists")
 
-    db_page = Page(**page.dict())
+    db_page = Page(**page.dict(), author_id=current_user.id)
     db.add(db_page)
     db.commit()
     db.refresh(db_page)
