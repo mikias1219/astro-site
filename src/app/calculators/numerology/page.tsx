@@ -57,7 +57,9 @@ export default function NumerologyCalculatorPage() {
       });
 
       if (apiResult.success) {
-        setResult(apiResult.data as NumerologyResult);
+        const payload = (apiResult as any).data;
+        const unwrapped = payload && typeof payload === 'object' && 'data' in payload ? (payload as any).data : payload;
+        setResult(unwrapped as NumerologyResult);
       } else {
         setError(apiResult.error || 'Failed to calculate numerology');
       }

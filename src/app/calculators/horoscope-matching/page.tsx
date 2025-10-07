@@ -174,7 +174,9 @@ export default function HoroscopeMatchingPage() {
       const apiResult = await apiClient.calculateHoroscopeMatching(maleDetails, femaleDetails);
 
       if (apiResult.success) {
-        setResult(apiResult.data);
+        const payload = (apiResult as any).data;
+        const unwrapped = payload && typeof payload === 'object' && 'data' in payload ? (payload as any).data : payload;
+        setResult(unwrapped);
       } else {
         // Fallback to local calculation if API fails
         const compatibilityData = calculateCompatibility(
