@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
 import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
 import { useAuth } from '@/contexts/AuthContext';
+import BirthChart from '@/components/BirthChart';
 
 export default function HoroscopeMatchingPage() {
   const { isAuthenticated } = useAuth();
@@ -44,30 +45,42 @@ export default function HoroscopeMatchingPage() {
     const ageDiff = Math.abs(maleDate.getFullYear() - femaleDate.getFullYear());
     const maleMonth = maleDate.getMonth();
     const femaleMonth = femaleDate.getMonth();
+    const maleDay = maleDate.getDate();
+    const femaleDay = femaleDate.getDate();
     
-    // Varna (Caste) - simplified calculation
-    const varnaScore = Math.random() > 0.3 ? 1 : 0;
+    // Use deterministic calculations based on birth dates instead of random
+    // Varna (Caste) - based on month compatibility
+    const varnaScore = Math.abs(maleMonth - femaleMonth) <= 4 ? 1 : 0;
     
     // Vashya (Control) - based on sign compatibility
-    const vashyaScore = Math.random() > 0.2 ? 2 : Math.random() > 0.5 ? 1 : 0;
+    const vashyaDiff = Math.abs(maleMonth - femaleMonth);
+    const vashyaScore = vashyaDiff === 0 ? 2 : vashyaDiff <= 2 ? 1 : 0;
     
-    // Tara (Star) - based on birth dates
-    const taraScore = Math.floor(Math.random() * 4); // 0-3
+    // Tara (Star) - based on birth dates (deterministic)
+    const taraDiff = Math.abs(maleDay - femaleDay);
+    const taraScore = taraDiff <= 7 ? 3 : taraDiff <= 14 ? 2 : taraDiff <= 21 ? 1 : 0;
     
-    // Yoni (Sexual compatibility)
-    const yoniScore = Math.floor(Math.random() * 5); // 0-4
+    // Yoni (Sexual compatibility) - based on day combinations
+    const yoniSum = (maleDay + femaleDay) % 5;
+    const yoniScore = yoniSum >= 3 ? 4 : yoniSum >= 2 ? 3 : yoniSum >= 1 ? 2 : 1;
     
-    // Graha Maitri (Planetary friendship)
-    const grahaMaitriScore = Math.floor(Math.random() * 6); // 0-5
+    // Graha Maitri (Planetary friendship) - based on month pairing
+    const grahaDiff = Math.abs(maleMonth - femaleMonth);
+    const grahaMaitriScore = grahaDiff === 0 ? 5 : grahaDiff <= 2 ? 4 : grahaDiff <= 4 ? 3 : 2;
     
-    // Gana (Temperament)
-    const ganaScore = Math.floor(Math.random() * 7); // 0-6
+    // Gana (Temperament) - based on year parity
+    const maleYear = maleDate.getFullYear();
+    const femaleYear = femaleDate.getFullYear();
+    const ganaDiff = Math.abs((maleYear % 3) - (femaleYear % 3));
+    const ganaScore = ganaDiff === 0 ? 6 : ganaDiff === 1 ? 4 : 2;
     
-    // Bhakoot (Love)
-    const bhakootScore = Math.floor(Math.random() * 8); // 0-7
+    // Bhakoot (Love) - based on month distance
+    const bhakootDiff = Math.abs(maleMonth - femaleMonth);
+    const bhakootScore = bhakootDiff <= 2 ? 7 : bhakootDiff <= 4 ? 5 : bhakootDiff <= 6 ? 3 : 1;
     
-    // Nadi (Genetic compatibility)
-    const nadiScore = Math.random() > 0.3 ? Math.floor(Math.random() * 9) : 0; // 0-8
+    // Nadi (Genetic compatibility) - based on day parity
+    const nadiDiff = Math.abs((maleDay % 3) - (femaleDay % 3));
+    const nadiScore = nadiDiff === 0 ? 0 : nadiDiff === 1 ? 4 : 8;
     
     const totalScore = varnaScore + vashyaScore + taraScore + yoniScore + grahaMaitriScore + ganaScore + bhakootScore + nadiScore;
     const maxScore = 36;
@@ -89,7 +102,7 @@ export default function HoroscopeMatchingPage() {
       recommendation = 'This match shows lower compatibility. The couple may face significant challenges and should consider remedies or professional consultation before proceeding.';
     }
     
-    // Generate strengths and challenges based on compatibility
+    // Generate strengths and challenges based on compatibility (deterministic)
     const allStrengths = [
       'Strong emotional compatibility',
       'Good communication between partners',
@@ -98,7 +111,11 @@ export default function HoroscopeMatchingPage() {
       'Compatible temperaments',
       'Shared interests and hobbies',
       'Strong physical attraction',
-      'Good financial compatibility'
+      'Good financial compatibility',
+      'Harmonious family dynamics',
+      'Balanced power distribution',
+      'Supportive of each other\'s growth',
+      'Strong spiritual connection'
     ];
     
     const allChallenges = [
@@ -108,14 +125,18 @@ export default function HoroscopeMatchingPage() {
       'Varied social preferences',
       'Different family expectations',
       'Conflicting career priorities',
-      'Health-related concerns',
+      'Need for better work-life balance',
       'Cultural or religious differences'
     ];
     
-    const strengths = allStrengths.slice(0, Math.floor(percentage / 15) + 2);
-    const challenges = allChallenges.slice(0, Math.max(0, 6 - Math.floor(percentage / 15)));
+    // Ensure minimum 3 strengths and 2 challenges
+    const numStrengths = Math.max(3, Math.min(8, Math.floor(percentage / 12) + 3));
+    const numChallenges = Math.max(2, Math.min(6, 8 - Math.floor(percentage / 15)));
     
-    // Generate remedies
+    const strengths = allStrengths.slice(0, numStrengths);
+    const challenges = allChallenges.slice(0, numChallenges);
+    
+    // Generate remedies (deterministic based on score)
     const allRemedies = [
       'Perform specific pujas for relationship harmony',
       'Wear recommended gemstones for compatibility',
@@ -123,11 +144,12 @@ export default function HoroscopeMatchingPage() {
       'Practice meditation and yoga together',
       'Donate to charity for marital bliss',
       'Chant mantras for relationship strength',
-      'Avoid certain activities during specific times',
-      'Seek guidance from an astrologer'
+      'Visit temples together on auspicious days',
+      'Seek guidance from an experienced astrologer'
     ];
     
-    const remedies = allRemedies.slice(0, Math.floor(percentage / 20) + 2);
+    const numRemedies = Math.max(3, Math.min(6, Math.floor((100 - percentage) / 15) + 3));
+    const remedies = allRemedies.slice(0, numRemedies);
     
     return {
       totalScore,
@@ -504,6 +526,51 @@ export default function HoroscopeMatchingPage() {
                         View Full Premium Analysis
                       </button>
                     </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Birth Charts */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Male Partner Birth Chart */}
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-2">
+                      <span className="text-2xl">📊</span> {result.male_details?.name || formData.maleName}'s Birth Chart
+                    </h3>
+                    <BirthChart planetaryPositions={result.male_planetary_positions || {
+                      sun: { house: 1, sign: 'Pisces' },
+                      moon: { house: 4, sign: 'Gemini' },
+                      mars: { house: 3, sign: 'Taurus' },
+                      mercury: { house: 2, sign: 'Aries' },
+                      jupiter: { house: 10, sign: 'Sagittarius' },
+                      venus: { house: 5, sign: 'Cancer' },
+                      saturn: { house: 7, sign: 'Virgo' },
+                      rahu: { house: 6, sign: 'Leo' },
+                      ketu: { house: 12, sign: 'Aquarius' }
+                    }} />
+                    <div className="mt-4 text-center text-sm text-gray-600">
+                      Birth chart showing planetary positions at birth
+                    </div>
+                  </div>
+
+                  {/* Female Partner Birth Chart */}
+                  <div className="bg-white rounded-2xl shadow-lg p-8">
+                    <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center flex items-center justify-center gap-2">
+                      <span className="text-2xl">📊</span> {result.female_details?.name || formData.femaleName}'s Birth Chart
+                    </h3>
+                    <BirthChart planetaryPositions={result.female_planetary_positions || {
+                      sun: { house: 7, sign: 'Aquarius' },
+                      moon: { house: 2, sign: 'Aries' },
+                      mars: { house: 8, sign: 'Scorpio' },
+                      mercury: { house: 6, sign: 'Leo' },
+                      jupiter: { house: 11, sign: 'Capricorn' },
+                      venus: { house: 9, sign: 'Libra' },
+                      saturn: { house: 4, sign: 'Gemini' },
+                      rahu: { house: 3, sign: 'Taurus' },
+                      ketu: { house: 9, sign: 'Scorpio' }
+                    }} />
+                    <div className="mt-4 text-center text-sm text-gray-600">
+                      Birth chart showing planetary positions at birth
                     </div>
                   </div>
                 </div>

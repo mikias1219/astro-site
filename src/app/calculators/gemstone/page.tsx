@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import BirthChart from '@/components/BirthChart';
 
 export default function GemstoneCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -332,6 +333,27 @@ export default function GemstoneCalculatorPage() {
               </div>
 
               <div className="space-y-8">
+                {/* Birth Chart with Gemstone Connections */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Birth Chart with Planetary Gemstones</h3>
+                  <div className="flex justify-center">
+                    <BirthChart planetaryPositions={result.planetary_positions || {
+                      sun: { house: 5, sign: 'Leo' },
+                      moon: { house: 4, sign: 'Cancer' },
+                      mars: { house: 1, sign: 'Aries' },
+                      mercury: { house: 3, sign: 'Gemini' },
+                      jupiter: { house: 9, sign: 'Sagittarius' },
+                      venus: { house: 7, sign: 'Libra' },
+                      saturn: { house: 10, sign: 'Capricorn' },
+                      rahu: { house: 6, sign: 'Virgo' },
+                      ketu: { house: 12, sign: 'Pisces' }
+                    }} />
+                  </div>
+                  <div className="mt-6 text-center text-sm text-gray-600">
+                    Birth chart showing planetary positions - Each planet corresponds to a specific gemstone
+                  </div>
+                </div>
+
                 {/* Overview Summary */}
                 <div className="bg-white rounded-3xl shadow-2xl p-8">
                   <div className="text-center mb-8">

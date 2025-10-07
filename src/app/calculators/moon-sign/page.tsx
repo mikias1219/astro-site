@@ -6,6 +6,7 @@ import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
 import LoginRequiredModal from '@/components/auth/LoginRequiredModal';
 import { useAuth } from '@/contexts/AuthContext';
+import BirthChart from '@/components/BirthChart';
 
 export default function MoonSignCalculatorPage() {
   const { isAuthenticated } = useAuth();
@@ -383,6 +384,27 @@ export default function MoonSignCalculatorPage() {
               </div>
 
               <div className="space-y-8">
+                {/* Birth Chart Visualization */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Birth Chart Analysis</h3>
+                  <div className="flex justify-center">
+                    <BirthChart planetaryPositions={result.planetary_positions || {
+                      sun: { house: 5, sign: 'Leo' },
+                      moon: { house: result.moon_sign ? Math.floor((new Date(result.personal_info?.birth_date || '').getMonth() / 2.5) % 12) + 1 : 4, sign: result.moon_sign || result.moonSign || 'Cancer' },
+                      mars: { house: 3, sign: 'Aries' },
+                      mercury: { house: 6, sign: 'Virgo' },
+                      jupiter: { house: 9, sign: 'Sagittarius' },
+                      venus: { house: 7, sign: 'Libra' },
+                      saturn: { house: 10, sign: 'Capricorn' },
+                      rahu: { house: 12, sign: 'Pisces' },
+                      ketu: { house: 6, sign: 'Virgo' }
+                    }} />
+                  </div>
+                  <div className="mt-6 text-center text-sm text-gray-600">
+                    Traditional Vedic astrology birth chart showing planetary positions with emphasis on Moon placement
+                  </div>
+                </div>
+
                 {/* Moon Sign Overview */}
                 <div id="overview" className="bg-white rounded-2xl shadow-lg p-8">
                   <div className="text-center mb-8">

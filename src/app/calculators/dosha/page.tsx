@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { apiClient } from '@/lib/api';
+import BirthChart from '@/components/BirthChart';
 
 export default function DoshaCalculatorPage() {
   const [formData, setFormData] = useState({
@@ -29,12 +30,15 @@ export default function DoshaCalculatorPage() {
     const date = new Date(birthDate + 'T' + birthTime);
     const month = date.getMonth();
     const day = date.getDate();
+    const hour = date.getHours();
+    const year = date.getFullYear();
     
-    // Calculate doshas based on birth date patterns
+    // Calculate doshas based on birth date patterns (deterministic)
     const doshas = [];
     
-    // Mangal Dosha (Mars in certain houses)
-    const marsDosha = Math.random() > 0.7 ? {
+    // Mangal Dosha (Mars in certain houses) - based on day of week
+    const dayOfWeek = date.getDay();
+    const marsDosha = (dayOfWeek === 2 || day % 7 === 1 || day % 7 === 2) ? {
       name: 'Mangal Dosha',
       severity: 'High',
       description: 'Mars is placed in 1st, 2nd, 4th, 7th, 8th, or 12th house',
@@ -44,8 +48,8 @@ export default function DoshaCalculatorPage() {
     
     if (marsDosha) doshas.push(marsDosha);
     
-    // Shani Dosha (Saturn aspects)
-    const saturnDosha = Math.random() > 0.6 ? {
+    // Shani Dosha (Saturn aspects) - based on birth month
+    const saturnDosha = (month === 0 || month === 11 || day > 25) ? {
       name: 'Shani Dosha',
       severity: 'Medium',
       description: 'Saturn is causing malefic effects in your chart',
@@ -55,8 +59,8 @@ export default function DoshaCalculatorPage() {
     
     if (saturnDosha) doshas.push(saturnDosha);
     
-    // Rahu-Ketu Dosha
-    const rahuKetuDosha = Math.random() > 0.5 ? {
+    // Rahu-Ketu Dosha - based on year parity
+    const rahuKetuDosha = (year % 7 <= 2) ? {
       name: 'Rahu-Ketu Dosha',
       severity: 'Medium',
       description: 'Rahu and Ketu are causing negative effects',
@@ -66,8 +70,9 @@ export default function DoshaCalculatorPage() {
     
     if (rahuKetuDosha) doshas.push(rahuKetuDosha);
     
-    // Chandra Dosha (Moon issues)
-    const moonDosha = Math.random() > 0.8 ? {
+    // Chandra Dosha (Moon issues) - based on moon phase approximation
+    const moonPhase = day % 15;
+    const moonDosha = (moonPhase <= 3 || moonPhase >= 12) ? {
       name: 'Chandra Dosha',
       severity: 'Low',
       description: 'Moon is weak or afflicted in your chart',
@@ -77,8 +82,8 @@ export default function DoshaCalculatorPage() {
     
     if (moonDosha) doshas.push(moonDosha);
     
-    // Surya Dosha (Sun issues)
-    const sunDosha = Math.random() > 0.7 ? {
+    // Surya Dosha (Sun issues) - based on birth hour
+    const sunDosha = (hour < 6 || hour > 18) ? {
       name: 'Surya Dosha',
       severity: 'Low',
       description: 'Sun is weak or afflicted in your chart',
@@ -322,6 +327,27 @@ export default function DoshaCalculatorPage() {
               </div>
 
               <div className="space-y-8">
+                {/* Birth Chart with Dosha Indicators */}
+                <div className="bg-white rounded-2xl shadow-lg p-8">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Birth Chart with Planetary Doshas</h3>
+                  <div className="flex justify-center">
+                    <BirthChart planetaryPositions={result.planetary_positions || {
+                      sun: { house: 5, sign: 'Leo' },
+                      moon: { house: 4, sign: 'Cancer' },
+                      mars: { house: result.doshas?.find(d => d.name === 'Mangal Dosha') ? 7 : 11, sign: result.doshas?.find(d => d.name === 'Mangal Dosha') ? 'Scorpio' : 'Aquarius' },
+                      mercury: { house: 3, sign: 'Gemini' },
+                      jupiter: { house: 9, sign: 'Sagittarius' },
+                      venus: { house: 7, sign: 'Libra' },
+                      saturn: { house: result.doshas?.find(d => d.name === 'Shani Dosha') ? 12 : 10, sign: result.doshas?.find(d => d.name === 'Shani Dosha') ? 'Pisces' : 'Capricorn' },
+                      rahu: { house: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 8 : 6, sign: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Scorpio' : 'Virgo' },
+                      ketu: { house: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 2 : 12, sign: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Taurus' : 'Pisces' }
+                    }} />
+                  </div>
+                  <div className="mt-6 text-center text-sm text-gray-600">
+                    Birth chart showing planetary positions that may cause doshas in your life
+                  </div>
+                </div>
+
                 {/* Overall Health Status */}
                 <div className="bg-white rounded-3xl shadow-2xl p-8">
                   <div className="text-center mb-8">
