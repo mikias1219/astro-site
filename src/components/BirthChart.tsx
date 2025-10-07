@@ -8,14 +8,17 @@ interface PlanetaryPosition {
 }
 
 interface BirthChartProps {
-  planetaryPositions: Record<string, PlanetaryPosition | string>;
+  planetaryPositions?: Record<string, PlanetaryPosition | string> | null;
 }
 
 const BirthChart: React.FC<BirthChartProps> = ({ planetaryPositions }) => {
+  // Ensure planetaryPositions is a valid object
+  const safePlanetaryPositions = planetaryPositions || {};
+
   // Convert planetary positions to house-based format
   const getPlanetsInHouse = (houseNumber: number) => {
     const planets: string[] = [];
-    Object.entries(planetaryPositions).forEach(([planet, position]) => {
+    Object.entries(safePlanetaryPositions).forEach(([planet, position]) => {
       const house = typeof position === 'object' && position && 'house' in position ? (position as PlanetaryPosition).house : null;
       if (house === houseNumber) {
         planets.push(planet);
@@ -128,7 +131,7 @@ const BirthChart: React.FC<BirthChartProps> = ({ planetaryPositions }) => {
               <div className="text-center">
                 <div className="text-sm font-bold text-orange-800 mb-1">Lagna</div>
                 <div className="text-lg font-bold text-orange-600">
-                  {Object.entries(planetaryPositions).find(([planet, position]) =>
+                  {Object.entries(safePlanetaryPositions).find(([planet, position]) =>
                     typeof position === 'object' && position && 'house' in position && (position as PlanetaryPosition).house === 1
                   )?.[1] ? '🌅' : '⭐'}
                 </div>
@@ -160,7 +163,7 @@ const BirthChart: React.FC<BirthChartProps> = ({ planetaryPositions }) => {
         <div className="mt-6">
           <h4 className="font-semibold text-gray-800 mb-3 text-center">Planetary Symbols</h4>
           <div className="grid grid-cols-3 md:grid-cols-5 gap-3 text-center">
-            {Object.keys(planetaryPositions).map(planet => (
+            {Object.keys(safePlanetaryPositions).map(planet => (
               <div key={planet} className="flex flex-col items-center">
                 <div className="text-2xl mb-1">{getPlanetSymbol(planet)}</div>
                 <div className="text-xs text-gray-600 capitalize">{planet}</div>
