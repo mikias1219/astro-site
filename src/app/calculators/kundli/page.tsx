@@ -582,8 +582,7 @@ export default function KundliCalculatorPage() {
                       <span className="text-2xl">✨</span> Special Yogas
                     </h3>
                     <div className="space-y-4">
-                      {result.yogas && result.yogas.length > 0 ? (
-                        result.yogas.map((yoga, index) => (
+                      {result.yogas && result.yogas.length > 0 ? result.yogas.map((yoga, index) => (
                           <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                             <div className="flex items-start gap-3">
                               <span className="text-2xl">🪄</span>
@@ -598,8 +597,7 @@ export default function KundliCalculatorPage() {
                               </div>
                             </div>
                           </div>
-                        ))
-                      ) : (
+                        )) : (
                         <div className="text-center py-8 text-gray-500">
                           <span className="text-4xl mb-2 block">🌟</span>
                           <p>No special yogas found in this chart.</p>
@@ -631,7 +629,7 @@ export default function KundliCalculatorPage() {
                           <div>
                             <h4 className="font-semibold text-gray-800 mb-3">Specific Doshas</h4>
                             <div className="space-y-3">
-                              {result.doshas.doshas.map((dosha, index) => (
+                              {result.doshas.doshas && result.doshas.doshas.length > 0 ? result.doshas.doshas.map((dosha, index) => (
                                 <div key={index} className="bg-red-50 p-4 rounded-lg border border-red-200">
                                   <div className="flex items-start gap-3 mb-2">
                                     <span className="text-xl">🚨</span>
@@ -651,7 +649,7 @@ export default function KundliCalculatorPage() {
                                     <strong>Remedy:</strong> {dosha.remedy}
                                   </div>
                                 </div>
-                              ))}
+                              )) : null}
                             </div>
                           </div>
                         )}

@@ -424,7 +424,7 @@ export default function MoonSignCalculatorPage() {
                     <span className="text-2xl">💙</span> Key Emotional Traits
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {result.traits.map((trait, index) => (
+                    {result.traits && result.traits.length > 0 ? result.traits.map((trait, index) => (
                       <div key={index} className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border border-blue-200">
                         <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,7 +433,12 @@ export default function MoonSignCalculatorPage() {
                         </div>
                         <span className="text-gray-800 font-medium">{trait}</span>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <div className="text-4xl mb-2">💙</div>
+                        <p className="text-gray-500">No specific emotional traits identified</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -578,7 +583,7 @@ export default function MoonSignCalculatorPage() {
                     </p>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {result.compatibility.map((sign, index) => (
+                      {result.compatibility && result.compatibility.length > 0 ? result.compatibility.map((sign, index) => (
                         <div key={index} className="bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full flex items-center justify-center">
@@ -590,7 +595,12 @@ export default function MoonSignCalculatorPage() {
                             </div>
                           </div>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                          <div className="text-4xl mb-2">💕</div>
+                          <p className="text-gray-500">No specific compatibility signs identified</p>
+                        </div>
+                      )}
                     </div>
 
                     <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg border border-indigo-200">

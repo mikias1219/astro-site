@@ -435,7 +435,7 @@ export default function DoshaCalculatorPage() {
 
                 {/* Detailed Dosha Analysis */}
                 <div className="space-y-6">
-                  {result.doshas.map((dosha, index) => (
+                  {result.doshas && result.doshas.length > 0 ? result.doshas.map((dosha, index) => (
                     <div key={index} className="bg-white rounded-2xl shadow-lg p-8">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -513,7 +513,22 @@ export default function DoshaCalculatorPage() {
                         </p>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-12">
+                      <div className="text-6xl mb-4">✨</div>
+                      <h4 className="text-2xl font-bold text-green-600 mb-4">No Major Doshas Found</h4>
+                      <p className="text-gray-600 max-w-2xl mx-auto">
+                        Congratulations! Your birth chart analysis shows no significant planetary doshas.
+                        This indicates a naturally balanced chart with positive planetary influences.
+                      </p>
+                      <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg max-w-xl mx-auto">
+                        <p className="text-green-800 text-sm">
+                          While no doshas are present, maintaining positive spiritual practices and regular
+                          astrological consultations will help preserve this harmonious balance.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Prevention & Maintenance */}

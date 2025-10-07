@@ -367,7 +367,7 @@ export default function GemstoneCalculatorPage() {
 
                 {/* Detailed Gemstone Cards */}
                 <div className="space-y-8">
-                  {result.gemstones.map((gemstone, index) => (
+                  {result.gemstones && result.gemstones.length > 0 ? result.gemstones.map((gemstone, index) => (
                     <div key={index} className={`bg-white rounded-2xl shadow-lg p-8 border-l-4 ${getPriorityColor(gemstone.priority)}`}>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -449,7 +449,16 @@ export default function GemstoneCalculatorPage() {
                         </p>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <div className="text-6xl mb-4">💎</div>
+                      <h4 className="text-2xl font-bold text-gray-600 mb-4">No Gemstone Recommendations</h4>
+                      <p className="text-gray-500 max-w-md mx-auto">
+                        Based on your birth chart analysis, no specific gemstone recommendations are currently available.
+                        This may change based on future planetary transits.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Wearing Guidelines */}
