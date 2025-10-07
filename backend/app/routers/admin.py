@@ -591,11 +591,13 @@ async def toggle_admin_page_status(
     current_user: User = Depends(get_admin_user)
 ):
     """Toggle page published status"""
+    from datetime import datetime
     page = db.query(Page).filter(Page.id == page_id).first()
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
 
     page.is_published = not page.is_published
+    page.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(page)
     return page
