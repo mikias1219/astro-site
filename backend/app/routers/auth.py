@@ -27,36 +27,53 @@ router = APIRouter()
 @router.post("/register", response_model=EmailVerificationResponse)
 async def register(user: UserCreate, request: Request, db: Session = Depends(get_db)):
     """Register a new user with email verification"""
-    # Check if user already exists
-    if db.query(User).filter(User.email == user.email).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
+    try:
+        # Check if user already exists
+        existing_email = db.query(User).filter(User.email == user.email).first()
+        if existing_email:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        existing_username = db.query(User).filter(User.username == user.username).first()
+        if existing_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        
+        # Create new user (automatically active and verified - email verification disabled)
+        hashed_password = get_password_hash(user.password)
+        db_user = User(
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            phone=user.phone,
+            preferred_language=user.preferred_language,
+            hashed_password=hashed_password,
+            role=UserRole.USER,
+            is_active=True,   # Automatically active - no email verification required
+            is_verified=True  # Automatically verified - no email verification required
         )
-    
-    if db.query(User).filter(User.username == user.username).first():
+        
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+    except HTTPException:
+        # Re-raise HTTP exceptions (like 400 Bad Request)
+        raise
+    except Exception as e:
+        # Log and handle unexpected errors
+        import traceback
+        import sys
+        print(f"❌ Registration error: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Registration failed. Please try again later. Error: {str(e)}"
         )
-    
-    # Create new user (automatically active and verified - email verification disabled)
-    hashed_password = get_password_hash(user.password)
-    db_user = User(
-        email=user.email,
-        username=user.username,
-        full_name=user.full_name,
-        phone=user.phone,
-        preferred_language=user.preferred_language,
-        hashed_password=hashed_password,
-        role=UserRole.USER,
-        is_active=True,   # Automatically active - no email verification required
-        is_verified=True  # Automatically verified - no email verification required
-    )
-    
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
     
     # EMAIL VERIFICATION DISABLED - COMMENTED OUT FOR FUTURE USE
     # Generate verification token

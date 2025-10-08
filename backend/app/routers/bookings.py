@@ -71,35 +71,64 @@ async def create_booking(
     db: Session = Depends(get_db)
 ):
     """Create a new booking"""
-    # Verify service exists
-    service = db.query(Service).filter(Service.id == booking.service_id).first()
-    if not service:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Service not found"
+    try:
+        # Verify service exists
+        service = db.query(Service).filter(Service.id == booking.service_id).first()
+        if not service:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Service not found"
+            )
+        
+        # Check if booking date is in the future (handle both naive and timezone-aware datetimes)
+        booking_dt = booking.booking_date
+        if booking_dt.tzinfo is None:
+            # If naive datetime, assume UTC
+            booking_dt = booking_dt.replace(tzinfo=timezone.utc)
+        
+        current_dt = datetime.now(timezone.utc)
+        
+        if booking_dt < current_dt:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Booking date must be in the future"
+            )
+        
+        # Create booking
+        db_booking = Booking(
+            **booking.dict(),
+            user_id=current_user.id,
+            status=BookingStatus.PENDING
         )
-    
-    # Check if booking date is in the future
-    if booking.booking_date < datetime.now(timezone.utc):
+        
+        db.add(db_booking)
+        db.commit()
+        db.refresh(db_booking)
+        
+        # Try to send confirmation email (don't fail if email fails)
+        try:
+            email_service.send_booking_confirmation(db_booking)
+        except Exception as email_error:
+            # Log email error but don't fail the booking
+            import sys
+            print(f"⚠️  Email notification failed: {email_error}", file=sys.stderr)
+        
+        return db_booking
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        # Log and handle unexpected errors
+        import traceback
+        import sys
+        print(f"❌ Booking creation error: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Booking date must be in the future"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create booking. Please try again. Error: {str(e)}"
         )
-    
-    db_booking = Booking(
-        **booking.dict(),
-        user_id=current_user.id,
-        status=BookingStatus.PENDING
-    )
-    
-    db.add(db_booking)
-    db.commit()
-    db.refresh(db_booking)
-    
-    # Send confirmation email
-    email_service.send_booking_confirmation(db_booking)
-    
-    return db_booking
 
 @router.put("/{booking_id}", response_model=BookingResponse)
 async def update_booking(
@@ -109,42 +138,60 @@ async def update_booking(
     db: Session = Depends(get_db)
 ):
     """Update a booking"""
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
-    if not booking:
+    try:
+        booking = db.query(Booking).filter(Booking.id == booking_id).first()
+        if not booking:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Booking not found"
+            )
+        
+        # Check permissions
+        if current_user.role not in ["admin", "editor"] and booking.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Not enough permissions"
+            )
+        
+        # Users can only update their own bookings if status is pending
+        if current_user.role not in ["admin", "editor"] and booking.status != BookingStatus.PENDING:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot modify confirmed bookings"
+            )
+        
+        update_data = booking_update.dict(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(booking, field, value)
+        
+        # Store old status for email notification
+        old_status = booking.status.value
+        
+        db.commit()
+        db.refresh(booking)
+        
+        # Try to send update notification email if status changed (don't fail if email fails)
+        if old_status != booking.status.value:
+            try:
+                email_service.send_booking_update(booking, old_status)
+            except Exception as email_error:
+                import sys
+                print(f"⚠️  Email notification failed: {email_error}", file=sys.stderr)
+        
+        return booking
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        import sys
+        print(f"❌ Booking update error: {str(e)}", file=sys.stderr)
+        traceback.print_exc(file=sys.stderr)
+        db.rollback()
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Booking not found"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update booking. Error: {str(e)}"
         )
-    
-    # Check permissions
-    if current_user.role not in ["admin", "editor"] and booking.user_id != current_user.id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
-    
-    # Users can only update their own bookings if status is pending
-    if current_user.role not in ["admin", "editor"] and booking.status != BookingStatus.PENDING:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot modify confirmed bookings"
-        )
-    
-    update_data = booking_update.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(booking, field, value)
-    
-    # Store old status for email notification
-    old_status = booking.status.value
-    
-    db.commit()
-    db.refresh(booking)
-    
-    # Send update notification email if status changed
-    if old_status != booking.status.value:
-        email_service.send_booking_update(booking, old_status)
-    
-    return booking
 
 @router.delete("/{booking_id}")
 async def cancel_booking(

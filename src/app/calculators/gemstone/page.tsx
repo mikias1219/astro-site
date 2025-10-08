@@ -16,6 +16,7 @@ export default function GemstoneCalculatorPage() {
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -321,21 +322,36 @@ export default function GemstoneCalculatorPage() {
 
               {/* Navigation Tabs */}
               <div className="flex flex-wrap justify-center mb-8 bg-white rounded-lg shadow-sm p-2">
-                <button className="px-6 py-3 rounded-md font-semibold text-yellow-600 bg-yellow-50 border-2 border-yellow-200">
+                <button 
+                  onClick={() => setActiveTab('overview')}
+                  className={`px-6 py-3 rounded-md font-semibold transition-colors ${activeTab === 'overview' ? 'text-yellow-600 bg-yellow-50 border-2 border-yellow-200' : 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50'}`}
+                >
                   Overview
                 </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                <button 
+                  onClick={() => setActiveTab('gemstones')}
+                  className={`px-6 py-3 rounded-md font-semibold transition-colors ${activeTab === 'gemstones' ? 'text-yellow-600 bg-yellow-50 border-2 border-yellow-200' : 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50'}`}
+                >
                   Gemstones
                 </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                <button 
+                  onClick={() => setActiveTab('wearing')}
+                  className={`px-6 py-3 rounded-md font-semibold transition-colors ${activeTab === 'wearing' ? 'text-yellow-600 bg-yellow-50 border-2 border-yellow-200' : 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50'}`}
+                >
                   Wearing Guide
                 </button>
-                <button className="px-6 py-3 rounded-md font-semibold text-gray-600 hover:text-yellow-600 hover:bg-yellow-50 transition-colors">
+                <button 
+                  onClick={() => setActiveTab('care')}
+                  className={`px-6 py-3 rounded-md font-semibold transition-colors ${activeTab === 'care' ? 'text-yellow-600 bg-yellow-50 border-2 border-yellow-200' : 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50'}`}
+                >
                   Care Tips
                 </button>
               </div>
 
               <div className="space-y-8">
+                {/* Overview Tab */}
+                {activeTab === 'overview' && (
+                  <>
                 {/* Birth Chart with Gemstone Connections */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 text-center">Birth Chart with Planetary Gemstones</h3>
@@ -391,7 +407,12 @@ export default function GemstoneCalculatorPage() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
 
+                {/* Gemstones Tab */}
+                {activeTab === 'gemstones' && (
+                  <>
                 {/* Detailed Gemstone Cards */}
                 <div className="space-y-8">
                   {Array.isArray(result.gemstones) && result.gemstones.length > 0 ? result.gemstones.map((gemstone, index) => (
@@ -487,7 +508,12 @@ export default function GemstoneCalculatorPage() {
                     </div>
                   )}
                 </div>
+                  </>
+                )}
 
+                {/* Wearing Guide Tab */}
+                {activeTab === 'wearing' && (
+                  <>
                 {/* Wearing Guidelines */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -606,7 +632,12 @@ export default function GemstoneCalculatorPage() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
 
+                {/* Care Tips Tab */}
+                {activeTab === 'care' && (
+                  <>
                 {/* Gemstone Compatibility */}
                 <div className="bg-white rounded-2xl shadow-lg p-8">
                   <h3 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -663,7 +694,10 @@ export default function GemstoneCalculatorPage() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
 
+                {/* CTA - Always visible */}
                 {/* CTA */}
                 <div className="text-center mt-12">
                   <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-8 border-2 border-yellow-200">
