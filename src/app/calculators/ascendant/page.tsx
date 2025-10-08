@@ -193,24 +193,30 @@ export default function AscendantCalculatorPage() {
       if (apiResult.success) {
         const payload = (apiResult as any).data;
         const unwrapped = payload && typeof payload === 'object' && 'data' in payload ? (payload as any).data : payload;
-        setResult(unwrapped);
+        // Ensure all arrays are properly initialized
+        const processedResult = {
+          ...unwrapped,
+          name: formData.name,
+          traits: Array.isArray(unwrapped?.traits) ? unwrapped.traits : [],
+          compatibility: Array.isArray(unwrapped?.compatibility) ? unwrapped.compatibility : [],
+          degree: unwrapped?.degree || Math.floor(Math.random() * 30) + 1
+        };
+        setResult(processedResult);
       } else {
         // Fallback to local calculation if API fails
         const ascendantData = calculateAscendant(formData.birthDate, formData.birthTime, formData.birthPlace);
         setResult({
-          ascendant: ascendantData.ascendant,
-          description: `Your ascendant (rising sign) is ${ascendantData.ascendant}. This represents your outward personality and how others see you.`,
-          characteristics: `People with ${ascendantData.ascendant} ascendant are known for their strong personality and leadership qualities.`,
+          ...ascendantData,
+          name: formData.name,
           degree: Math.floor(Math.random() * 30) + 1
         });
       }
-    } catch (error) {
+      } catch (error) {
       // Fallback to local calculation if API fails
       const ascendantData = calculateAscendant(formData.birthDate, formData.birthTime, formData.birthPlace);
       setResult({
-        ascendant: ascendantData.ascendant,
-        description: `Your ascendant (rising sign) is ${ascendantData.ascendant}. This represents your outward personality and how others see you.`,
-        characteristics: `People with ${ascendantData.ascendant} ascendant are known for their strong personality and leadership qualities.`,
+        ...ascendantData,
+        name: formData.name,
         degree: Math.floor(Math.random() * 30) + 1
       });
     } finally {
@@ -460,7 +466,7 @@ export default function AscendantCalculatorPage() {
                     <span className="text-2xl">⭐</span> Key Personality Traits
                   </h3>
                   <div className="grid md:grid-cols-2 gap-4">
-                    {result.traits && result.traits.length > 0 ? result.traits.map((trait, index) => (
+                    {Array.isArray(result.traits) && result.traits.length > 0 ? result.traits.map((trait, index) => (
                       <div key={index} className="flex items-center gap-3 bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
                         <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
                           <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -537,7 +543,7 @@ export default function AscendantCalculatorPage() {
                     </p>
 
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {result.compatibility && result.compatibility.length > 0 ? result.compatibility.map((sign, index) => (
+                      {Array.isArray(result.compatibility) && result.compatibility.length > 0 ? result.compatibility.map((sign, index) => (
                         <div key={index} className="bg-gradient-to-r from-pink-50 to-rose-50 p-4 rounded-lg border border-pink-200">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center">

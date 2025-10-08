@@ -627,7 +627,7 @@ export default function KundliCalculatorPage() {
                             <span className="text-lg">🔮</span> Upcoming Periods
                           </h4>
                           <div className="space-y-3">
-                            {result.dasha_periods.upcoming_periods?.map((period, index) => (
+                            {Array.isArray(result.dasha_periods?.upcoming_periods) && result.dasha_periods.upcoming_periods.map((period, index) => (
                               <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                                 <div className="flex justify-between items-center mb-2">
                                   <span className="font-bold text-gray-800">{period.planet} Dasha</span>
@@ -650,7 +650,7 @@ export default function KundliCalculatorPage() {
                       <span className="text-2xl">✨</span> Special Yogas
                     </h3>
                     <div className="space-y-4">
-                      {result.yogas && result.yogas.length > 0 ? result.yogas.map((yoga, index) => (
+                      {Array.isArray(result.yogas) && result.yogas.length > 0 ? result.yogas.map((yoga, index) => (
                           <div key={index} className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border border-green-200">
                             <div className="flex items-start gap-3">
                               <span className="text-2xl">🪄</span>

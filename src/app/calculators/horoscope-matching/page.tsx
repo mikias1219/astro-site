@@ -682,7 +682,7 @@ export default function HoroscopeMatchingPage() {
                       <span className="text-2xl">💪</span> Relationship Strengths
                     </h3>
                     <div className="space-y-4">
-                      {result.strengths?.map((strength, index) => (
+                      {Array.isArray(result.strengths) && result.strengths.map((strength, index) => (
                         <div key={index} className="flex items-start gap-3 bg-green-50 p-4 rounded-lg border border-green-200">
                           <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -705,7 +705,7 @@ export default function HoroscopeMatchingPage() {
                       <span className="text-2xl">⚠️</span> Potential Challenges
                     </h3>
                     <div className="space-y-4">
-                      {result.challenges?.map((challenge, index) => (
+                      {Array.isArray(result.challenges) && result.challenges.map((challenge, index) => (
                         <div key={index} className="flex items-start gap-3 bg-orange-50 p-4 rounded-lg border border-orange-200">
                           <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -732,7 +732,7 @@ export default function HoroscopeMatchingPage() {
 
                   <div className="space-y-6">
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {result.remedies?.map((remedy, index) => (
+                      {Array.isArray(result.remedies) && result.remedies.map((remedy, index) => (
                         <div key={index} className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border border-purple-200">
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">

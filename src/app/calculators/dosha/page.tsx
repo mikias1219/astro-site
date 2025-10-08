@@ -124,16 +124,27 @@ export default function DoshaCalculatorPage() {
       if (apiResult.success) {
         const payload = (apiResult as any).data;
         const unwrapped = payload && typeof payload === 'object' && 'data' in payload ? (payload as any).data : payload;
-        setResult(unwrapped);
+        // Ensure doshas is an array
+        const processedResult = {
+          ...unwrapped,
+          doshas: Array.isArray(unwrapped?.doshas) ? unwrapped.doshas : (unwrapped?.doshas ? [unwrapped.doshas] : []),
+          name: formData.name,
+          overallHealth: unwrapped?.overallHealth || (unwrapped?.total_doshas === 0 ? 'Excellent' : unwrapped?.total_doshas <= 2 ? 'Good' : 'Needs Attention'),
+          totalDoshas: unwrapped?.total_doshas || unwrapped?.doshas?.length || 0
+        };
+        setResult(processedResult);
       } else {
         // Fallback to local calculation if API fails
         const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
         setResult(doshaData);
       }
-    } catch (error) {
+      } catch (error) {
       // Fallback to local calculation if API fails
       const doshaData = calculateDoshas(formData.birthDate, formData.birthTime, formData.birthPlace);
-      setResult(doshaData);
+      setResult({
+        ...doshaData,
+        name: formData.name
+      });
     } finally {
       setLoading(false);
     }
@@ -334,13 +345,13 @@ export default function DoshaCalculatorPage() {
                     <BirthChart planetaryPositions={result.planetary_positions || {
                       sun: { house: 5, sign: 'Leo' },
                       moon: { house: 4, sign: 'Cancer' },
-                      mars: { house: result.doshas?.find(d => d.name === 'Mangal Dosha') ? 7 : 11, sign: result.doshas?.find(d => d.name === 'Mangal Dosha') ? 'Scorpio' : 'Aquarius' },
+                      mars: { house: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Mangal') || d.name?.includes('Manglik'))) ? 7 : 11, sign: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Mangal') || d.name?.includes('Manglik'))) ? 'Scorpio' : 'Aquarius' },
                       mercury: { house: 3, sign: 'Gemini' },
                       jupiter: { house: 9, sign: 'Sagittarius' },
                       venus: { house: 7, sign: 'Libra' },
-                      saturn: { house: result.doshas?.find(d => d.name === 'Shani Dosha') ? 12 : 10, sign: result.doshas?.find(d => d.name === 'Shani Dosha') ? 'Pisces' : 'Capricorn' },
-                      rahu: { house: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 8 : 6, sign: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Scorpio' : 'Virgo' },
-                      ketu: { house: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 2 : 12, sign: result.doshas?.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Taurus' : 'Pisces' }
+                      saturn: { house: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Shani') || d.name?.includes('Saturn'))) ? 12 : 10, sign: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Shani') || d.name?.includes('Saturn'))) ? 'Pisces' : 'Capricorn' },
+                      rahu: { house: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Rahu') || d.name?.includes('Ketu'))) ? 8 : 6, sign: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Rahu') || d.name?.includes('Ketu'))) ? 'Scorpio' : 'Virgo' },
+                      ketu: { house: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Rahu') || d.name?.includes('Ketu'))) ? 2 : 12, sign: (Array.isArray(result.doshas) && result.doshas?.find(d => d.name?.includes('Rahu') || d.name?.includes('Ketu'))) ? 'Taurus' : 'Pisces' }
                     }} />
                   </div>
                   <div className="mt-6 text-center text-sm text-gray-600">
@@ -411,7 +422,7 @@ export default function DoshaCalculatorPage() {
                       </div>
                     </div>
                     <div className="text-2xl font-bold text-red-600">
-                      {result.doshas.find(d => d.name === 'Mangal Dosha') ? 'Present' : 'Clear'}
+                      {Array.isArray(result.doshas) && result.doshas.find(d => d.name?.includes('Mangal') || d.name?.includes('Manglik')) ? 'Present' : 'Clear'}
                     </div>
                   </div>
 
@@ -426,7 +437,7 @@ export default function DoshaCalculatorPage() {
                       </div>
                     </div>
                     <div className="text-2xl font-bold text-blue-600">
-                      {result.doshas.find(d => d.name === 'Shani Dosha') ? 'Present' : 'Clear'}
+                      {Array.isArray(result.doshas) && result.doshas.find(d => d.name?.includes('Shani') || d.name?.includes('Saturn')) ? 'Present' : 'Clear'}
                     </div>
                   </div>
 
@@ -441,7 +452,7 @@ export default function DoshaCalculatorPage() {
                       </div>
                     </div>
                     <div className="text-2xl font-bold text-purple-600">
-                      {result.doshas.find(d => d.name === 'Rahu-Ketu Dosha') ? 'Present' : 'Clear'}
+                      {Array.isArray(result.doshas) && result.doshas.find(d => d.name?.includes('Rahu') || d.name?.includes('Ketu')) ? 'Present' : 'Clear'}
                     </div>
                   </div>
 
@@ -456,14 +467,14 @@ export default function DoshaCalculatorPage() {
                       </div>
                     </div>
                     <div className="text-2xl font-bold text-cyan-600">
-                      {result.doshas.find(d => d.name === 'Chandra Dosha') ? 'Present' : 'Clear'}
+                      {Array.isArray(result.doshas) && result.doshas.find(d => d.name?.includes('Chandra') || d.name?.includes('Moon')) ? 'Present' : 'Clear'}
                     </div>
                   </div>
                 </div>
 
                 {/* Detailed Dosha Analysis */}
                 <div className="space-y-6">
-                  {result.doshas && result.doshas.length > 0 ? result.doshas.map((dosha, index) => (
+                  {Array.isArray(result.doshas) && result.doshas.length > 0 ? result.doshas.map((dosha, index) => (
                     <div key={index} className="bg-white rounded-2xl shadow-lg p-8">
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -501,7 +512,7 @@ export default function DoshaCalculatorPage() {
                             <span className="text-red-500">⚠️</span> Potential Effects
                           </h4>
                           <div className="space-y-3">
-                            {dosha.effects.map((effect, effectIndex) => (
+                            {(Array.isArray(dosha.effects) ? dosha.effects : [dosha.effects]).filter(Boolean).map((effect, effectIndex) => (
                               <div key={effectIndex} className="flex items-start gap-3 bg-red-50 p-3 rounded-lg border border-red-200">
                                 <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
@@ -518,7 +529,7 @@ export default function DoshaCalculatorPage() {
                             <span className="text-green-500">🛡️</span> Recommended Remedies
                           </h4>
                           <div className="space-y-3">
-                            {dosha.remedies.map((remedy, remedyIndex) => (
+                            {(Array.isArray(dosha.remedies) ? dosha.remedies : (typeof dosha.remedies === 'string' ? dosha.remedies.split(',').map(r => r.trim()) : [dosha.remedies])).filter(Boolean).map((remedy, remedyIndex) => (
                               <div key={remedyIndex} className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-200">
                                 <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />

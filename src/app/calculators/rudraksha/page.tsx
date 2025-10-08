@@ -101,7 +101,14 @@ export default function RudrakshaCalculatorPage() {
         const payload: any = response.data;
         // Backend returns { success, data, message }. Unwrap inner data.
         const unwrapped = payload?.data ?? payload;
-        setResult(unwrapped as RudrakshaResult);
+        // Ensure arrays are properly initialized
+        const processedResult = {
+          ...unwrapped,
+          problem_specific_recommendations: Array.isArray(unwrapped?.problem_specific_recommendations) 
+            ? unwrapped.problem_specific_recommendations 
+            : []
+        };
+        setResult(processedResult as RudrakshaResult);
       } else {
         setError(response.error || 'Failed to calculate Rudraksha recommendations');
       }
@@ -393,21 +400,21 @@ export default function RudrakshaCalculatorPage() {
               </div>
 
               {/* Problem-Specific Recommendations */}
-              {result.problem_specific_recommendations && result.problem_specific_recommendations.length > 0 && (
+              {Array.isArray(result.problem_specific_recommendations) && result.problem_specific_recommendations.length > 0 && (
                 <div className="mt-12">
                   <h3 className="text-2xl font-bold text-gray-800 mb-8 text-center">
                     Problem-Specific Recommendations
                   </h3>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {result.problem_specific_recommendations?.map((rec, index) => (
+                    {result.problem_specific_recommendations.map((rec, index) => (
                       <div key={index} className="bg-white rounded-xl shadow-lg p-6">
                         <div className="text-center mb-4">
                           <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span className="text-xl font-bold text-white">{rec.rudraksha.name.split(' ')[0]}</span>
+                            <span className="text-xl font-bold text-white">{rec.rudraksha?.name?.split(' ')[0] || rec.rudraksha?.mukhi || 'N/A'}</span>
                           </div>
-                          <h4 className="font-semibold text-gray-800">{rec.rudraksha.name}</h4>
+                          <h4 className="font-semibold text-gray-800">{rec.rudraksha?.name || `${rec.rudraksha?.mukhi} Mukhi Rudraksha`}</h4>
                         </div>
-                        <p className="text-gray-600 text-sm">{rec.reason}</p>
+                        <p className="text-gray-600 text-sm">{rec.reason || 'Recommended for your situation'}</p>
                       </div>
                     ))}
                   </div>

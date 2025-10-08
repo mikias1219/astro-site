@@ -113,33 +113,36 @@ export default function GemstoneCalculatorPage() {
       if (apiResult.success) {
         const payload = (apiResult as any).data;
         const unwrapped = payload && typeof payload === 'object' && 'data' in payload ? (payload as any).data : payload;
-        setResult(unwrapped);
+        // Process gemstone data to ensure proper structure
+        const processedResult = {
+          ...unwrapped,
+          name: formData.name,
+          gemstones: unwrapped?.gemstones || unwrapped?.recommendations || [],
+          totalRecommendations: unwrapped?.total_recommendations || unwrapped?.gemstones?.length || unwrapped?.recommendations?.length || 0,
+          bestWearingTime: unwrapped?.best_wearing_time || unwrapped?.wearing_time || '6 AM - 8 AM (Sunrise)',
+          precautions: Array.isArray(unwrapped?.precautions) ? unwrapped.precautions : [
+            'Always consult an astrologer before wearing gemstones',
+            'Start with smaller stones to test compatibility',
+            'Clean gemstones regularly with lukewarm water',
+            'Remove during sleep and while bathing',
+            'Avoid wearing conflicting gemstones together'
+          ]
+        };
+        setResult(processedResult);
       } else {
         // Fallback to local calculation if API fails
         const gemstoneData = calculateGemstones(formData.birthDate, formData.birthTime, formData.birthPlace);
-        const primaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Primary');
-        const secondaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Secondary');
         setResult({
-          primary_gemstone: primaryGemstone?.name || 'Ruby',
-          secondary_gemstone: secondaryGemstone?.name || 'Pearl',
-          wearing_finger: primaryGemstone?.finger || 'Ring finger',
-          wearing_day: 'Sunday',
-          benefits: primaryGemstone?.benefits?.join(', ') || 'Enhances planetary strength',
-          metal: primaryGemstone?.metal || 'Gold'
+          ...gemstoneData,
+          name: formData.name
         });
       }
-    } catch (error) {
+      } catch (error) {
       // Fallback to local calculation if API fails
       const gemstoneData = calculateGemstones(formData.birthDate, formData.birthTime, formData.birthPlace);
-      const primaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Primary');
-      const secondaryGemstone = gemstoneData.gemstones.find(g => g.priority === 'Secondary');
       setResult({
-        primary_gemstone: primaryGemstone?.name || 'Ruby',
-        secondary_gemstone: secondaryGemstone?.name || 'Pearl',
-        wearing_finger: primaryGemstone?.finger || 'Ring finger',
-        wearing_day: 'Sunday',
-        benefits: primaryGemstone?.benefits?.join(', ') || 'Enhances planetary strength',
-        metal: primaryGemstone?.metal || 'Gold'
+        ...gemstoneData,
+        name: formData.name
       });
     } finally {
       setLoading(false);
@@ -367,20 +370,20 @@ export default function GemstoneCalculatorPage() {
                   </div>
 
                   <div className="grid md:grid-cols-3 gap-6">
-                    <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg border border-red-200 text-center">
-                      <div className="text-3xl mb-2">💍</div>
-                      <div className="font-bold text-red-800 text-lg">Primary Gemstone</div>
-                      <div className="text-red-600 font-semibold">
-                        {result.gemstones.find(g => g.priority === 'Primary')?.name || 'Not Found'}
-                      </div>
-                    </div>
-                    <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 text-center">
-                      <div className="text-3xl mb-2">💎</div>
-                      <div className="font-bold text-blue-800 text-lg">Secondary Gemstone</div>
-                      <div className="text-blue-600 font-semibold">
-                        {result.gemstones.find(g => g.priority === 'Secondary')?.name || 'Optional'}
-                      </div>
-                    </div>
+                        <div className="bg-gradient-to-r from-red-50 to-pink-50 p-6 rounded-lg border border-red-200 text-center">
+                          <div className="text-3xl mb-2">💍</div>
+                          <div className="font-bold text-red-800 text-lg">Primary Gemstone</div>
+                          <div className="text-red-600 font-semibold">
+                            {(Array.isArray(result.gemstones) && result.gemstones.find(g => g.priority === 'Primary')?.name) || result.primary_gemstone || 'Ruby'}
+                          </div>
+                        </div>
+                        <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg border border-blue-200 text-center">
+                          <div className="text-3xl mb-2">💎</div>
+                          <div className="font-bold text-blue-800 text-lg">Secondary Gemstone</div>
+                          <div className="text-blue-600 font-semibold">
+                            {(Array.isArray(result.gemstones) && result.gemstones.find(g => g.priority === 'Secondary')?.name) || result.secondary_gemstone || 'Optional'}
+                          </div>
+                        </div>
                     <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg border border-purple-200 text-center">
                       <div className="text-3xl mb-2">✨</div>
                       <div className="font-bold text-purple-800 text-lg">Best Wearing Time</div>
@@ -391,7 +394,7 @@ export default function GemstoneCalculatorPage() {
 
                 {/* Detailed Gemstone Cards */}
                 <div className="space-y-8">
-                  {result.gemstones && result.gemstones.length > 0 ? result.gemstones.map((gemstone, index) => (
+                  {Array.isArray(result.gemstones) && result.gemstones.length > 0 ? result.gemstones.map((gemstone, index) => (
                     <div key={index} className={`bg-white rounded-2xl shadow-lg p-8 border-l-4 ${getPriorityColor(gemstone.priority)}`}>
                       <div className="flex items-center justify-between mb-6">
                         <div className="flex items-center gap-4">
@@ -450,7 +453,7 @@ export default function GemstoneCalculatorPage() {
                             <span className="text-green-500">✨</span> Benefits & Properties
                           </h4>
                           <div className="space-y-3">
-                            {gemstone.benefits.map((benefit, benefitIndex) => (
+                            {(Array.isArray(gemstone.benefits) ? gemstone.benefits : (typeof gemstone.benefits === 'string' ? gemstone.benefits.split(',').map(b => b.trim()) : [])).filter(Boolean).map((benefit, benefitIndex) => (
                               <div key={benefitIndex} className="flex items-start gap-3 bg-green-50 p-3 rounded-lg border border-green-200">
                                 <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -558,7 +561,7 @@ export default function GemstoneCalculatorPage() {
                           <span className="text-xl">⚠️</span> Important Precautions
                         </h4>
                         <div className="space-y-3">
-                          {result.precautions.map((precaution, index) => (
+                          {(Array.isArray(result.precautions) ? result.precautions : []).map((precaution, index) => (
                             <div key={index} className="flex items-start gap-3 bg-orange-50 p-3 rounded-lg border border-orange-200">
                               <svg className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
