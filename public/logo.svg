@@ -1,25 +1,54 @@
-<svg width="200" height="80" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="200" height="80" fill="white" stroke="black" stroke-width="1"/>
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#d63031;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="starGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffd700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffed4e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
   
-  <!-- Sunburst graphic -->
-  <g transform="translate(100, 25)">
-    <circle cx="0" cy="0" r="8" fill="#FFD700"/>
-    <g stroke="#FFD700" stroke-width="2" fill="none">
-      <line x1="0" y1="-12" x2="0" y2="-20"/>
-      <line x1="8.5" y1="-8.5" x2="14.1" y2="-14.1"/>
-      <line x1="12" y1="0" x2="20" y2="0"/>
-      <line x1="8.5" y1="8.5" x2="14.1" y2="14.1"/>
-      <line x1="0" y1="12" x2="0" y2="20"/>
-      <line x1="-8.5" y1="8.5" x2="-14.1" y2="14.1"/>
-      <line x1="-12" y1="0" x2="-20" y2="0"/>
-      <line x1="-8.5" y1="-8.5" x2="-14.1" y2="-14.1"/>
-    </g>
+  <!-- Main Background Circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#logoGradient)" />
+  
+  <!-- Outer Ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="white" stroke-width="2" opacity="0.3" />
+  
+  <!-- Star Symbol (Astrology) -->
+  <g id="star" transform="translate(100, 60)">
+    <!-- Large Star -->
+    <polygon points="0,-25 7.5,-10 25,-10 12.5,0 18.75,15 0,7.5 -18.75,15 -12.5,0 -25,-10 -7.5,-10" 
+             fill="url(#starGradient)" stroke="white" stroke-width="1" opacity="0.9" />
   </g>
   
-  <!-- Main text -->
-  <text x="100" y="50" text-anchor="middle" font-family="serif" font-size="18" font-weight="bold" fill="#DC2626">Dr. Arup Shastri</text>
+  <!-- Crescent Moon (Night/Vedic Astrology) -->
+  <g id="moon" transform="translate(70, 85)">
+    <path d="M 0 -15 Q 12 -8 12 0 Q 12 8 0 15 Q 8 8 8 0 Q 8 -8 0 -15" 
+          fill="white" opacity="0.85" />
+  </g>
   
-  <!-- Subtitle -->
-  <text x="100" y="65" text-anchor="middle" font-family="serif" font-size="12" fill="black">Doctorate of Astrology</text>
+  <!-- Zodiac Circle Elements -->
+  <g id="zodiac-dots" opacity="0.7">
+    <circle cx="100" cy="35" r="3" fill="white" />
+    <circle cx="145" cy="55" r="3" fill="white" />
+    <circle cx="160" cy="100" r="3" fill="white" />
+    <circle cx="145" cy="145" r="3" fill="white" />
+    <circle cx="100" cy="165" r="3" fill="white" />
+    <circle cx="55" cy="145" r="3" fill="white" />
+    <circle cx="40" cy="100" r="3" fill="white" />
+    <circle cx="55" cy="55" r="3" fill="white" />
+  </g>
+  
+  <!-- Inner Circle with Initials -->
+  <circle cx="100" cy="100" r="45" fill="rgba(255, 255, 255, 0.1)" stroke="white" stroke-width="1" opacity="0.4" />
+  
+  <!-- Text: D.A (Dr. Arup) -->
+  <text x="100" y="115" font-family="Arial, sans-serif" font-size="28" font-weight="bold" 
+        text-anchor="middle" fill="white" opacity="0.95">DA</text>
+  
+  <!-- Decorative Bottom Line -->
+  <line x1="60" y1="140" x2="140" y2="140" stroke="white" stroke-width="1" opacity="0.5" />
 </svg>
