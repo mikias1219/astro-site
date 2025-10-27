@@ -107,8 +107,8 @@ export default function ConsultationPage() {
 
             <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-white font-bold text-2xl">1</span>
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full shadow-lg overflow-hidden">
+                  <img src="/Book Your Session.png" alt="Step 1: Book Your Session" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-3">Book Your Session</h3>
                 <p className="text-gray-600">
@@ -117,8 +117,8 @@ export default function ConsultationPage() {
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-white font-bold text-2xl">2</span>
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full shadow-lg overflow-hidden">
+                  <img src="/Consultation.png" alt="Step 2: Consultation" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-3">Consultation</h3>
                 <p className="text-gray-600">
@@ -127,8 +127,8 @@ export default function ConsultationPage() {
               </div>
 
               <div className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-white font-bold text-2xl">3</span>
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full shadow-lg overflow-hidden">
+                  <img src="/Get Guidance.png" alt="Step 3: Get Guidance" className="w-full h-full object-cover" />
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-3">Get Guidance</h3>
                 <p className="text-gray-600">
