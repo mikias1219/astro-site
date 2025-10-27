@@ -14,6 +14,12 @@ interface Page {
   updated_at: string;
 }
 
+// Add this export for static generation
+export async function generateStaticParams() {
+  // Return empty array - will use fallback for dynamic routes
+  return [];
+}
+
 export default function DynamicPage() {
   const params = useParams();
   const [page, setPage] = useState<Page | null>(null);
