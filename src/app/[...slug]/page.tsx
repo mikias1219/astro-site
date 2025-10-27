@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 
+// Mark as dynamic - do not generate static params
+export const dynamic = 'force-dynamic';
+
 interface Page {
   id: number;
   title: string;
@@ -12,12 +15,6 @@ interface Page {
   is_published: boolean;
   created_at: string;
   updated_at: string;
-}
-
-// Add this export for static generation
-export async function generateStaticParams() {
-  // Return empty array - will use fallback for dynamic routes
-  return [];
 }
 
 export default function DynamicPage() {
