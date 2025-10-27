@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../contexts/AuthContext';
+import RichTextEditor from '../../../components/RichTextEditor';
 
 interface Blog {
   id: number;
   title: string;
   slug: string;
   description: string;
+  content?: string;
   featured_image?: string;
   is_published: boolean;
   author_id: number;
@@ -31,6 +33,7 @@ export default function AdminBlogsPage() {
     title: '',
     slug: '',
     description: '',
+    content: '',
     featured_image: '',
     image_alt_text: '',
     is_published: false
@@ -102,6 +105,7 @@ export default function AdminBlogsPage() {
           title: '',
           slug: '',
           description: '',
+          content: '',
           featured_image: '',
           image_alt_text: '',
           is_published: false
@@ -120,6 +124,7 @@ export default function AdminBlogsPage() {
       title: blog.title,
       slug: blog.slug,
       description: blog.description,
+      content: blog.content || '',
       featured_image: blog.featured_image || '',
       image_alt_text: (blog as any).image_alt_text || '',
       is_published: blog.is_published
@@ -234,6 +239,7 @@ export default function AdminBlogsPage() {
                     title: '',
                     slug: '',
                     description: '',
+                    content: '',
                     featured_image: '',
                     image_alt_text: '',
                     is_published: false
@@ -341,7 +347,7 @@ export default function AdminBlogsPage() {
         {/* Enhanced Blog Form Modal */}
         {showAddForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-y-auto">
               <div className="p-8">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-3xl font-bold text-gray-900">
@@ -355,6 +361,7 @@ export default function AdminBlogsPage() {
                         title: '',
                         slug: '',
                         description: '',
+                        content: '',
                         featured_image: '',
                         image_alt_text: '',
                         is_published: false
@@ -393,16 +400,25 @@ export default function AdminBlogsPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description *</label>
                     <textarea
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={6}
-                      placeholder="Write your blog description here..."
+                      rows={3}
+                      placeholder="Write your meta description (used for SEO)..."
                       required
                     />
                     <p className="text-sm text-gray-500 mt-1">{formData.description.length} characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Blog Content *</label>
+                    <RichTextEditor
+                      value={formData.content}
+                      onChange={(value) => setFormData({...formData, content: value})}
+                      placeholder="Write your blog content here..."
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -415,11 +431,10 @@ export default function AdminBlogsPage() {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              // Generate alt text from filename (remove extension and replace dashes/underscores with spaces)
                               const altText = file.name
-                                .replace(/\.[^/.]+$/, '') // Remove extension
-                                .replace(/[-_]/g, ' ') // Replace dashes/underscores with spaces
-                                .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+                                .replace(/\.[^/.]+$/, '')
+                                .replace(/[-_]/g, ' ')
+                                .replace(/\b\w/g, l => l.toUpperCase());
 
                               setFormData({
                                 ...formData,
@@ -431,7 +446,7 @@ export default function AdminBlogsPage() {
                           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
                         />
                         <div className="text-sm text-gray-500">
-                          Upload an image or enter a URL below. Alt text will be auto-generated from filename.
+                          Upload an image or enter a URL below.
                         </div>
                       </div>
                     </div>
@@ -443,7 +458,6 @@ export default function AdminBlogsPage() {
                         value={formData.featured_image.startsWith('blob:') ? '' : formData.featured_image}
                         onChange={(e) => {
                           const url = e.target.value;
-                          // Generate alt text from URL if it's a direct image URL
                           if (url) {
                             const filename = url.split('/').pop()?.split('.')[0] || '';
                             const altText = filename
@@ -473,7 +487,7 @@ export default function AdminBlogsPage() {
                         placeholder="Describe the image for accessibility"
                       />
                       <p className="text-sm text-gray-500 mt-1">
-                        Auto-generated from filename. Edit if needed for better accessibility.
+                        Auto-generated from filename. Edit if needed.
                       </p>
                     </div>
                     <div className="flex items-center">
@@ -490,21 +504,21 @@ export default function AdminBlogsPage() {
                     </div>
                   </div>
 
-
                   <div className="flex justify-end space-x-4 pt-6 border-t">
                     <button
                       type="button"
                       onClick={() => {
                         setShowAddForm(false);
                         setEditingBlog(null);
-                      setFormData({
-                        title: '',
-                        slug: '',
-                        description: '',
-                        featured_image: '',
-                        image_alt_text: '',
-                        is_published: false
-                      });
+                        setFormData({
+                          title: '',
+                          slug: '',
+                          description: '',
+                          content: '',
+                          featured_image: '',
+                          image_alt_text: '',
+                          is_published: false
+                        });
                       }}
                       className="px-8 py-3 text-gray-600 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
                     >
@@ -530,7 +544,6 @@ export default function AdminBlogsPage() {
               <thead className="bg-gradient-to-r from-purple-50 to-pink-50">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Blog Post</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">SEO</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Views</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-purple-700 uppercase tracking-wider">Created</th>
@@ -553,31 +566,6 @@ export default function AdminBlogsPage() {
                           <div className="text-sm font-semibold text-gray-900 max-w-xs truncate">{blog.title}</div>
                           <div className="text-sm text-gray-500 max-w-xs truncate">{blog.description}</div>
                           <div className="text-xs text-gray-400">by Admin</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="space-y-1">
-                        <div className="flex items-center text-xs">
-                          {(blog as any).meta_title ? (
-                            <span className="text-green-600">✓ Title</span>
-                          ) : (
-                            <span className="text-gray-400">○ Title</span>
-                          )}
-                        </div>
-                        <div className="flex items-center text-xs">
-                          {(blog as any).meta_description ? (
-                            <span className="text-green-600">✓ Desc</span>
-                          ) : (
-                            <span className="text-gray-400">○ Desc</span>
-                          )}
-                        </div>
-                        <div className="flex items-center text-xs">
-                          {(blog as any).canonical_url ? (
-                            <span className="text-green-600">✓ Canonical</span>
-                          ) : (
-                            <span className="text-gray-400">○ Canonical</span>
-                          )}
                         </div>
                       </div>
                     </td>

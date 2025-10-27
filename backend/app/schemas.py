@@ -187,12 +187,13 @@ class BlogBase(BaseModel):
     featured_image: Optional[str] = None
 
 class BlogCreate(BlogBase):
-    pass
+    content: Optional[str] = None
 
 class BlogUpdate(BaseModel):
     title: Optional[str] = None
     slug: Optional[str] = None
     description: Optional[str] = None
+    content: Optional[str] = None
     featured_image: Optional[str] = None
     is_published: Optional[bool] = None
     published_at: Optional[datetime] = None
@@ -205,6 +206,7 @@ class BlogResponse(BlogBase):
     updated_at: Optional[datetime] = None
     author_id: Optional[int] = None
     view_count: int
+    content: Optional[str] = None
 
     model_config = {
         "from_attributes": True

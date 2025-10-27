@@ -139,6 +139,7 @@ class Blog(Base):
     title = Column(String(255), nullable=False)
     slug = Column(String(255), unique=True, index=True, nullable=False)
     description = Column(Text, nullable=False)
+    content = Column(Text)  # Rich HTML content from Quill editor
     featured_image = Column(String(500))
     is_published = Column(Boolean, default=False)
     published_at = Column(DateTime)
