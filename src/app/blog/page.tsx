@@ -100,45 +100,48 @@ export default function BlogPage() {
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {blogs.slice(0, 6).map((post) => (
-                <article key={post.id} className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group">
-                  <div className="relative overflow-hidden">
-                    {post.featured_image ? (
-                      <img
-                        src={post.featured_image}
-                        alt={post.title}
-                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
-                        <div className="text-4xl">📚</div>
+                <Link key={post.id} href={`/blog/${post.slug}`}>
+                  <article className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 group cursor-pointer h-full">
+                    <div className="relative overflow-hidden">
+                      {post.featured_image ? (
+                        <img
+                          src={post.featured_image}
+                          alt={post.title}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-red-100 flex items-center justify-center">
+                          <div className="text-4xl">📚</div>
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4">
+                        <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                          Astrology
+                        </span>
                       </div>
-                    )}
-                    <div className="absolute top-4 left-4">
-                      <span className="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                        Astrology
-                      </span>
                     </div>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
-                      <span>{new Date(post.published_at).toLocaleDateString()}</span>
-                      <span>•</span>
-                      <span>{post.view_count} views</span>
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
-                      {post.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">
-                      {post.description}
-                    </p>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
-                        DA
+                    <div className="p-6 flex flex-col h-full">
+                      <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+                        <span>{new Date(post.published_at).toLocaleDateString()}</span>
+                        <span>•</span>
+                        <span>{post.view_count} views</span>
                       </div>
-                      <span className="font-semibold text-gray-800 text-sm">Dr. Arup Shastri</span>
+                      <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-orange-600 transition-colors line-clamp-2">
+                        {post.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3 flex-grow">
+                        {post.description}
+                      </p>
+                      <div className="flex items-center gap-3 pt-4 border-t border-gray-200">
+                        <div className="w-8 h-8 bg-gradient-to-r from-orange-500 to-red-600 rounded-full flex items-center justify-center text-white font-bold text-xs">
+                          DA
+                        </div>
+                        <span className="font-semibold text-gray-800 text-sm">Dr. Arup Shastri</span>
+                        <span className="ml-auto text-orange-600 font-semibold text-sm group-hover:text-orange-700">Read More →</span>
+                      </div>
                     </div>
-                  </div>
-                </article>
+                  </article>
+                </Link>
               ))}
             </div>
           </div>
