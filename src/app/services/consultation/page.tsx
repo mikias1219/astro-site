@@ -7,8 +7,13 @@ export default function ConsultationPage() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 py-20">
-          <div className="max-w-7xl mx-auto px-4">
+        <section className="bg-gradient-to-br from-orange-50 via-yellow-50 to-red-50 py-20 relative overflow-hidden">
+          {/* Banner in top-left corner */}
+          <div className="absolute top-0 left-0 w-48 h-48 opacity-20 pointer-events-none">
+            <img src="/consultation we banner.png" alt="Banner" className="w-full h-full object-cover" />
+          </div>
+          
+          <div className="max-w-7xl mx-auto px-4 relative z-10">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
                 Personal Consultation
