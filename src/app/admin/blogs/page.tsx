@@ -405,11 +405,15 @@ export default function AdminBlogsPage() {
                       value={formData.description}
                       onChange={(e) => setFormData({...formData, description: e.target.value})}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                      rows={3}
-                      placeholder="Write your meta description (used for SEO)..."
+                      rows={4}
+                      placeholder="Write a compelling meta description (150-160 characters recommended for SEO)..."
+                      maxLength={160}
                       required
                     />
-                    <p className="text-sm text-gray-500 mt-1">{formData.description.length} characters</p>
+                    <div className="flex justify-between items-center mt-1">
+                      <p className="text-sm text-gray-500">{formData.description.length}/160 characters</p>
+                      <p className="text-xs text-gray-400">Used for SEO and social media previews</p>
+                    </div>
                   </div>
 
                   <div>

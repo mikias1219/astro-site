@@ -142,7 +142,7 @@ export default function BlogDetailPage() {
             <article className="prose prose-lg max-w-none mb-12">
               {blog.content ? (
                 <div
-                  className="text-gray-700 leading-relaxed space-y-6"
+                  className="text-gray-700 leading-relaxed space-y-6 prose-headings:font-bold prose-h1:text-4xl prose-h1:text-gray-800 prose-h1:mb-6 prose-h2:text-3xl prose-h2:text-gray-800 prose-h2:mb-4 prose-h3:text-2xl prose-h3:text-gray-800 prose-h3:mb-3 prose-p:text-gray-700 prose-p:mb-4 prose-ul:list-disc prose-ul:pl-6 prose-li:text-gray-700 prose-li:mb-2 prose-strong:text-gray-800 prose-strong:font-semibold"
                   dangerouslySetInnerHTML={{ __html: blog.content }}
                 />
               ) : (

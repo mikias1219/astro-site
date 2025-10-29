@@ -52,11 +52,12 @@ export default function ConsultationPage() {
               </div>
               
               <div className="relative">
-                <img 
-                  src="/images/whatsapp/consultation-1.jpg" 
-                  alt="Personal Consultation" 
-                  className="w-full h-96 object-cover rounded-2xl shadow-2xl"
-                />
+                <div className="w-full h-96 bg-gradient-to-br from-orange-100 to-red-100 rounded-2xl shadow-2xl flex items-center justify-center">
+                  <div className="text-center p-8">
+                    <h3 className="text-3xl font-bold text-gray-800 mb-4">Personal Consultation</h3>
+                    <p className="text-xl text-gray-600">Astro Arup Shastri</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
