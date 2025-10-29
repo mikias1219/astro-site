@@ -9,13 +9,11 @@ const nextConfig = {
   trailingSlash: true,
   // API rewrites for development and production
   async rewrites() {
+    // Use environment variable or default based on environment
     // On server: proxy to local backend (127.0.0.1:8002)
-    // For local dev: proxy to localhost:8002 (set NEXT_PUBLIC_API_URL=http://localhost:8002)
-    // Default: use production backend URL
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 
-      (process.env.NODE_ENV === 'production' 
-        ? 'http://127.0.0.1:8002' 
-        : 'http://localhost:8002');
+    // For local dev: set NEXT_PUBLIC_API_URL=http://localhost:8002
+    // Since we're running on server, default to 127.0.0.1:8002
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8002';
     return [
       {
         source: '/api/:path*',
