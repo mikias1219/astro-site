@@ -32,8 +32,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const modules = {
     toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
       ['bold', 'italic', 'underline', 'strike'],
+      [{ 'header': 1 }, { 'header': 2 }, { 'header': 3 }, { 'header': 4 }, { 'header': 5 }, { 'header': 6 }],
       [{ list: 'ordered' }, { list: 'bullet' }],
       [{ align: [] }],
       ['blockquote', 'code-block'],
