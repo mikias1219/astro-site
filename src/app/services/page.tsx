@@ -23,11 +23,8 @@ export default function ServicesPage() {
     const fetchServices = async () => {
       try {
         setLoading(true);
-        const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-          ? 'http://localhost:8000/api/services'
-          : 'https://astroarupshastri.com/api/services';
-
-        const response = await fetch(apiUrl);
+        // Use relative path - will be proxied by Next.js rewrites
+        const response = await fetch('/api/services/');
         
         if (response.ok) {
           const data = await response.json();

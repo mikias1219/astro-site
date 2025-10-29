@@ -119,9 +119,8 @@ export default function AdminSEOpage() {
 
   const fetchSEOSettings = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/seo/settings'
-        : 'https://astroarupshastri.com/api/admin/seo/settings';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/admin/seo/settings';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -140,9 +139,8 @@ export default function AdminSEOpage() {
 
   const fetchSEOPerformance = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/seo/performance'
-        : 'https://astroarupshastri.com/api/admin/seo/performance';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/admin/seo/performance';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -163,9 +161,8 @@ export default function AdminSEOpage() {
 
   const fetchPages = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/pages'
-        : 'https://astroarupshastri.com/api/pages';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/pages';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -180,9 +177,8 @@ export default function AdminSEOpage() {
         const pagesWithSEO = await Promise.all(
           pagesData.map(async (page: any) => {
             try {
-              const seoApiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-                ? `http://localhost:8000/api/seo/page/${page.slug}`
-                : `https://astroarupshastri.com/api/seo/page/${page.slug}`;
+              // Use relative path - will be proxied by Next.js rewrites
+              const seoApiUrl = `/api/seo/page/${page.slug}`;
 
               const seoResponse = await fetch(seoApiUrl, {
                 headers: {
@@ -232,9 +228,8 @@ export default function AdminSEOpage() {
 
   const fetchBlogs = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/blogs'
-        : 'https://astroarupshastri.com/api/blogs';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/blogs';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -249,9 +244,8 @@ export default function AdminSEOpage() {
         const blogsWithSEO = await Promise.all(
           blogsData.map(async (blog: any) => {
             try {
-              const seoApiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-                ? `http://localhost:8000/api/seo/blog/${blog.slug}`
-                : `https://astroarupshastri.com/api/seo/blog/${blog.slug}`;
+              // Use relative path - will be proxied by Next.js rewrites
+              const seoApiUrl = `/api/seo/blog/${blog.slug}`;
 
               const seoResponse = await fetch(seoApiUrl, {
                 headers: {
@@ -303,9 +297,8 @@ export default function AdminSEOpage() {
 
   const fetchImages = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/seo/images'
-        : 'https://astroarupshastri.com/api/admin/seo/images';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/admin/seo/images';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -324,9 +317,8 @@ export default function AdminSEOpage() {
 
   const fetchRedirects = async () => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/seo/redirects'
-        : 'https://astroarupshastri.com/api/admin/seo/redirects';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/admin/seo/redirects';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -347,9 +339,8 @@ export default function AdminSEOpage() {
     if (!confirm('Are you sure you want to delete this redirect?')) return;
 
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? `http://localhost:8000/api/admin/seo/redirects/${redirectId}`
-        : `https://astroarupshastri.com/api/admin/seo/redirects/${redirectId}`;
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = `/api/admin/seo/redirects/${redirectId}`;
 
       const response = await fetch(apiUrl, {
         method: 'DELETE',

@@ -38,14 +38,14 @@ export default function PanchangPage() {
   const fetchPanchang = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`https://astroarupshastri.com/api/panchang/?date_filter=${selectedDate}`);
+      const response = await fetch(`/api/panchang/?date_filter=${selectedDate}`);
       if (response.ok) {
         const data = await response.json();
         if (data.length > 0) {
           setPanchang(data[0]);
         } else {
           // If no data for selected date, fetch today's data
-          const todayResponse = await fetch('https://astroarupshastri.com/api/panchang/today');
+          const todayResponse = await fetch('/api/panchang/today');
           if (todayResponse.ok) {
             const todayData = await todayResponse.json();
             setPanchang(todayData);

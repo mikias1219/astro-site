@@ -7,6 +7,22 @@ const nextConfig = {
     dangerouslyAllowSVG: true,
   },
   trailingSlash: true,
+  // API rewrites for development and production
+  async rewrites() {
+    // On server: proxy to local backend (127.0.0.1:8002)
+    // For local dev: proxy to localhost:8002 (set NEXT_PUBLIC_API_URL=http://localhost:8002)
+    // Default: use production backend URL
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 
+      (process.env.NODE_ENV === 'production' 
+        ? 'http://127.0.0.1:8002' 
+        : 'http://localhost:8002');
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${apiUrl}/api/:path*`,
+      },
+    ];
+  },
   // Production optimizations - only apply in production
   ...(process.env.NODE_ENV === 'production' && {
     swcMinify: true,

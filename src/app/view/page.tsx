@@ -63,7 +63,7 @@ function ContentViewer() {
   const fetchPage = async (pageSlug: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://astroarupshastri.com/api/pages/${pageSlug}`);
+      const response = await fetch(`/api/pages/${pageSlug}`);
 
       if (!response.ok) {
         if (response.status === 404) {
@@ -92,7 +92,7 @@ function ContentViewer() {
   const fetchPost = async (postSlug: string) => {
     try {
       setLoading(true);
-      const response = await fetch(`https://astroarupshastri.com/api/blog-posts/${postSlug}`);
+      const response = await fetch(`/api/blog-posts/${postSlug}`);
 
       if (!response.ok) {
         if (response.status === 404) {

@@ -42,7 +42,8 @@ export default function AdminServicesPage() {
 
   const fetchServices = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/services', {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch('/api/admin/services', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -67,9 +68,10 @@ export default function AdminServicesPage() {
     if (!token) return;
 
     try {
+      // Use relative path - will be proxied by Next.js rewrites
       const url = editingService 
-        ? `https://astroarupshastri.com/api/admin/services/${editingService.id}`
-        : 'https://astroarupshastri.com/api/admin/services';
+        ? `/api/admin/services/${editingService.id}`
+        : '/api/admin/services';
       
       const method = editingService ? 'PUT' : 'POST';
 
@@ -123,7 +125,8 @@ export default function AdminServicesPage() {
     if (!token || !confirm('Are you sure you want to delete this service?')) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/services/${serviceId}`, {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch(`/api/admin/services/${serviceId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -144,7 +147,8 @@ export default function AdminServicesPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/services/${serviceId}/toggle`, {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch(`/api/admin/services/${serviceId}/toggle`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`

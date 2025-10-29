@@ -49,11 +49,8 @@ export default function AdminBlogsPage() {
 
   const fetchBlogs = async (authToken: string) => {
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/blogs'
-        : 'https://astroarupshastri.com/api/admin/blogs';
-
-      const response = await fetch(apiUrl, {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch('/api/admin/blogs', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -78,13 +75,10 @@ export default function AdminBlogsPage() {
     if (!token) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/blogs'
-        : 'https://astroarupshastri.com/api/admin/blogs';
-
+      // Use relative path - will be proxied by Next.js rewrites
       const url = editingBlog
-        ? `${baseUrl}/${editingBlog.id}`
-        : baseUrl;
+        ? `/api/admin/blogs/${editingBlog.id}`
+        : '/api/admin/blogs';
       
       const method = editingBlog ? 'PUT' : 'POST';
 

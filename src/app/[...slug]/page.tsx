@@ -29,11 +29,8 @@ export default function DynamicPage() {
     const fetchPage = async () => {
       try {
         setLoading(true);
-        const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-          ? 'http://localhost:8000/api/pages/slug'
-          : 'https://astroarupshastri.com/api/pages/slug';
-
-        const response = await fetch(`${apiUrl}/${slug}`);
+        // Use relative path - will be proxied by Next.js rewrites
+        const response = await fetch(`/api/pages/slug/${slug}`);
         
         if (response.ok) {
           const data = await response.json();

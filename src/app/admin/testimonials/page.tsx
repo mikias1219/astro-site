@@ -42,7 +42,8 @@ export default function AdminTestimonialsPage() {
 
   const fetchTestimonials = async (authToken: string) => {
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/testimonials', {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch('/api/admin/testimonials', {
         headers: {
           'Authorization': `Bearer ${authToken}`
         }
@@ -67,7 +68,8 @@ export default function AdminTestimonialsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch('https://astroarupshastri.com/api/admin/testimonials', {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch('/api/admin/testimonials', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -99,7 +101,8 @@ export default function AdminTestimonialsPage() {
     if (!token) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/testimonials/${testimonialId}`, {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch(`/api/admin/testimonials/${testimonialId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -122,7 +125,8 @@ export default function AdminTestimonialsPage() {
     if (!token || !confirm('Are you sure you want to delete this testimonial?')) return;
 
     try {
-      const response = await fetch(`https://astroarupshastri.com/api/admin/testimonials/${testimonialId}`, {
+      // Use relative path - will be proxied by Next.js rewrites
+      const response = await fetch(`/api/admin/testimonials/${testimonialId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
