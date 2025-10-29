@@ -32,8 +32,8 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
 
   const modules = {
     toolbar: [
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ 'header': 1 }, { 'header': 2 }, { 'header': 3 }, { 'header': 4 }, { 'header': 5 }, { 'header': 6 }],
       [{ list: 'ordered' }, { list: 'bullet' }],
       [{ align: [] }],
       ['blockquote', 'code-block'],
@@ -58,6 +58,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
     'image',
     'color',
     'background',
+    'size',
   ];
 
   return (
@@ -86,6 +87,28 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
         :global(.quill-editor .ql-editor) {
           min-height: 350px;
           padding: 16px;
+        }
+        :global(.quill-editor .ql-picker-label[data-label]::before),
+        :global(.quill-editor .ql-picker-item[data-label]::before) {
+          content: attr(data-label);
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="1"]::before) {
+          content: "Heading 1";
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="2"]::before) {
+          content: "Heading 2";
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="3"]::before) {
+          content: "Heading 3";
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="4"]::before) {
+          content: "Heading 4";
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="5"]::before) {
+          content: "Heading 5";
+        }
+        :global(.quill-editor .ql-picker.ql-header .ql-picker-item[data-value="6"]::before) {
+          content: "Heading 6";
         }
       `}</style>
     </div>
