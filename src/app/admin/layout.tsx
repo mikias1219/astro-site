@@ -98,6 +98,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 >
                   Testimonials
                 </Link>
+                <Link
+                  href="/admin/pages"
+                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                >
+                  Pages
+                </Link>
+                <Link
+                  href="/admin/faqs"
+                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                >
+                  FAQs
+                </Link>
+                <Link
+                  href="/admin/seo"
+                  className="text-gray-600 hover:text-orange-600 transition-colors font-medium"
+                >
+                  SEO
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

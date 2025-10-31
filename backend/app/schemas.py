@@ -166,6 +166,7 @@ class PageUpdate(BaseModel):
     excerpt: Optional[str] = None
     anchor_text: Optional[str] = None
     anchor_link: Optional[str] = None
+    banner_image: Optional[str] = None
     is_published: Optional[bool] = None
 
 class PageResponse(PageBase):

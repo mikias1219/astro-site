@@ -11,6 +11,7 @@ interface Page {
   excerpt?: string;
   anchor_text?: string;
   anchor_link?: string;
+  banner_image?: string;
   is_published: boolean;
   created_at: string;
   updated_at: string;
@@ -36,13 +37,24 @@ export default function AdminPagesPage() {
     excerpt: '',
     anchor_text: '',
     anchor_link: '',
+    banner_image: '',
     is_active: true
+  });
+  
+  const [editingSEO, setEditingSEO] = useState<Page | null>(null);
+  const [showSEOModal, setShowSEOModal] = useState(false);
+  const [seoData, setSeoData] = useState({
+    meta_title: '',
+    meta_description: '',
+    meta_keywords: '',
+    canonical_url: '',
+    schema_markup: ''
   });
 
   useEffect(() => {
-    if (token && !loading && !fetching) {
+    if (token) {
       fetchPages(token);
-    } else if (!token) {
+    } else {
       setLoading(false);
     }
   }, [token]);
@@ -101,6 +113,7 @@ export default function AdminPagesPage() {
         excerpt: formData.excerpt || (formData.content ? formData.content.substring(0, 200) + '...' : ''),
         anchor_text: formData.anchor_text || null,
         anchor_link: formData.anchor_link || null,
+        banner_image: formData.banner_image || null,
         is_published: formData.is_active
       };
 
@@ -144,6 +157,7 @@ export default function AdminPagesPage() {
       excerpt: '',
       anchor_text: '',
       anchor_link: '',
+      banner_image: '',
       is_active: true
     });
   };
@@ -157,9 +171,64 @@ export default function AdminPagesPage() {
       excerpt: page.excerpt || '',
       anchor_text: page.anchor_text || '',
       anchor_link: page.anchor_link || '',
+      banner_image: page.banner_image || '',
       is_active: page.is_published
     });
     setShowAddForm(true);
+  };
+  
+  const fetchSEO = async (pageSlug: string) => {
+    if (!token) return;
+    try {
+      const response = await fetch(`/api/seo/page/${pageSlug}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setSeoData({
+          meta_title: data.meta_title || '',
+          meta_description: data.meta_description || '',
+          meta_keywords: data.meta_keywords || '',
+          canonical_url: data.canonical_url || '',
+          schema_markup: data.schema_markup || ''
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching SEO:', error);
+    }
+  };
+  
+  const handleEditSEO = async (page: Page) => {
+    setEditingSEO(page);
+    await fetchSEO(page.slug);
+    setShowSEOModal(true);
+  };
+  
+  const handleSaveSEO = async () => {
+    if (!token || !editingSEO) return;
+    try {
+      const response = await fetch(`/api/seo/page/${editingSEO.slug}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(seoData)
+      });
+      if (response.ok) {
+        alert('✅ SEO settings saved successfully!');
+        setShowSEOModal(false);
+        setEditingSEO(null);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        alert(`❌ Failed to save SEO: ${errorData.detail || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error saving SEO:', error);
+      alert('❌ Failed to save SEO settings. Please check your connection.');
+    }
   };
 
   const handleDelete = async (pageId: number) => {
@@ -432,6 +501,54 @@ export default function AdminPagesPage() {
                   </div>
 
                   <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Banner Image</label>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-2">Upload Image</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              setFormData({
+                                ...formData,
+                                banner_image: URL.createObjectURL(file),
+                              });
+                            }
+                          }}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                        />
+                        <div className="text-sm text-gray-500 mt-1">
+                          Upload a banner image or enter a URL below.
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-2">Or Image URL</label>
+                        <input
+                          type="url"
+                          value={formData.banner_image?.startsWith('blob:') ? '' : formData.banner_image || ''}
+                          onChange={(e) => setFormData({ ...formData, banner_image: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                          placeholder="https://example.com/banner.jpg"
+                        />
+                      </div>
+                      
+                      {formData.banner_image && !formData.banner_image.startsWith('blob:') && (
+                        <div className="mt-4">
+                          <img 
+                            src={formData.banner_image} 
+                            alt="Banner preview" 
+                            className="max-w-full h-48 object-contain rounded-lg border border-gray-200"
+                            onError={() => setFormData({ ...formData, banner_image: '' })}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">Page Content *</label>
                     <textarea
                       value={formData.content}
@@ -558,6 +675,13 @@ export default function AdminPagesPage() {
                           ✏️
                         </button>
                         <button
+                          onClick={() => handleEditSEO(page)}
+                          className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                          title="Edit SEO"
+                        >
+                          🔍
+                        </button>
+                        <button
                           onClick={() => togglePageStatus(page.id, page.is_published)}
                           className={`p-2 rounded-lg transition-colors ${
                             page.is_published
@@ -631,6 +755,119 @@ export default function AdminPagesPage() {
             </svg>
             <h3 className="mt-2 text-sm font-medium text-gray-900">No pages found</h3>
             <p className="mt-1 text-sm text-gray-500">Get started by creating your first page.</p>
+          </div>
+        )}
+
+        {/* SEO Edit Modal */}
+        {showSEOModal && editingSEO && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-8">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Edit SEO for {editingSEO.title}</h2>
+                  <button
+                    onClick={() => {
+                      setShowSEOModal(false);
+                      setEditingSEO(null);
+                      setSeoData({
+                        meta_title: '',
+                        meta_description: '',
+                        meta_keywords: '',
+                        canonical_url: '',
+                        schema_markup: ''
+                      });
+                    }}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Title</label>
+                    <input
+                      type="text"
+                      value={seoData.meta_title}
+                      onChange={(e) => setSeoData({...seoData, meta_title: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Enter meta title..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{seoData.meta_title.length}/60 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Description</label>
+                    <textarea
+                      value={seoData.meta_description}
+                      onChange={(e) => setSeoData({...seoData, meta_description: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                      placeholder="Enter meta description..."
+                    />
+                    <p className="text-sm text-gray-500 mt-1">{seoData.meta_description.length}/160 characters</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Meta Keywords</label>
+                    <input
+                      type="text"
+                      value={seoData.meta_keywords}
+                      onChange={(e) => setSeoData({...seoData, meta_keywords: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="keyword1, keyword2, keyword3"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Canonical URL</label>
+                    <input
+                      type="url"
+                      value={seoData.canonical_url}
+                      onChange={(e) => setSeoData({...seoData, canonical_url: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="https://astroarupshastri.com/page-url"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">Schema Markup (JSON-LD)</label>
+                    <textarea
+                      value={seoData.schema_markup}
+                      onChange={(e) => setSeoData({...seoData, schema_markup: e.target.value})}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
+                      rows={8}
+                      placeholder='{"@context": "https://schema.org", "@type": "WebPage", ...}'
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-4 mt-8">
+                  <button
+                    onClick={() => {
+                      setShowSEOModal(false);
+                      setEditingSEO(null);
+                      setSeoData({
+                        meta_title: '',
+                        meta_description: '',
+                        meta_keywords: '',
+                        canonical_url: '',
+                        schema_markup: ''
+                      });
+                    }}
+                    className="px-6 py-3 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveSEO}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors"
+                  >
+                    Save SEO Settings
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </div>

@@ -123,6 +123,7 @@ class Page(Base):
     excerpt = Column(Text)
     anchor_text = Column(String(255))  # Internal linking anchor text
     anchor_link = Column(String(500))  # URL for the anchor text
+    banner_image = Column(String(500))  # Banner/hero image for the page
     is_published = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
