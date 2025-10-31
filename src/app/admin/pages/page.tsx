@@ -52,9 +52,8 @@ export default function AdminPagesPage() {
 
     setFetching(true);
     try {
-      const apiUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/pages'
-        : 'https://astroarupshastri.com/api/admin/pages';
+      // Use relative path - will be proxied by Next.js rewrites
+      const apiUrl = '/api/admin/pages';
 
       const response = await fetch(apiUrl, {
         headers: {
@@ -85,9 +84,8 @@ export default function AdminPagesPage() {
     if (!token) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/pages'
-        : 'https://astroarupshastri.com/api/admin/pages';
+      // Use relative path - will be proxied by Next.js rewrites
+      const baseUrl = '/api/admin/pages';
 
       const url = editingPage
         ? `${baseUrl}/${editingPage.id}`
@@ -168,9 +166,8 @@ export default function AdminPagesPage() {
     if (!token || !confirm('Are you sure you want to delete this page? This action cannot be undone.')) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/pages'
-        : 'https://astroarupshastri.com/api/admin/pages';
+      // Use relative path - will be proxied by Next.js rewrites
+      const baseUrl = '/api/admin/pages';
 
       const response = await fetch(`${baseUrl}/${pageId}`, {
         method: 'DELETE',
@@ -199,9 +196,8 @@ export default function AdminPagesPage() {
     if (!token) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && window.location.hostname === 'localhost'
-        ? 'http://localhost:8000/api/admin/pages'
-        : 'https://astroarupshastri.com/api/admin/pages';
+      // Use relative path - will be proxied by Next.js rewrites
+      const baseUrl = '/api/admin/pages';
 
       const response = await fetch(`${baseUrl}/${pageId}/toggle`, {
         method: 'PUT',

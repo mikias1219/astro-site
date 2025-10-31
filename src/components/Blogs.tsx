@@ -12,6 +12,7 @@ interface Blog {
   featured_image?: string;
   published_at: string;
   author_id: number;
+  is_published?: boolean;
 }
 
 export function Blogs() {
@@ -22,11 +23,20 @@ export function Blogs() {
     const fetchBlogs = async () => {
       try {
         const result = await apiClient.getBlogs();
-        if (result.success) {
-          setBlogs((result.data as Blog[]).slice(0, 3)); // Show only first 3 blogs
+        if (result.success && result.data) {
+          const blogsData = Array.isArray(result.data) ? result.data : [];
+          // Filter to only show published blogs and take first 3
+          const publishedBlogs = blogsData
+            .filter((blog: Blog) => blog.is_published !== false)
+            .slice(0, 3);
+          setBlogs(publishedBlogs);
+        } else {
+          console.error('Failed to fetch blogs:', result.error);
+          setBlogs([]);
         }
       } catch (error) {
         console.error('Failed to fetch blogs:', error);
+        setBlogs([]);
       } finally {
         setLoading(false);
       }
